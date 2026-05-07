@@ -1,0 +1,133 @@
+# ============================================================
+#  .gitignore — RestaurantePRO (Laravel)
+#  Gerado para uso seguro no GitHub/GitLab/Bitbucket
+# ============================================================
+
+# ------------------------------------------------------------------
+# SEGURANÇA — NUNCA suba esses arquivos
+# ------------------------------------------------------------------
+.env
+.env.*
+!.env.example        # .env.example pode (e deve) subir — sem dados reais
+
+*.pem
+*.key
+*.cert
+*.p12
+*.pfx
+auth.json            # credenciais Composer/Packagist
+
+
+# ------------------------------------------------------------------
+# LARAVEL — arquivos gerados em runtime
+# ------------------------------------------------------------------
+/bootstrap/cache/*.php
+/storage/*.key
+/storage/app/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/logs/*
+
+# Manter a estrutura de pastas vazias
+!/storage/app/.gitkeep
+!/storage/app/public/.gitkeep
+!/storage/framework/.gitkeep
+!/storage/framework/cache/.gitkeep
+!/storage/framework/cache/data/.gitkeep
+!/storage/framework/sessions/.gitkeep
+!/storage/framework/testing/.gitkeep
+!/storage/framework/views/.gitkeep
+!/storage/logs/.gitkeep
+
+
+# ------------------------------------------------------------------
+# DEPENDÊNCIAS — instale localmente via composer/npm
+# ------------------------------------------------------------------
+/vendor/
+/node_modules/
+npm-debug.log
+yarn-error.log
+
+
+# ------------------------------------------------------------------
+# CACHE & BUILD
+# ------------------------------------------------------------------
+/public/hot
+/public/storage
+/public/build
+/public/mix-manifest.json
+/public/css/app.css
+/public/js/app.js
+
+# Cache de configuração gerado por "php artisan config:cache"
+bootstrap/cache/config.php
+bootstrap/cache/events.php
+bootstrap/cache/packages.php
+bootstrap/cache/routes.php
+bootstrap/cache/services.php
+
+
+# ------------------------------------------------------------------
+# BANCO DE DADOS
+# ------------------------------------------------------------------
+*.sqlite
+*.sqlite3
+*.sqlite-shm
+*.sqlite-wal
+database/*.sqlite
+database/*.db
+
+# Dumps de banco — podem conter dados sensíveis
+*.sql
+*.sql.gz
+*.dump
+
+
+# ------------------------------------------------------------------
+# IDEs & EDITORES
+# ------------------------------------------------------------------
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+desktop.ini
+.phpunit.result.cache
+.php-cs-fixer.cache
+
+
+# ------------------------------------------------------------------
+# TESTES & COVERAGE
+# ------------------------------------------------------------------
+/coverage/
+/.phpunit.cache
+/tests/coverage/
+
+
+# ------------------------------------------------------------------
+# ARQUIVOS DE LOG & DEBUG
+# ------------------------------------------------------------------
+*.log
+*.logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+# ------------------------------------------------------------------
+# ARQUIVOS TEMPORÁRIOS / LOCAIS
+# ------------------------------------------------------------------
+*.tmp
+*.temp
+*.bak
+*.orig
+*.zip          # não suba zips de backup no repositório
+*.tar.gz
+/tmp/
+vendor/
