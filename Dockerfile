@@ -29,6 +29,15 @@ WORKDIR /var/www/html
 # Copiar arquivos do projeto
 COPY . /var/www/html/
 
+# Criar estrutura de diretórios do Laravel (não rastreada pelo Git)
+RUN mkdir -p storage/app/public \
+    storage/framework/cache/data \
+    storage/framework/sessions \
+    storage/framework/testing \
+    storage/framework/views \
+    storage/logs \
+    bootstrap/cache
+
 # Instalar dependências do Composer
 RUN composer install --optimize-autoloader --no-dev --no-interaction
 
