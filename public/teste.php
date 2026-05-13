@@ -1,11 +1,11 @@
 <?php
 echo "<h1>Teste de Conexão com o Banco</h1>";
 
-$host = 'containers-us-west.railway.app';
-$port = '3306';  // Mudou de 12345 para 3306
+$host = 'yamabiko.proxy.rlwy.net';
+$port = '22170';
 $db = 'railway';
 $user = 'root';
-$pass = 'ncBsYgEIidvIuFcCMtrRhyTPXcRBSpHcu';
+$pass = 'nCBsYgEIidvIUfcCMtRhytPXcRBSPhcu';
 
 echo "<p>Conectando a: $host:$port/$db</p>";
 
