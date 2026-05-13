@@ -28,7 +28,7 @@
     @else
     <table>
         <thead>
-            <tr><th>#</th><th>Mesa</th><th>Garçom</th><th>Itens</th><th>Total</th><th>Status</th><th>Horário</th><th></th></tr>
+            <tr><th>#</th><th>Mesa</th><th>Garçom</th><th>Itens</th><th>Total</th><th>Status</th><th>Horário</th></tr>
         </thead>
         <tbody id="pedidos-table">
         @foreach($pedidos as $p)
@@ -41,9 +41,6 @@
             <td class="td-mono">R$ {{ number_format($p->total,2,',','.') }}</td>
             <td><span class="badge badge-{{ $cores[$p->status] ?? 'secondary' }}">{{ str_replace('_',' ',ucfirst($p->status)) }}</span></td>
             <td style="color:var(--muted); font-size:12px">{{ $p->created_at->format('d/m H:i') }}</td>
-            <td onclick="event.stopPropagation()">
-                <a href="{{ route('orders.show', $p) }}" class="btn btn-secondary btn-sm btn-icon">👁</a>
-            </td>
         </tr>
         @endforeach
         </tbody>
