@@ -5,9 +5,15 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/js/app.jsx'], // ← remove o app.css
+            input: ['resources/css/app.css', 'resources/js/app.jsx'],
             refresh: true,
         }),
         react(),
     ],
+    resolve: {
+        name: 'vite-plugin-laravel',
+        alias: {
+            '@': '/resources/js',
+        },
+    },
 });
