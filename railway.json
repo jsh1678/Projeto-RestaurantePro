@@ -1,10 +1,12 @@
 {
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "npm ci --legacy-peer-deps && chmod +x node_modules/.bin/vite && npm run build"
+    "buildCommand": "composer install --no-dev --optimize-autoloader"
   },
   "deploy": {
-    "startCommand": "php artisan serve --host=0.0.0.0 --port=$PORT",
-    "healthcheckPath": "/"
+    "startCommand": "php -S 0.0.0.0:${PORT:-8080} -t public",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 300,
+    "restartPolicyType": "ON_FAILURE"
   }
-}   
+}
