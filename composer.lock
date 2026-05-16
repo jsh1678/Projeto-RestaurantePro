@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "07df6d944810dc2bb00b6d8ace12950a",
+    "content-hash": "a7da9b33eb92d54387a6d8b42dd0d4ff",
     "packages": [
         {
             "name": "brick/math",
@@ -1052,6 +1052,143 @@
                 }
             ],
             "time": "2025-08-22T14:27:06+00:00"
+        },
+        {
+            "name": "laragear/meta",
+            "version": "v4.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Laragear/Meta.git",
+                "reference": "fc49b31415622c71e7f40103379d9a2810f83644"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Laragear/Meta/zipball/fc49b31415622c71e7f40103379d9a2810f83644",
+                "reference": "fc49b31415622c71e7f40103379d9a2810f83644",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/database": "11.*|12.*",
+                "illuminate/filesystem": "11.*|12.*",
+                "illuminate/http": "11.*|12.*",
+                "illuminate/support": "11.*|12.*"
+            },
+            "require-dev": {
+                "laragear/meta-testing": "3.*",
+                "orchestra/testbench": "9.*|10.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Laragear\\Meta\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Italo Israel Baeza Cabrera",
+                    "email": "DarkGhostHunter@Gmail.com",
+                    "homepage": "https://github.com/sponsors/DarkGhostHunter"
+                }
+            ],
+            "description": "A Laravel Package helper for Laravel Packages",
+            "keywords": [
+                "laravel",
+                "package"
+            ],
+            "support": {
+                "issues": "https://github.com/Laragear/Meta/issues",
+                "source": "https://github.com/Laragear/Meta"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/DarkGhostHunter",
+                    "type": "Github Sponsorship"
+                },
+                {
+                    "url": "https://paypal.me/darkghosthunter",
+                    "type": "Paypal"
+                }
+            ],
+            "time": "2025-02-16T23:28:11+00:00"
+        },
+        {
+            "name": "laragear/poke",
+            "version": "v4.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Laragear/Poke.git",
+                "reference": "051d9b791f4287862eb235646a92143a7f11d576"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Laragear/Poke/zipball/051d9b791f4287862eb235646a92143a7f11d576",
+                "reference": "051d9b791f4287862eb235646a92143a7f11d576",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/http": "11.*|12.*",
+                "illuminate/routing": "11.*|12.*",
+                "illuminate/support": "11.*|12.*",
+                "illuminate/view": "11.*|12.*",
+                "laragear/meta": "4.*",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "laragear/meta-testing": "3.*",
+                "orchestra/testbench": "9.*|10.*"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Laragear\\Poke\\PokeServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Laragear\\Poke\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Italo Israel Baeza Cabrera",
+                    "email": "DarkGhostHunter@Gmail.com",
+                    "homepage": "https://patreon.com/packagesforlaravel"
+                }
+            ],
+            "description": "Keep your forms alive, avoid TokenMismatchException by gently poking your Laravel app",
+            "keywords": [
+                "Forms",
+                "csrf",
+                "laravel",
+                "poke",
+                "token-mismatch",
+                "xsrf"
+            ],
+            "support": {
+                "issues": "https://github.com/laragear/poke/issues",
+                "source": "https://github.com/laragear/poke"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/DarkGhostHunter",
+                    "type": "GitHub Sponsorship"
+                },
+                {
+                    "url": "https://paypal.me/darkghosthunter",
+                    "type": "Paypal"
+                }
+            ],
+            "time": "2025-03-27T04:29:09+00:00"
         },
         {
             "name": "laravel/framework",
