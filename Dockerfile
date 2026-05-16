@@ -1,6 +1,6 @@
 FROM php:8.2-cli
 
-# Instalar git, unzip e outras dependências ESSENCIAIS
+# Instalar dependências
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -15,14 +15,22 @@ COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
-# Copiar arquivos
+# Copiar arquivos do projeto
 COPY . .
 
-# Instalar dependências
-RUN composer install --no-interaction
+# Criar .env a partir do .env.example (SE não existir)
+RUN if [ ! -f .env ]; then \
+        cp .env.example .env; \
+    fi
 
-# Configurar Laravel
+# Instalar dependências
+RUN composer install --no-interaction --no-progress
+
+# Gerar APP_KEY (vai gerar uma nova, mas a do Railway vai sobrescrever)
 RUN php artisan key:generate --force
+
+# Limpar e cachear configurações
+RUN php artisan config:cache
 
 EXPOSE 8000
 
