@@ -1,2 +1,9 @@
 .env
-vendor/ 
+vendor/
+/vendor
+/node_modules
+.env
+storage/*.log
+.idea/
+.vscode/
+.DS_Store

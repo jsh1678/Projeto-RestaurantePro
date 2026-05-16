@@ -1,4 +1,11 @@
 <?php return array (
+  'laragear/poke' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Laragear\\Poke\\PokeServiceProvider',
+    ),
+  ),
   'laravel/tinker' => 
   array (
     'providers' => 
