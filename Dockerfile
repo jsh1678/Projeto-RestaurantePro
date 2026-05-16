@@ -1,27 +1,28 @@
 FROM php:8.2-cli
 
-RUN apt-get update && apt-get install -y \
-    git zip unzip curl \
-    libpq-dev libpng-dev libonig-dev libxml2-dev \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd \
-    && apt-get clean
+# Instalar extensões necessárias
+RUN docker-php-ext-install pdo_mysql
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Instalar Composer
+COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
+# Criar diretório de trabalho
 WORKDIR /app
 
+# Copiar arquivos do projeto
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Instalar dependências do Laravel
+RUN composer install --no-interaction --no-progress --no-suggest
 
-RUN chmod -R 777 storage bootstrap/cache || true
+# Gerar APP_KEY (se não existir)
+RUN php artisan key:generate --force
 
-RUN php artisan key:generate --force || true
+# Limpar e cachear configurações
+RUN php artisan config:cache
 
-RUN php artisan config:clear || true
-RUN php artisan config:cache || true
-
+# Expor porta
 EXPOSE 8000
 
-# CORRIGIDO: usa PHP server ao invés de artisan serve
-CMD php -S 0.0.0.0:${PORT:-8000} -t public
+# Iniciar o servidor
+CMD php artisan serve --host=0.0.0.0 --port=8000
