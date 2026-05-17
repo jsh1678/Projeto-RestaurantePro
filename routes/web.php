@@ -41,7 +41,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/pedidos/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::patch('/pedidos/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::post('/pedidos/{order}/cancelar', [OrderController::class, 'cancelar'])->name('orders.cancelar');
-    // Editar pedido existente (garçom adiciona/remove itens)
     Route::get('/pedidos/{order}/editar', [OrderController::class, 'edit'])->name('orders.edit');
     Route::put('/pedidos/{order}', [OrderController::class, 'update'])->name('orders.update');
 
@@ -55,7 +54,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/mesas/{table}/editar',         [TableController::class, 'edit'])->name('mesas.edit');
     Route::put('/mesas/{table}',                [TableController::class, 'update'])->name('mesas.update');
     Route::delete('/mesas/{table}',             [TableController::class, 'destroy'])->name('mesas.destroy');
-    Route::patch('/mesas/{mesa}/atualizar',    [TableController::class, 'atualizar'])->name('mesas.atualizar');
+    Route::patch('/mesas/{mesa}/atualizar',     [TableController::class, 'atualizar'])->name('mesas.atualizar');
 
     Route::get('/estoque', [StockController::class, 'index'])->name('dashboard.estoque');
     Route::post('/estoque/{item}/movimento', [StockController::class, 'registrarMovimento'])->name('estoque.movimento');
@@ -68,7 +67,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/chef/estoque', [ChefController::class, 'estoque'])->name('chef.estoque');
     Route::patch('/chef/item/{item}/status', [ChefController::class, 'marcarItemComo'])->name('chef.item.status');
 
-    // ── Gerenciamento (Gerente) ─────────────────────────────
     Route::get('/gerenciar',               fn() => redirect()->route('gerenciar.mesas'))->name('gerenciar');
     Route::get('/gerenciar/mesas',         [GerenciarController::class, 'mesas'])->name('gerenciar.mesas');
     Route::get('/gerenciar/cardapio',      [GerenciarController::class, 'cardapio'])->name('gerenciar.cardapio');
@@ -81,11 +79,9 @@ Route::middleware('auth')->group(function () {
     Route::put('/gerenciar/produtos/{item}', [GerenciarController::class, 'produtosUpdate'])->name('gerenciar.produtos.update');
     Route::delete('/gerenciar/produtos/{item}', [GerenciarController::class, 'produtosDestroy'])->name('gerenciar.produtos.destroy');
 
-    // ── Relatórios de Gestão ────────────────────────────────
     Route::get('/gestao/relatorios',       [GestaoRelatoriosController::class, 'index'])->name('gestao.relatorios');
     Route::get('/gestao/relatorios/pdf',   [GestaoRelatoriosController::class, 'pdf'])->name('gestao.relatorios.pdf');
 
-    // ── Controle de Estoque ─────────────────────────────────
     Route::get('/controle-estoque',        [ControleEstoqueController::class, 'index'])->name('controle.estoque');
     Route::post('/controle-estoque/entrada', [ControleEstoqueController::class, 'entrada'])->name('controle.estoque.entrada');
     Route::post('/controle-estoque/saida',   [ControleEstoqueController::class, 'saida'])->name('controle.estoque.saida');
@@ -98,8 +94,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/caixa/abrir', [CaixaController::class, 'abrirCaixa'])->name('caixa.abrir');
     Route::post('/caixa/sangria', [CaixaController::class, 'registrarSangria'])->name('caixa.sangria');
     Route::post('/caixa/pagamento/{order}', [CaixaController::class, 'confirmarPagamento'])->name('caixa.pagamento');
+});
 
-
-   Route::get('/up', function () {
+Route::get('/up', function () {
     return response()->json(['status' => 'ok', 'time' => now()]);
 });
