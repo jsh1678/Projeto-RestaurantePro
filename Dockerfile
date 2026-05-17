@@ -25,29 +25,23 @@ WORKDIR /app
 # Copiar arquivos
 COPY . .
 
-# CRIAR .env a partir do .env.example (CORREÇÃO AQUI!)
+# Criar .env se não existir
 RUN if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env; fi
 RUN if [ ! -f .env ]; then echo "APP_KEY=" > .env; fi
 
-# Instalar dependências PHP
+# Instalar dependências
 RUN composer install --no-interaction --no-progress
-
-# Instalar dependências Node e compilar React
 RUN npm install
 RUN npm run build
 
-# Configurar Laravel (agora com .env existente)
+# Configurar Laravel
 RUN php artisan key:generate --force
 RUN php artisan config:cache
 
+# DAR PERMISSÃO DE EXECUÇÃO AO START.SH (CORREÇÃO)
+RUN chmod +x start.sh
+
 EXPOSE 8000
 
-# Script de start
-RUN echo '#!/bin/bash\n\
-echo "=== Iniciando Servidor ==="\n\
-php artisan migrate --force\n\
-php artisan config:clear\n\
-php artisan config:cache\n\
-php artisan serve --host=0.0.0.0 --port=8000' > /start.sh && chmod +x /start.sh
-
+# Executar o start.sh
 CMD ["./start.sh"]
