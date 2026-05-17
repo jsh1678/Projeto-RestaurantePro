@@ -98,4 +98,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/caixa/abrir', [CaixaController::class, 'abrirCaixa'])->name('caixa.abrir');
     Route::post('/caixa/sangria', [CaixaController::class, 'registrarSangria'])->name('caixa.sangria');
     Route::post('/caixa/pagamento/{order}', [CaixaController::class, 'confirmarPagamento'])->name('caixa.pagamento');
+
+
+   Route::get('/up', function () {
+    return response()->json(['status' => 'ok', 'time' => now()]);
 });
