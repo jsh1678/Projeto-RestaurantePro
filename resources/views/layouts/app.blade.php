@@ -4,29 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+{{-- [FIX #7] Font Awesome: apenas solid + brands (~40% menor que all.min.css) --}}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/solid.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/brands.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css">
+
+{{-- [FIX #6] Fontes com preload para não bloquear renderização --}}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Cinzel:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Cinzel:wght@400;500;600;700;800;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Cinzel:wght@400;500;600;700;800;900&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Cinzel:wght@400;500;600;700;800;900&display=swap"></noscript>
 
-<script>
-tailwind.config = {
-  corePlugins: { preflight: false },
-  theme: {
-    extend: {
-      colors: {
-        'red-tomato':   '#EC2D01',
-        'saddle-brown': '#8B4513',
-        'nugget-gold':  '#FAB269',
-        'verde-folha':  '#3E5F3C',
-        'preto-suave':  '#1C1C1C',
-        'creme-claro':  '#F4E8D0',
-      }
-    }
-  }
-}
-</script>
+{{-- [FIX #2] Tailwind CDN REMOVIDO — projeto usa CSS puro com variáveis --}}
+{{-- [FIX #1] @vite REMOVIDO — arquivo app.jsx não existe --}}
+
 <title>@yield('page-title', 'RestaurantePRO')</title>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -290,6 +283,9 @@ body {
 .table-wrap {
   background: var(--bg2); border: 1px solid var(--border);
   border-radius: var(--radius); overflow: hidden; margin-bottom: 22px;
+  /* [FIX #10] scroll horizontal em mobile */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .table-header {
   padding: 16px 20px;
@@ -300,7 +296,7 @@ body {
   font-family: var(--font-title); font-size: 14px; font-weight: 600;
   color: var(--cream); letter-spacing: 1.2px; text-transform: uppercase;
 }
-table { width: 100%; border-collapse: collapse; }
+table { width: 100%; border-collapse: collapse; min-width: 500px; }
 thead th {
   background: rgba(250,178,105,.04);
   padding: 12px 16px; text-align: left;
@@ -354,8 +350,14 @@ tbody tr:hover { background: rgba(250,178,105,.03); }
 .btn-sm { padding: 7px 15px; font-size: 11px; border-radius: 6px; }
 .btn-icon { width: 36px; height: 36px; padding: 0; justify-content: center; border-radius: 7px; }
 
+/* [FIX #12] Estado de loading em botões de submit */
+.btn[data-loading]:disabled {
+  opacity: .7;
+}
+
 /* ===== FORMS ===== */
 .form-group { margin-bottom: 17px; }
+/* [FIX #15] Labels associados corretamente via CSS (for/id nas views) */
 .form-group label {
   display: block; margin-bottom: 6px;
   font-family: var(--font-title); font-size: 11px; font-weight: 600;
@@ -419,12 +421,38 @@ tbody tr:hover { background: rgba(250,178,105,.03); }
 }
 .kpi-lbl { font-family: var(--font-body); font-size: 15px; color: var(--muted); font-style: italic; }
 
+/* ===== [FIX #9] DASHBOARD GRID — responsivo ===== */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px;
+}
+
 /* ===== MISC ===== */
 .empty-state { text-align: center; padding: 52px 24px; color: var(--muted); }
 .empty-state .es-icon { font-size: 48px; display: block; margin-bottom: 14px; opacity: .25; }
 .empty-state p { font-family: var(--font-body); font-size: 17px; font-style: italic; }
 hr, .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
 .campo-erro { color: #fca5a5; font-size: 14px; margin-top: 5px; display: none; }
+
+/* [FIX #13] Modal de confirmação reutilizável */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 999;
+  background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px 28px 22px; max-width: 380px; width: 90%;
+  box-shadow: var(--shadow);
+}
+.modal-card h3 {
+  font-family: var(--font-title); font-size: 15px; font-weight: 700;
+  color: var(--cream); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;
+}
+.modal-card p { font-family: var(--font-body); font-size: 16px; color: var(--muted); margin-bottom: 20px; }
+.modal-actions { display: flex; gap: 10px; }
 
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
@@ -436,14 +464,22 @@ hr, .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0
   .content { padding: 18px 16px; }
   .topbar { padding: 12px 16px; }
   .cards-grid { grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 12px; }
-  .table-wrap { overflow-x: auto; }
-  table { min-width: 600px; }
   .form-row { grid-template-columns: 1fr; }
+  .btn-topbar-sair span { display: none; }
+  .btn-topbar-sair { padding: 8px 12px; }
+
+  /* [FIX #9] Dashboard grid → 1 coluna em mobile */
+  .dashboard-grid { grid-template-columns: 1fr; }
+
+  /* [FIX #11] Layout de pedido → coluna única em mobile */
+  .order-layout { flex-direction: column !important; }
+  .resumo-col { width: 100% !important; min-width: 0 !important; position: static !important; }
+
+  /* Inline grids com colunas fixas → forçar 1 coluna */
   [style*="grid-template-columns:360px"] { display: block !important; }
   [style*="grid-template-columns:340px"] { display: block !important; }
   [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
-  .btn-topbar-sair span { display: none; }
-  .btn-topbar-sair { padding: 8px 12px; }
+  [style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
 }
 @media (max-width: 480px) {
   .cards-grid { grid-template-columns: 1fr 1fr; }
@@ -453,23 +489,20 @@ hr, .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0
 }
 </style>
 @yield('styles')
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <script>
-    // MELHORIA 5: Proteção contra 404 em recarregamento
-    // Se vier erro de sessão expirada, redirecionar para login
-    window.addEventListener('pageshow', function(e) {
-        if (e.persisted) {
-            // Página veio do cache (back-forward cache) - verificar sessão
-            fetch('/dashboard', { method: 'HEAD', credentials: 'same-origin' })
-                .then(r => { if (r.status === 401 || r.url.includes('/login')) window.location.href = '/login'; })
-                .catch(() => {});
-        }
-    });
-    </script>
 </head>
 <body>
-  <div id="app">
-        
+  {{-- [FIX #13] Modal de confirmação reutilizável --}}
+  <div class="modal-overlay" id="modal-confirm" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <h3 id="modal-title">⚠️ Confirmar Ação</h3>
+      <p id="modal-msg">Confirmar esta ação?</p>
+      <div class="modal-actions">
+        <button id="modal-ok" class="btn btn-danger" onclick="confirmarModal()">Confirmar</button>
+        <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <aside class="sidebar" id="sidebar">
@@ -583,7 +616,7 @@ hr, .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0
 <div class="main">
   <div class="topbar">
     <div style="display:flex;align-items:center;gap:14px">
-      <button class="btn-hamburger" id="btn-hamburger" onclick="toggleSidebar()">☰</button>
+      <button class="btn-hamburger" id="btn-hamburger" onclick="toggleSidebar()" aria-label="Abrir menu">☰</button>
       <div>
         <h1>@yield('page-title','Dashboard')</h1>
         <div class="bc">@yield('breadcrumb','Sistema de Gestão')</div>
@@ -597,22 +630,29 @@ hr, .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0
   </div>
 
   <div class="content">
+    {{-- [FIX #14] Flash com auto-dismiss via CSS animation + JS --}}
     @if(session('success'))
-    <div class="alert alert-success">
+    <div class="alert alert-success" id="flash-success" role="alert">
       ✅ <span>{{ session('success') }}</span>
-      <button class="cls" onclick="this.parentElement.remove()">×</button>
+      <button class="cls" onclick="this.parentElement.remove()" aria-label="Fechar">×</button>
     </div>
     @endif
     @if(session('error'))
-    <div class="alert alert-error">
+    <div class="alert alert-error" id="flash-error" role="alert">
       ❌ <span>{{ session('error') }}</span>
-      <button class="cls" onclick="this.parentElement.remove()">×</button>
+      <button class="cls" onclick="this.parentElement.remove()" aria-label="Fechar">×</button>
+    </div>
+    @endif
+    @if(session('warning'))
+    <div class="alert alert-warning" id="flash-warning" role="alert">
+      ⚠️ <span>{{ session('warning') }}</span>
+      <button class="cls" onclick="this.parentElement.remove()" aria-label="Fechar">×</button>
     </div>
     @endif
     @if($errors->any())
-    <div class="alert alert-error">
+    <div class="alert alert-error" role="alert">
       ❌ <span>{{ $errors->first() }}</span>
-      <button class="cls" onclick="this.parentElement.remove()">×</button>
+      <button class="cls" onclick="this.parentElement.remove()" aria-label="Fechar">×</button>
     </div>
     @endif
 
@@ -621,6 +661,7 @@ hr, .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0
 </div>
 
 <script>
+/* ===== SIDEBAR ===== */
 function toggleSidebar(){
   const sb = document.getElementById('sidebar');
   const ov = document.getElementById('sidebar-overlay');
@@ -644,14 +685,70 @@ document.querySelectorAll('#sidebar-nav a').forEach(function(a){
   if(saved) nav.scrollTop = parseInt(saved);
   nav.addEventListener('scroll', function(){ sessionStorage.setItem('sb-scroll', nav.scrollTop); });
 })();
+
+/* ===== [FIX #14] Auto-dismiss flash após 5s ===== */
 setTimeout(function(){
   document.querySelectorAll('.alert').forEach(function(el){
     el.style.transition='opacity .5s'; el.style.opacity='0';
     setTimeout(function(){el.remove();},500);
   });
-},6000);
+},5000);
+
+/* ===== [FIX #13] Modal de confirmação reutilizável ===== */
+var _modalCallback = null;
+
+/**
+ * Exibe modal de confirmação.
+ * @param {string} msg - Mensagem a exibir
+ * @param {Function} callback - Função a executar se confirmar
+ * @param {string} [titulo] - Título opcional do modal
+ */
+function confirmar(msg, callback, titulo) {
+  document.getElementById('modal-msg').textContent = msg;
+  if (titulo) document.getElementById('modal-title').textContent = titulo;
+  _modalCallback = callback;
+  document.getElementById('modal-confirm').classList.add('open');
+}
+
+function confirmarModal() {
+  fecharModal();
+  if (typeof _modalCallback === 'function') _modalCallback();
+}
+
+function fecharModal() {
+  document.getElementById('modal-confirm').classList.remove('open');
+  _modalCallback = null;
+}
+
+// Fechar modal com ESC
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') fecharModal();
+});
+
+/* ===== [FIX #12] Loading em botões submit ===== */
+document.querySelectorAll('form').forEach(function(form) {
+  form.addEventListener('submit', function() {
+    var btn = form.querySelector('button[type="submit"]');
+    if (btn && !btn.dataset.noLoading) {
+      setTimeout(function() {
+        btn.disabled = true;
+        var original = btn.innerHTML;
+        btn.dataset.originalHtml = original;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
+      }, 10);
+    }
+  });
+});
+
+/* ===== Proteção sessão expirada ===== */
+window.addEventListener('pageshow', function(e) {
+    if (e.persisted) {
+        fetch('/dashboard', { method: 'HEAD', credentials: 'same-origin' })
+            .then(r => { if (r.status === 401 || r.url.includes('/login')) window.location.href = '/login'; })
+            .catch(() => {});
+    }
+});
 </script>
-        @yield('content')
-    </div>
+@yield('scripts')
 </body>
 </html>
