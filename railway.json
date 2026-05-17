@@ -1,9 +1,3 @@
 {
-  "builder": "NIXPACKS",
-  "deploy": {
-    "startCommand": "php -S 0.0.0.0:${PORT:-8080} -t public",
-    "healthcheckPath": "/up",
-    "healthcheckTimeout": 300,
-    "restartPolicyType": "ON_FAILURE"
-  }
+  "builder": "NIXPACKS"
 }
