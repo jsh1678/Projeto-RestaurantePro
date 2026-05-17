@@ -1,61 +1,38 @@
 FROM php:8.2-cli
 
-# Instalar dependências do sistema
+# Instalar dependências
 RUN apt-get update && apt-get install -y \
     git \
-    curl \
     unzip \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    libzip-dev \
     zip \
-    && docker-php-ext-install \
-        pdo \
-        pdo_mysql \
-        mbstring \
-        exif \
-        pcntl \
-        bcmath \
-        gd \
-        zip \
-    && apt-get clean \
+    curl \
+    nodejs \
+    npm \
     && rm -rf /var/lib/apt/lists/*
 
+# Instalar extensões PHP
+RUN docker-php-ext-install pdo_mysql mbstring
+
 # Instalar Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
-# Copiar arquivos do projeto
+# Copiar arquivos
 COPY . .
 
-# Remover arquivos desnecessários para produção
-RUN rm -f \
-    add_more_dishes.php \
-    add_stock.php \
-    public/clear-cache.php \
-    public/conexao.php \
-    public/migrar.php \
-    public/rodar_seeder.php \
-    .router.php
+# Instalar dependências PHP
+RUN composer install --no-interaction --no-progress
 
-# Instalar dependências PHP (sem dev)
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Instalar dependências Node e compilar React
+RUN npm install || true
+RUN npm run build || true
 
-# Criar estrutura de diretórios necessária
-RUN mkdir -p \
-    storage/framework/sessions \
-    storage/framework/views \
-    storage/framework/cache/data \
-    storage/logs \
-    bootstrap/cache
-
-# Permissões de escrita
-RUN chmod -R 775 storage bootstrap/cache
-
-# Copiar e habilitar script de inicialização
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
+# Configurar Laravel (sem .env)
+RUN php artisan key:generate --force || true
 
 EXPOSE 8000
+
+# Usar seu start.sh
+RUN chmod +x start.sh
+CMD ["./start.sh"]
