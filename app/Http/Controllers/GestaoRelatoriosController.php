@@ -57,15 +57,27 @@ class GestaoRelatoriosController extends Controller
             ])->sortByDesc('qtd')->take(15);
 
         // ── 4. Tempo médio de preparo (em minutos)
-        $tempoPreparo = Order::whereBetween('created_at',[$di,$df])
-            ->whereNotNull('horario_termino_preparo')
-            ->whereNotNull('horario_termino_preparo')
-            ->get()
-            ->map(fn($o) => $o->horario_pedido->diffInMinutes($o->horario_termino_preparo));
-        $tempoMedio = $tempoPreparo->count() > 0 ? round($tempoPreparo->avg(), 1) : 0;
-        $tempoMax   = $tempoPreparo->count() > 0 ? round($tempoPreparo->max(), 1) : 0;
-        $tempoMin   = $tempoPreparo->count() > 0 ? round($tempoPreparo->min(), 1) : 0;
+       // ── 4. Tempo médio de preparo (em minutos)
+$tempoPreparo = Order::whereBetween('created_at',[$di,$df])
+    ->whereNotNull('horario_termino_preparo')
+    ->get()
+    ->map(function($o) {
+        // Verificar se horario_pedido existe
+        if (!$o->horario_pedido || !$o->horario_termino_preparo) {
+            return null;
+        }
+        
+        try {
+            return $o->horario_pedido->diffInMinutes($o->horario_termino_preparo);
+        } catch (\Exception $e) {
+            return null;
+        }
+    })
+    ->filter(); // Remove valores nulos
 
+$tempoMedio = $tempoPreparo->count() > 0 ? round($tempoPreparo->avg(), 1) : 0;
+$tempoMax   = $tempoPreparo->count() > 0 ? round($tempoPreparo->max(), 1) : 0;
+$tempoMin   = $tempoPreparo->count() > 0 ? round($tempoPreparo->min(), 1) : 0;
         // ── 5. Custo de insumos (compras)
         $custoInsumos = Purchase::whereBetween('created_at',[$di,$df])
             ->where('status','recebido')
