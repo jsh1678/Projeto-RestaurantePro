@@ -1,4 +1,14 @@
 #!/bin/bash
+#!/bin/bash
+set -e
+
+cd /app
+
+echo "=== ARQUIVOS EM PUBLIC ==="
+ls -la /app/public/
+echo "=========================="
+
+# ... resto do arquivo continua igual
 set -e
 
 cd /app
