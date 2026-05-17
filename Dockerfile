@@ -1,6 +1,6 @@
 FROM php:8.2-cli
 
-# Instalar dependências do sistema (incluindo oniguruma para mbstring)
+# Instalar dependências
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -11,11 +11,14 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Instalar extensões PHP (ordem correta)
+# Instalar extensões PHP
 RUN docker-php-ext-install pdo_mysql mbstring
 
 # Instalar Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
+
+# Instalar Vite globalmente (CORREÇÃO AQUI!)
+RUN npm install -g vite
 
 WORKDIR /app
 
@@ -23,14 +26,15 @@ WORKDIR /app
 COPY . .
 
 # Instalar dependências PHP
-RUN composer install --no-interaction --no-progress || true
+RUN composer install --no-interaction --no-progress
 
-# Instalar dependências Node e compilar React (se existir package.json)
-RUN if [ -f package.json ]; then npm install && npm run build; fi
+# Instalar dependências Node e compilar React
+RUN npm install
+RUN npm run build
 
 # Configurar Laravel
-RUN php artisan key:generate --force || true
-RUN php artisan config:cache || true
+RUN php artisan key:generate --force
+RUN php artisan config:cache
 
 EXPOSE 8000
 
