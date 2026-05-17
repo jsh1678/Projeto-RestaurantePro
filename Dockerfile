@@ -17,13 +17,17 @@ RUN docker-php-ext-install pdo_mysql mbstring
 # Instalar Composer
 COPY --from=composer:2.6 /usr/bin/composer /usr/bin/composer
 
-# Instalar Vite globalmente (CORREÇÃO AQUI!)
+# Instalar Vite globalmente
 RUN npm install -g vite
 
 WORKDIR /app
 
 # Copiar arquivos
 COPY . .
+
+# CRIAR .env a partir do .env.example (CORREÇÃO AQUI!)
+RUN if [ ! -f .env ] && [ -f .env.example ]; then cp .env.example .env; fi
+RUN if [ ! -f .env ]; then echo "APP_KEY=" > .env; fi
 
 # Instalar dependências PHP
 RUN composer install --no-interaction --no-progress
@@ -32,7 +36,7 @@ RUN composer install --no-interaction --no-progress
 RUN npm install
 RUN npm run build
 
-# Configurar Laravel
+# Configurar Laravel (agora com .env existente)
 RUN php artisan key:generate --force
 RUN php artisan config:cache
 
