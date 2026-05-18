@@ -5,20 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
-{{-- [FIX #7] Font Awesome: apenas solid + brands (~40% menor que all.min.css) --}}
+{{-- Font Awesome: apenas solid + brands (~40% menor que all.min.css) --}}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/solid.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/brands.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/fontawesome.min.css">
 
-{{-- [FIX #6] Fontes com preload para não bloquear renderização --}}
+{{-- Fontes com preload para não bloquear renderização --}}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Cinzel:wght@400;500;600;700;800;900&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Cinzel:wght@400;500;600;700;800;900&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,600&family=Cinzel:wght@400;500;600;700;800;900&display=swap"></noscript>
-
-{{-- [FIX #2] Tailwind CDN REMOVIDO — projeto usa CSS puro com variáveis --}}
-{{-- [FIX #1] @vite REMOVIDO — arquivo app.jsx não existe --}}
 
 <title>@yield('page-title', 'RestaurantePRO')</title>
 <style>
@@ -283,7 +280,6 @@ body {
 .table-wrap {
   background: var(--bg2); border: 1px solid var(--border);
   border-radius: var(--radius); overflow: hidden; margin-bottom: 22px;
-  /* [FIX #10] scroll horizontal em mobile */
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -349,15 +345,10 @@ tbody tr:hover { background: rgba(250,178,105,.03); }
 .btn-warning:hover { background: rgba(250,178,105,.22); }
 .btn-sm { padding: 7px 15px; font-size: 11px; border-radius: 6px; }
 .btn-icon { width: 36px; height: 36px; padding: 0; justify-content: center; border-radius: 7px; }
-
-/* [FIX #12] Estado de loading em botões de submit */
-.btn[data-loading]:disabled {
-  opacity: .7;
-}
+.btn[data-loading]:disabled { opacity: .7; }
 
 /* ===== FORMS ===== */
 .form-group { margin-bottom: 17px; }
-/* [FIX #15] Labels associados corretamente via CSS (for/id nas views) */
 .form-group label {
   display: block; margin-bottom: 6px;
   font-family: var(--font-title); font-size: 11px; font-weight: 600;
@@ -421,7 +412,7 @@ tbody tr:hover { background: rgba(250,178,105,.03); }
 }
 .kpi-lbl { font-family: var(--font-body); font-size: 15px; color: var(--muted); font-style: italic; }
 
-/* ===== [FIX #9] DASHBOARD GRID — responsivo ===== */
+/* ===== DASHBOARD GRID ===== */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
@@ -435,7 +426,7 @@ tbody tr:hover { background: rgba(250,178,105,.03); }
 hr, .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
 .campo-erro { color: #fca5a5; font-size: 14px; margin-top: 5px; display: none; }
 
-/* [FIX #13] Modal de confirmação reutilizável */
+/* ===== MODAL DE CONFIRMAÇÃO ===== */
 .modal-overlay {
   display: none; position: fixed; inset: 0; z-index: 999;
   background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
@@ -454,6 +445,54 @@ hr, .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0
 .modal-card p { font-family: var(--font-body); font-size: 16px; color: var(--muted); margin-bottom: 20px; }
 .modal-actions { display: flex; gap: 10px; }
 
+/* ===== TOAST DE ERRO HTTP (500, 419 etc) ===== */
+#http-toast {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+  background: var(--bg2); border: 1px solid rgba(236,45,1,.35);
+  border-left: 4px solid var(--red);
+  border-radius: var(--radius); padding: 16px 20px;
+  max-width: 360px; width: calc(100vw - 48px);
+  box-shadow: var(--shadow);
+  display: flex; align-items: flex-start; gap: 12px;
+  transform: translateY(120%); opacity: 0;
+  transition: transform .35s cubic-bezier(.4,0,.2,1), opacity .35s;
+  pointer-events: none;
+}
+#http-toast.show {
+  transform: translateY(0); opacity: 1; pointer-events: auto;
+}
+#http-toast .toast-icon { font-size: 22px; flex-shrink: 0; line-height: 1; }
+#http-toast .toast-body { flex: 1; }
+#http-toast .toast-title {
+  font-family: var(--font-title); font-size: 12px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; color: #fca5a5; margin-bottom: 3px;
+}
+#http-toast .toast-msg {
+  font-family: var(--font-body); font-size: 15px; color: var(--muted);
+}
+#http-toast .toast-action {
+  margin-top: 10px; display: flex; gap: 8px;
+}
+#http-toast .toast-btn {
+  font-family: var(--font-title); font-size: 11px; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+  padding: 6px 14px; border-radius: 6px; border: none; transition: .18s;
+}
+#http-toast .toast-btn-primary {
+  background: var(--red); color: #fff;
+}
+#http-toast .toast-btn-primary:hover { background: var(--red-dark); }
+#http-toast .toast-btn-secondary {
+  background: transparent; color: var(--muted); border: 1px solid var(--border);
+}
+#http-toast .toast-btn-secondary:hover { color: var(--cream); border-color: var(--border-hv); }
+#http-toast .toast-close {
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; font-size: 18px; line-height: 1; flex-shrink: 0;
+  opacity: .6; transition: opacity .15s;
+}
+#http-toast .toast-close:hover { opacity: 1; }
+
 /* ===== MOBILE ===== */
 @media (max-width: 768px) {
   :root { --sidebar: 270px; }
@@ -467,19 +506,14 @@ hr, .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0
   .form-row { grid-template-columns: 1fr; }
   .btn-topbar-sair span { display: none; }
   .btn-topbar-sair { padding: 8px 12px; }
-
-  /* [FIX #9] Dashboard grid → 1 coluna em mobile */
   .dashboard-grid { grid-template-columns: 1fr; }
-
-  /* [FIX #11] Layout de pedido → coluna única em mobile */
   .order-layout { flex-direction: column !important; }
   .resumo-col { width: 100% !important; min-width: 0 !important; position: static !important; }
-
-  /* Inline grids com colunas fixas → forçar 1 coluna */
   [style*="grid-template-columns:360px"] { display: block !important; }
   [style*="grid-template-columns:340px"] { display: block !important; }
   [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
   [style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+  #http-toast { bottom: 16px; right: 16px; width: calc(100vw - 32px); }
 }
 @media (max-width: 480px) {
   .cards-grid { grid-template-columns: 1fr 1fr; }
@@ -491,17 +525,29 @@ hr, .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0
 @yield('styles')
 </head>
 <body>
-  {{-- [FIX #13] Modal de confirmação reutilizável --}}
-  <div class="modal-overlay" id="modal-confirm" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="modal-card">
-      <h3 id="modal-title">⚠️ Confirmar Ação</h3>
-      <p id="modal-msg">Confirmar esta ação?</p>
-      <div class="modal-actions">
-        <button id="modal-ok" class="btn btn-danger" onclick="confirmarModal()">Confirmar</button>
-        <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
-      </div>
+
+{{-- ===== TOAST DE ERRO HTTP ===== --}}
+<div id="http-toast" role="alert" aria-live="assertive">
+  <span class="toast-icon" id="toast-icon">⚠️</span>
+  <div class="toast-body">
+    <div class="toast-title" id="toast-title">Erro</div>
+    <div class="toast-msg" id="toast-msg">Algo deu errado.</div>
+    <div class="toast-action" id="toast-action"></div>
+  </div>
+  <button class="toast-close" onclick="fecharToast()" aria-label="Fechar">×</button>
+</div>
+
+{{-- ===== MODAL DE CONFIRMAÇÃO ===== --}}
+<div class="modal-overlay" id="modal-confirm" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-card">
+    <h3 id="modal-title">⚠️ Confirmar Ação</h3>
+    <p id="modal-msg">Confirmar esta ação?</p>
+    <div class="modal-actions">
+      <button id="modal-ok" class="btn btn-danger" onclick="confirmarModal()">Confirmar</button>
+      <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
     </div>
   </div>
+</div>
 
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
@@ -630,21 +676,21 @@ hr, .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0
   </div>
 
   <div class="content">
-    {{-- [FIX #14] Flash com auto-dismiss via CSS animation + JS --}}
+    {{-- Flash messages --}}
     @if(session('success'))
-    <div class="alert alert-success" id="flash-success" role="alert">
+    <div class="alert alert-success" role="alert">
       ✅ <span>{{ session('success') }}</span>
       <button class="cls" onclick="this.parentElement.remove()" aria-label="Fechar">×</button>
     </div>
     @endif
     @if(session('error'))
-    <div class="alert alert-error" id="flash-error" role="alert">
+    <div class="alert alert-error" role="alert">
       ❌ <span>{{ session('error') }}</span>
       <button class="cls" onclick="this.parentElement.remove()" aria-label="Fechar">×</button>
     </div>
     @endif
     @if(session('warning'))
-    <div class="alert alert-warning" id="flash-warning" role="alert">
+    <div class="alert alert-warning" role="alert">
       ⚠️ <span>{{ session('warning') }}</span>
       <button class="cls" onclick="this.parentElement.remove()" aria-label="Fechar">×</button>
     </div>
@@ -661,10 +707,12 @@ hr, .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0
 </div>
 
 <script>
-/* ===== SIDEBAR ===== */
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
 function toggleSidebar(){
-  const sb = document.getElementById('sidebar');
-  const ov = document.getElementById('sidebar-overlay');
+  var sb = document.getElementById('sidebar');
+  var ov = document.getElementById('sidebar-overlay');
   sb.classList.toggle('open');
   ov.classList.toggle('open');
   document.body.style.overflow = sb.classList.contains('open') ? 'hidden' : '';
@@ -680,28 +728,34 @@ document.querySelectorAll('#sidebar-nav a').forEach(function(a){
   });
 });
 
+// Preservar posição de scroll da sidebar entre navegações
 (function(){
-  const nav = document.getElementById('sidebar');
+  var nav = document.getElementById('sidebar');
   if(!nav) return;
-  const saved = sessionStorage.getItem('sb-scroll');
+  var saved = sessionStorage.getItem('sb-scroll');
   if(saved) nav.scrollTop = parseInt(saved);
   nav.addEventListener('scroll', function(){ sessionStorage.setItem('sb-scroll', nav.scrollTop); });
 })();
 
-/* ===== Auto-dismiss flash após 5s ===== */
+/* ============================================================
+   AUTO-DISMISS FLASH (5 segundos)
+   ============================================================ */
 setTimeout(function(){
   document.querySelectorAll('.alert').forEach(function(el){
-    el.style.transition='opacity .5s'; el.style.opacity='0';
-    setTimeout(function(){el.remove();},500);
+    el.style.transition = 'opacity .5s';
+    el.style.opacity    = '0';
+    setTimeout(function(){ if(el.parentNode) el.remove(); }, 500);
   });
-},5000);
+}, 5000);
 
-/* ===== Modal de confirmação reutilizável ===== */
+/* ============================================================
+   MODAL DE CONFIRMAÇÃO
+   ============================================================ */
 var _modalCallback = null;
 
 function confirmar(msg, callback, titulo) {
-  document.getElementById('modal-msg').textContent = msg;
-  if (titulo) document.getElementById('modal-title').textContent = titulo;
+  document.getElementById('modal-msg').textContent   = msg || 'Confirmar esta ação?';
+  document.getElementById('modal-title').textContent = titulo || '⚠️ Confirmar Ação';
   _modalCallback = callback;
   document.getElementById('modal-confirm').classList.add('open');
 }
@@ -720,90 +774,221 @@ document.addEventListener('keydown', function(e){
   if (e.key === 'Escape') fecharModal();
 });
 
-/* ===== Loading em botões submit ===== */
+/* ============================================================
+   TOAST DE ERRO HTTP
+   Uso: mostrarToast({ titulo, msg, icone, botoes: [{label, acao, primario}] })
+   ============================================================ */
+var _toastTimer = null;
+
+function mostrarToast(opts) {
+  var toast   = document.getElementById('http-toast');
+  var icon    = document.getElementById('toast-icon');
+  var title   = document.getElementById('toast-title');
+  var msg     = document.getElementById('toast-msg');
+  var actions = document.getElementById('toast-action');
+
+  icon.textContent  = opts.icone  || '⚠️';
+  title.textContent = opts.titulo || 'Erro';
+  msg.textContent   = opts.msg    || 'Algo deu errado.';
+  actions.innerHTML = '';
+
+  if (opts.botoes && opts.botoes.length) {
+    opts.botoes.forEach(function(b) {
+      var btn = document.createElement('button');
+      btn.className   = 'toast-btn ' + (b.primario ? 'toast-btn-primary' : 'toast-btn-secondary');
+      btn.textContent = b.label;
+      btn.onclick     = function() { fecharToast(); if(typeof b.acao === 'function') b.acao(); };
+      actions.appendChild(btn);
+    });
+  }
+
+  toast.classList.add('show');
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(fecharToast, opts.duracao || 8000);
+}
+
+function fecharToast() {
+  document.getElementById('http-toast').classList.remove('show');
+  if (_toastTimer) { clearTimeout(_toastTimer); _toastTimer = null; }
+}
+
+/* Mapeamento de status HTTP → mensagem amigável */
+function mensagemParaStatus(status) {
+  var mapa = {
+    419: { icone: '⏱️', titulo: 'Sessão Expirada',     msg: 'Sua sessão expirou por inatividade.' },
+    401: { icone: '🔒', titulo: 'Não Autenticado',     msg: 'Você precisa fazer login para continuar.' },
+    403: { icone: '🚫', titulo: 'Acesso Negado',        msg: 'Você não tem permissão para esta ação.' },
+    404: { icone: '🔍', titulo: 'Não Encontrado',       msg: 'O recurso solicitado não foi encontrado.' },
+    422: { icone: '📋', titulo: 'Dados Inválidos',      msg: 'Verifique os campos e tente novamente.' },
+    429: { icone: '⏳', titulo: 'Muitas Requisições',   msg: 'Aguarde um momento antes de tentar novamente.' },
+    500: { icone: '🔥', titulo: 'Erro Interno',         msg: 'Erro no servidor. Tente novamente em instantes.' },
+    502: { icone: '🌐', titulo: 'Servidor Indisponível',msg: 'O servidor está temporariamente fora do ar.' },
+    503: { icone: '🛠️', titulo: 'Em Manutenção',       msg: 'O sistema está em manutenção. Tente mais tarde.' },
+  };
+  return mapa[status] || { icone: '⚠️', titulo: 'Erro ' + status, msg: 'Ocorreu um erro inesperado.' };
+}
+
+/* ============================================================
+   INTERCEPTOR GLOBAL DE FETCH
+   Captura 419, 401, 500, etc. em qualquer requisição fetch
+   ============================================================ */
+(function() {
+  var originalFetch = window.fetch;
+
+  window.fetch = function(input, init) {
+    return originalFetch.apply(this, arguments).then(function(response) {
+
+      // 419 — sessão/CSRF expirado: recarregar a página
+      if (response.status === 419) {
+        mostrarToast({
+          icone:  '⏱️',
+          titulo: 'Sessão Expirada',
+          msg:    'Sua sessão expirou. Recarregue a página para continuar.',
+          botoes: [
+            { label: 'Recarregar', primario: true,  acao: function(){ window.location.reload(); } },
+            { label: 'Ignorar',    primario: false }
+          ]
+        });
+        return response;
+      }
+
+      // 401 — não autenticado: redirecionar para login
+      if (response.status === 401) {
+        mostrarToast({
+          icone:  '🔒',
+          titulo: 'Sessão Encerrada',
+          msg:    'Você foi desconectado. Redirecionando para o login...',
+          botoes: [
+            { label: 'Ir para Login', primario: true, acao: function(){ window.location.href = '/login'; } }
+          ],
+          duracao: 4000
+        });
+        setTimeout(function(){ window.location.href = '/login'; }, 4000);
+        return response;
+      }
+
+      // 500, 502, 503 — erros de servidor
+      if (response.status >= 500) {
+        var info = mensagemParaStatus(response.status);
+        mostrarToast({
+          icone:  info.icone,
+          titulo: info.titulo,
+          msg:    info.msg,
+          botoes: [
+            { label: 'Tentar novamente', primario: true,  acao: function(){ window.location.reload(); } },
+            { label: 'Fechar',           primario: false }
+          ]
+        });
+        return response;
+      }
+
+      // 429 — rate limit
+      if (response.status === 429) {
+        mostrarToast({
+          icone:  '⏳',
+          titulo: 'Muitas Requisições',
+          msg:    'Aguarde um momento antes de tentar novamente.',
+          botoes: [{ label: 'Fechar', primario: false }]
+        });
+        return response;
+      }
+
+      return response;
+    }).catch(function(err) {
+      // Sem conexão / timeout de rede
+      mostrarToast({
+        icone:  '📡',
+        titulo: 'Sem Conexão',
+        msg:    'Verifique sua internet e tente novamente.',
+        botoes: [
+          { label: 'Tentar novamente', primario: true, acao: function(){ window.location.reload(); } },
+          { label: 'Fechar',           primario: false }
+        ]
+      });
+      throw err;
+    });
+  };
+})();
+
+/* ============================================================
+   PROTEÇÃO CONTRA SESSÃO EXPIRADA AO VOLTAR NO HISTÓRICO
+   (pageshow — UM único listener)
+   ============================================================ */
+window.addEventListener('pageshow', function(e) {
+  if (!e.persisted) return; // Página não veio do cache — ignorar
+
+  fetch('/dashboard', { method: 'HEAD', credentials: 'same-origin', cache: 'no-store' })
+    .then(function(r) {
+      if (r.status === 401 || r.url.includes('/login')) {
+        window.location.href = '/login';
+      }
+      // 419 já tratado pelo interceptor acima
+    })
+    .catch(function() {}); // Sem internet — silencioso
+});
+
+/* ============================================================
+   RENOVAÇÃO DO CSRF TOKEN A CADA 15 MINUTOS
+   Requer rota GET /csrf-token no routes/web.php:
+     Route::get('/csrf-token', fn() => response()->json(['token' => csrf_token()]))->middleware('web');
+   ============================================================ */
+setInterval(function() {
+  fetch('/csrf-token', { credentials: 'same-origin' })
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(data) {
+      if (!data || !data.token) return;
+      // Atualizar todos os inputs _token da página
+      document.querySelectorAll('input[name="_token"]').forEach(function(i) {
+        i.value = data.token;
+      });
+      // Atualizar meta tag
+      var meta = document.querySelector('meta[name="csrf-token"]');
+      if (meta) meta.setAttribute('content', data.token);
+      // Disponibilizar globalmente para JS
+      window._csrfToken = data.token;
+    })
+    .catch(function() {}); // Silencioso — o interceptor de fetch cuida do erro se for grave
+}, 15 * 60 * 1000);
+
+// Expor CSRF token no window assim que o DOM carregar
+document.addEventListener('DOMContentLoaded', function() {
+  var meta = document.querySelector('meta[name="csrf-token"]');
+  if (meta) window._csrfToken = meta.getAttribute('content');
+});
+
+/* ============================================================
+   LOADING EM BOTÕES DE SUBMIT (anti double-submit)
+   ============================================================ */
 document.querySelectorAll('form').forEach(function(form) {
-  let submitted = false;
+  var submitted = false;
+
   form.addEventListener('submit', function(e) {
     if (submitted) {
       e.preventDefault();
       return false;
     }
     submitted = true;
+
     var btn = form.querySelector('button[type="submit"]');
     if (btn && !btn.dataset.noLoading) {
       setTimeout(function() {
         btn.disabled = true;
-        var original = btn.innerHTML;
-        btn.dataset.originalHtml = original;
+        btn.dataset.originalHtml = btn.innerHTML;
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
       }, 10);
     }
-    setTimeout(() => { submitted = false; }, 5000);
+
+    // Liberar após 8s para não travar em caso de erro de rede
+    setTimeout(function() {
+      submitted = false;
+      if (btn && btn.dataset.originalHtml) {
+        btn.disabled = false;
+        btn.innerHTML = btn.dataset.originalHtml;
+        delete btn.dataset.originalHtml;
+      }
+    }, 8000);
   });
 });
-
-/* ===== MELHORADO: Proteção contra sessão expirada (419 e 401) ===== */
-window.addEventListener('pageshow', function(e) {
-    if (e.persisted) {
-        fetch('/dashboard', { method: 'HEAD', credentials: 'same-origin', cache: 'no-store' })
-            .then(r => {
-                if (r.status === 401 || r.url.includes('/login')) {
-                    window.location.href = '/login';
-                }
-                if (r.status === 419) {
-                    alert('⏱️ Sessão expirada. A página será recarregada.');
-                    window.location.reload();
-                }
-            })
-            .catch(() => {
-                // Sem internet — silencioso
-                console.log('Sem conexão com o servidor');
-            });
-    }
-});
-
-// Força reload se página vier do cache (resolve 419 no mobile)
-window.addEventListener('pageshow', function(e) {
-    if (e.persisted) {
-        window.location.reload();
-    }
-});
-
-// Captura CSRF token para requisições AJAX futuras
-document.addEventListener('DOMContentLoaded', function () {
-    const meta = document.querySelector('meta[name="csrf-token"]');
-    if (meta) {
-        window._csrfToken = meta.getAttribute('content');
-    }
-});
-
-// Recarregar token CSRF a cada 15 minutos
-setInterval(function() {
-    fetch('/csrf-token')
-        .then(response => response.json())
-        .then(data => {
-            document.querySelectorAll('input[name="_token"]').forEach(input => {
-                input.value = data.token;
-            });
-            const metaToken = document.querySelector('meta[name="csrf-token"]');
-            if (metaToken) metaToken.setAttribute('content', data.token);
-            window._csrfToken = data.token;
-        })
-        .catch(() => console.log('Token refresh falhou'));
-}, 15 * 60 * 1000);
-
-// Intercepta respostas 419 em requisições fetch
-const originalFetch = window.fetch;
-window.fetch = function() {
-    return originalFetch.apply(this, arguments)
-        .then(response => {
-            if (response.status === 419) {
-                alert('⏱️ Sessão expirada. A página será recarregada.');
-                window.location.reload();
-            }
-            return response;
-        });
-};
 </script>
 @yield('scripts')
 </body>
