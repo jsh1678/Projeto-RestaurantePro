@@ -669,6 +669,7 @@ function toggleSidebar(){
   ov.classList.toggle('open');
   document.body.style.overflow = sb.classList.contains('open') ? 'hidden' : '';
 }
+
 document.querySelectorAll('#sidebar-nav a').forEach(function(a){
   a.addEventListener('click', function(){
     if(window.innerWidth <= 768){
@@ -678,6 +679,7 @@ document.querySelectorAll('#sidebar-nav a').forEach(function(a){
     }
   });
 });
+
 (function(){
   const nav = document.getElementById('sidebar');
   if(!nav) return;
@@ -686,7 +688,7 @@ document.querySelectorAll('#sidebar-nav a').forEach(function(a){
   nav.addEventListener('scroll', function(){ sessionStorage.setItem('sb-scroll', nav.scrollTop); });
 })();
 
-/* ===== [FIX #14] Auto-dismiss flash após 5s ===== */
+/* ===== Auto-dismiss flash após 5s ===== */
 setTimeout(function(){
   document.querySelectorAll('.alert').forEach(function(el){
     el.style.transition='opacity .5s'; el.style.opacity='0';
@@ -694,15 +696,9 @@ setTimeout(function(){
   });
 },5000);
 
-/* ===== [FIX #13] Modal de confirmação reutilizável ===== */
+/* ===== Modal de confirmação reutilizável ===== */
 var _modalCallback = null;
 
-/**
- * Exibe modal de confirmação.
- * @param {string} msg - Mensagem a exibir
- * @param {Function} callback - Função a executar se confirmar
- * @param {string} [titulo] - Título opcional do modal
- */
 function confirmar(msg, callback, titulo) {
   document.getElementById('modal-msg').textContent = msg;
   if (titulo) document.getElementById('modal-title').textContent = titulo;
@@ -720,14 +716,19 @@ function fecharModal() {
   _modalCallback = null;
 }
 
-// Fechar modal com ESC
 document.addEventListener('keydown', function(e){
   if (e.key === 'Escape') fecharModal();
 });
 
-/* ===== [FIX #12] Loading em botões submit ===== */
+/* ===== Loading em botões submit ===== */
 document.querySelectorAll('form').forEach(function(form) {
-  form.addEventListener('submit', function() {
+  let submitted = false;
+  form.addEventListener('submit', function(e) {
+    if (submitted) {
+      e.preventDefault();
+      return false;
+    }
+    submitted = true;
     var btn = form.querySelector('button[type="submit"]');
     if (btn && !btn.dataset.noLoading) {
       setTimeout(function() {
@@ -737,17 +738,72 @@ document.querySelectorAll('form').forEach(function(form) {
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando...';
       }, 10);
     }
+    setTimeout(() => { submitted = false; }, 5000);
   });
 });
 
-/* ===== Proteção sessão expirada ===== */
+/* ===== MELHORADO: Proteção contra sessão expirada (419 e 401) ===== */
 window.addEventListener('pageshow', function(e) {
     if (e.persisted) {
-        fetch('/dashboard', { method: 'HEAD', credentials: 'same-origin' })
-            .then(r => { if (r.status === 401 || r.url.includes('/login')) window.location.href = '/login'; })
-            .catch(() => {});
+        fetch('/dashboard', { method: 'HEAD', credentials: 'same-origin', cache: 'no-store' })
+            .then(r => {
+                if (r.status === 401 || r.url.includes('/login')) {
+                    window.location.href = '/login';
+                }
+                if (r.status === 419) {
+                    alert('⏱️ Sessão expirada. A página será recarregada.');
+                    window.location.reload();
+                }
+            })
+            .catch(() => {
+                // Sem internet — silencioso
+                console.log('Sem conexão com o servidor');
+            });
     }
 });
+
+// Força reload se página vier do cache (resolve 419 no mobile)
+window.addEventListener('pageshow', function(e) {
+    if (e.persisted) {
+        window.location.reload();
+    }
+});
+
+// Captura CSRF token para requisições AJAX futuras
+document.addEventListener('DOMContentLoaded', function () {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    if (meta) {
+        window._csrfToken = meta.getAttribute('content');
+    }
+});
+
+// Recarregar token CSRF a cada 15 minutos
+setInterval(function() {
+    fetch('/csrf-token')
+        .then(response => response.json())
+        .then(data => {
+            document.querySelectorAll('input[name="_token"]').forEach(input => {
+                input.value = data.token;
+            });
+            const metaToken = document.querySelector('meta[name="csrf-token"]');
+            if (metaToken) metaToken.setAttribute('content', data.token);
+            window._csrfToken = data.token;
+        })
+        .catch(() => console.log('Token refresh falhou'));
+}, 15 * 60 * 1000);
+
+// Intercepta respostas 419 em requisições fetch
+const originalFetch = window.fetch;
+window.fetch = function() {
+    return originalFetch.apply(this, arguments)
+        .then(response => {
+            if (response.status === 419) {
+                alert('⏱️ Sessão expirada. A página será recarregada.');
+                window.location.reload();
+            }
+            return response;
+        });
+};
 </script>
 @yield('scripts')
 </body>
