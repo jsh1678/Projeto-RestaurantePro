@@ -147,13 +147,15 @@ class ChefController extends Controller
             $pedido = $item->order;
             $pedido->load('items');
 
-            // ✅ FIX: Só muda o status do pedido se ele ainda está 'em_preparo'
-            // Evita sobrescrever status já avançados (ex: garçom cancelou enquanto chef preparava)
+            // ✅ FIX: Quando todos os itens ficam prontos, o pedido vai para 'pronto'
+            // (avisa o garçom para entregar), mas NÃO fecha a conta.
+            // A conta só fecha quando o garçom/gerente clicar em "Fechar Conta"
+            // manualmente — o cliente pode querer pedir mais itens.
             $todosProntos = $pedido->items->every(fn($it) => $it->status === 'pronto');
 
             if ($todosProntos && $pedido->status === 'em_preparo') {
                 $pedido->update([
-                    'status'                  => 'pronto_entrega',
+                    'status'                  => 'pronto',
                     'horario_pronto'          => now(),
                     'horario_termino_preparo' => now(),
                 ]);
@@ -172,3 +174,11 @@ class ChefController extends Controller
             ->with('success', "Item marcado como {$labelStatus}");
     }
 }
+
+
+<file path="app/Http/Controllers/ControleEstoqueController.php">
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\StockItem;

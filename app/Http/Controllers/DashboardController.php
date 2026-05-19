@@ -64,9 +64,9 @@ class DashboardController extends Controller
                 'mesasOcupadas' => $mesasOcupadas,
                 'totalMesas'    => $totalMesas,
 
-                // ✅ FIX: "Para entregar" = pedidos prontos pela cozinha (pronto_entrega)
-                // "aguardando_pagamento" já foi entregue, não precisa aparecer aqui
-                'pedidosProntosPagamento' => Order::whereIn('status', ['pronto_entrega'])
+                // "Para entregar" = pedidos prontos pela cozinha (status 'pronto')
+                // 'pronto_entrega' e 'aguardando_pagamento' = conta já fechada, vai para o caixa
+                'pedidosProntosPagamento' => Order::whereIn('status', ['pronto', 'pronto_entrega'])
                     ->with('table', 'items')
                     ->get(),
 
@@ -153,81 +153,3 @@ class DashboardController extends Controller
     public function relatorios()
     {
         if (Auth::user()->role !== 'gerente') abort(403);
-
-        $dataInicio = request('data_inicio')
-            ? Carbon::parse(request('data_inicio'))->startOfDay()
-            : Carbon::today()->subDays(29)->startOfDay();
-        $dataFim = request('data_fim')
-            ? Carbon::parse(request('data_fim'))->endOfDay()
-            : Carbon::today()->endOfDay();
-
-        $pedidos    = Order::with('user', 'table')
-            ->whereBetween('created_at', [$dataInicio, $dataFim])->get();
-        $pagamentos = Payment::with('order.table')
-            ->whereBetween('created_at', [$dataInicio, $dataFim])
-            ->where('status', 'confirmado')->get();
-
-        $totalVendas       = $pagamentos->sum('valor_final');
-        $totalPedidos      = $pedidos->count();
-        $pedidosCancelados = $pedidos->where('status', 'cancelado')->count();
-        $ticketMedio       = $pagamentos->count() > 0 ? $totalVendas / $pagamentos->count() : 0;
-
-        $porMetodo = $pagamentos->groupBy('metodo')->map(fn($g) => [
-            'qtd'   => $g->count(),
-            'total' => $g->sum('valor_final'),
-        ]);
-
-        $itensMaisVendidos = OrderItem::with('menuItem')
-            ->whereHas('order', fn($q) => $q->whereBetween('created_at', [$dataInicio, $dataFim])
-                ->where('status', '!=', 'cancelado'))
-            ->get()
-            ->groupBy('menu_item_id')
-            ->map(fn($g) => [
-                'nome'       => $g->first()->menuItem->nome ?? '—',
-                'quantidade' => $g->sum('quantidade'),
-                'total'      => $g->sum('subtotal'),
-            ])
-            ->sortByDesc('quantidade')
-            ->take(10);
-
-        $vendasPorDia = $pagamentos->groupBy(fn($p) => $p->created_at->format('d/m'))
-            ->map(fn($g) => $g->sum('valor_final'))
-            ->sortKeys();
-
-        $totalCompras  = Purchase::whereBetween('created_at', [$dataInicio, $dataFim])
-            ->where('status', 'recebido')->sum('total');
-        $totalSangrias = Sangria::whereBetween('created_at', [$dataInicio, $dataFim])->sum('valor');
-        $lucroEstimado = $totalVendas - $totalCompras - $totalSangrias;
-
-        $porGarcom = $pedidos->where('status', '!=', 'cancelado')
-            ->groupBy('user_id')
-            ->map(fn($g) => [
-                'nome'    => $g->first()->user->name ?? '—',
-                'pedidos' => $g->count(),
-                'total'   => $g->sum('total'),
-            ])
-            ->sortByDesc('total')
-            ->take(10);
-
-        $porMesa = $pedidos->where('status', '!=', 'cancelado')
-            ->groupBy('table_id')
-            ->map(fn($g) => [
-                'mesa'    => 'Mesa ' . ($g->first()->table->numero ?? '?'),
-                'pedidos' => $g->count(),
-                'total'   => $g->sum('total'),
-            ])
-            ->sortByDesc('total')
-            ->take(10);
-
-        $estoqueCritico = StockItem::whereColumn('quantidade_atual', '<=', 'quantidade_minima')
-            ->orderBy('quantidade_atual')->get();
-
-        return view('dashboard.relatorios', compact(
-            'pedidos', 'pagamentos', 'totalVendas', 'totalPedidos',
-            'pedidosCancelados', 'ticketMedio', 'porMetodo',
-            'itensMaisVendidos', 'vendasPorDia', 'totalCompras',
-            'totalSangrias', 'lucroEstimado', 'porGarcom', 'porMesa',
-            'estoqueCritico', 'dataInicio', 'dataFim'
-        ));
-    }
-}
