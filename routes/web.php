@@ -66,6 +66,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/chef/preparo', [ChefController::class, 'preparo'])->name('chef.preparo');
     Route::get('/chef/estoque', [ChefController::class, 'estoque'])->name('chef.estoque');
     Route::patch('/chef/item/{item}/status', [ChefController::class, 'marcarItemComo'])->name('chef.item.status');
+    // ↓ ADICIONAR:
+    Route::get('/cozinha/stream', [OrderController::class, 'cozinhaStream'])->name('cozinha.stream');
 
     Route::get('/gerenciar',               fn() => redirect()->route('gerenciar.mesas'))->name('gerenciar');
     Route::get('/gerenciar/mesas',         [GerenciarController::class, 'mesas'])->name('gerenciar.mesas');

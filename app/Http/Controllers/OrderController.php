@@ -10,6 +10,7 @@ use App\Models\StockItem;
 use App\Models\StockMovement;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -95,6 +96,13 @@ class OrderController extends Controller
         ]);
     }
 
+    /**
+     * Atualiza um pedido existente com diff inteligente:
+     * - Itens que já existiam e continuam → preservados (mantém status da cozinha)
+     * - Itens com quantidade aumentada → quantidade atualizada + marcado como não enviado
+     * - Itens novos (não existiam antes) → criados com enviado_cozinha = false
+     * - Itens removidos → deletados
+     */
     public function update(Request $request, Order $order)
     {
         if (!Auth::user() || Auth::user()->role !== 'garcom') {
@@ -114,29 +122,103 @@ class OrderController extends Controller
             'itens.*.quantidade'   => 'required|integer|min:1',
         ]);
 
-        DB::transaction(function () use ($validated, $order, $request) {
-            $total = 0;
-            $order->items()->delete();
+        $itensNovos = DB::transaction(function () use ($validated, $order, $request) {
+            // Mapa dos itens atuais: menu_item_id → OrderItem
+            $itensAtuais = $order->items->keyBy('menu_item_id');
 
-            foreach ($validated['itens'] as $item) {
-                $menuItem = MenuItem::find($item['menu_item_id']);
-                $subtotal = $menuItem->preco * $item['quantidade'];
-                OrderItem::create([
-                    'order_id'       => $order->id,
-                    'menu_item_id'   => $menuItem->id,
-                    'quantidade'     => $item['quantidade'],
-                    'preco_unitario' => $menuItem->preco,
-                    'subtotal'       => $subtotal,
-                ]);
-                $total += $subtotal;
+            // Mapa do que foi enviado pelo garçom: menu_item_id → quantidade
+            $itensEnviados = collect($validated['itens'])->keyBy('menu_item_id');
+
+            $total        = 0;
+            $itensNovos   = collect(); // novos ou com quantidade aumentada
+
+            // ── 1. Criar ou atualizar itens ──────────────────────────────────
+            foreach ($itensEnviados as $menuItemId => $dados) {
+                $menuItem = MenuItem::find($menuItemId);
+                if (!$menuItem) continue;
+
+                $qtdNova  = (int) $dados['quantidade'];
+                $subtotal = $menuItem->preco * $qtdNova;
+                $total   += $subtotal;
+
+                if ($itensAtuais->has($menuItemId)) {
+                    // Item já existia
+                    $itemExistente = $itensAtuais[$menuItemId];
+                    $qtdAnterior   = $itemExistente->quantidade;
+
+                    if ($qtdNova > $qtdAnterior) {
+                        // Quantidade aumentou → re-envia delta para cozinha
+                        $itemExistente->update([
+                            'quantidade'         => $qtdNova,
+                            'subtotal'           => $subtotal,
+                            'enviado_cozinha'    => false,  // re-notifica cozinha
+                            'enviado_cozinha_em' => null,
+                        ]);
+                        $itensNovos->push([
+                            'item'        => $itemExistente->fresh()->load('menuItem'),
+                            'delta'       => $qtdNova - $qtdAnterior, // só o acréscimo
+                            'quantidade'  => $qtdNova,
+                            'tipo'        => 'adicionado',
+                        ]);
+                    } elseif ($qtdNova < $qtdAnterior) {
+                        // Quantidade diminuiu → atualiza mas NÃO re-notifica
+                        $itemExistente->update([
+                            'quantidade' => $qtdNova,
+                            'subtotal'   => $subtotal,
+                        ]);
+                    }
+                    // Se igual: não faz nada
+
+                } else {
+                    // Item novo → cria e marca para envio à cozinha
+                    $novoItem = OrderItem::create([
+                        'order_id'        => $order->id,
+                        'menu_item_id'    => $menuItem->id,
+                        'quantidade'      => $qtdNova,
+                        'preco_unitario'  => $menuItem->preco,
+                        'subtotal'        => $subtotal,
+                        'status'          => 'pendente',
+                        'enviado_cozinha' => false,
+                    ]);
+                    $itensNovos->push([
+                        'item'       => $novoItem->load('menuItem'),
+                        'delta'      => $qtdNova,
+                        'quantidade' => $qtdNova,
+                        'tipo'       => 'novo',
+                    ]);
+                }
             }
 
-            $order->update([
+            // ── 2. Deletar itens que foram removidos ─────────────────────────
+            foreach ($itensAtuais as $menuItemId => $itemExistente) {
+                if (!$itensEnviados->has($menuItemId)) {
+                    $itemExistente->delete();
+                }
+            }
+
+            // ── 3. Atualizar totais e status do pedido ───────────────────────
+            $updates = [
                 'total'         => $total,
                 'observacoes'   => $validated['observacoes'] ?? null,
                 'pedido_viagem' => $request->has('pedido_viagem'),
-            ]);
+            ];
+
+            // Se o pedido estava 'pronto' (chef terminou) mas o garçom adicionou
+            // itens novos → volta para 'em_preparo'
+            if ($itensNovos->isNotEmpty() && $order->status === 'pronto') {
+                $updates['status']          = 'em_preparo';
+                $updates['horario_pronto']  = null;
+            }
+
+            $order->update($updates);
+
+            return $itensNovos;
         });
+
+        // ── 4. Notificar cozinha via cache (lido pelo SSE) ───────────────────
+        if ($itensNovos->isNotEmpty()) {
+            $this->notificarCozinha($order, $itensNovos);
+        }
 
         return redirect()->route('dashboard')
             ->with('success', '✅ Pedido atualizado com sucesso!');
@@ -234,11 +316,13 @@ class OrderController extends Controller
                 $menuItem = $menuItemsCache[$item['menu_item_id']];
                 $subtotal = $menuItem->preco * $item['quantidade'];
                 OrderItem::create([
-                    'order_id'       => $pedido->id,
-                    'menu_item_id'   => $menuItem->id,
-                    'quantidade'     => $item['quantidade'],
-                    'preco_unitario' => $menuItem->preco,
-                    'subtotal'       => $subtotal,
+                    'order_id'        => $pedido->id,
+                    'menu_item_id'    => $menuItem->id,
+                    'quantidade'      => $item['quantidade'],
+                    'preco_unitario'  => $menuItem->preco,
+                    'subtotal'        => $subtotal,
+                    'status'          => 'pendente',
+                    'enviado_cozinha' => false,   // será marcado pelo SSE ao enviar
                 ]);
                 $total += $subtotal;
             }
@@ -246,6 +330,16 @@ class OrderController extends Controller
             $pedido->update(['total' => $total]);
             return $pedido;
         });
+
+        // Notificar cozinha: todos os itens são "novos"
+        $pedido->load('items.menuItem');
+        $itensNovos = $pedido->items->map(fn($item) => [
+            'item'       => $item,
+            'delta'      => $item->quantidade,
+            'quantidade' => $item->quantidade,
+            'tipo'       => 'novo',
+        ]);
+        $this->notificarCozinha($pedido, $itensNovos);
 
         return redirect()->route('dashboard')
             ->with('success', 'Pedido criado com sucesso!');
@@ -259,10 +353,108 @@ class OrderController extends Controller
     }
 
     /**
-     * Garçom marca o pedido como entregue → status vira aguardando_pagamento.
-     * TAMBÉM marca todos os order_items como 'entregue' para o chef não ver mais.
-     * TAMBÉM atualiza o status da mesa para 'ocupada' (já estava, mas garante).
+     * Endpoint SSE — a cozinha abre esta URL e fica escutando eventos em tempo real.
+     * Compatível com PHP síncrono (sem WebSockets, sem Redis, sem filas).
      */
+    public function cozinhaStream(Request $request)
+    {
+        if (!Auth::check() || Auth::user()->role !== 'chef') {
+            abort(403);
+        }
+
+        return response()->stream(function () {
+            // Cabeçalho inicial — mantém conexão viva
+            echo "data: " . json_encode(['type' => 'connected']) . "\n\n";
+            ob_flush();
+            flush();
+
+            $ultimoCheck = now();
+            $maxSegundos = 55; // reconecta antes do timeout do proxy (60s)
+            $inicio      = time();
+
+            while ((time() - $inicio) < $maxSegundos) {
+                // Busca itens que chegaram após o último check E ainda não foram
+                // marcados como enviados para a cozinha.
+                $itensNovos = OrderItem::with(['order.table', 'order.user', 'menuItem'])
+                    ->where('enviado_cozinha', false)
+                    ->whereHas('order', fn($q) => $q->whereIn('status', ['em_preparo', 'pronto']))
+                    ->where('created_at', '>=', $ultimoCheck->subSeconds(2)) // janela de segurança
+                    ->orderBy('created_at')
+                    ->get();
+
+                if ($itensNovos->isNotEmpty()) {
+                    // Agrupa por pedido para o payload
+                    $payload = $itensNovos->groupBy('order_id')->map(function ($itens, $orderId) {
+                        $pedido = $itens->first()->order;
+                        return [
+                            'order_id'  => $orderId,
+                            'numero'    => str_pad($orderId, 4, '0', STR_PAD_LEFT),
+                            'mesa'      => $pedido->table->numero ?? '—',
+                            'garcom'    => $pedido->user->name ?? '—',
+                            'viagem'    => (bool) $pedido->pedido_viagem,
+                            'obs'       => $pedido->observacoes,
+                            'itens'     => $itens->map(fn($i) => [
+                                'id'        => $i->id,
+                                'nome'      => $i->menuItem->nome ?? 'Item',
+                                'quantidade'=> $i->quantidade,
+                            ])->values(),
+                        ];
+                    })->values();
+
+                    echo "event: novos_itens\n";
+                    echo "data: " . json_encode($payload) . "\n\n";
+                    ob_flush();
+                    flush();
+
+                    // Marca como enviados para não re-notificar
+                    OrderItem::whereIn('id', $itensNovos->pluck('id'))
+                        ->update([
+                            'enviado_cozinha'    => true,
+                            'enviado_cozinha_em' => now(),
+                        ]);
+                }
+
+                $ultimoCheck = now();
+
+                // Heartbeat a cada ciclo para manter a conexão viva
+                echo ": heartbeat\n\n";
+                ob_flush();
+                flush();
+
+                if (connection_aborted()) break;
+
+                sleep(2); // verifica a cada 2 segundos
+            }
+
+            // Diz ao cliente para reconectar em 1s
+            echo "event: reconectar\n";
+            echo "data: {}\n\n";
+            ob_flush();
+            flush();
+        }, 200, [
+            'Content-Type'      => 'text/event-stream',
+            'Cache-Control'     => 'no-cache',
+            'X-Accel-Buffering' => 'no',   // desativa buffer do Nginx
+            'Connection'        => 'keep-alive',
+        ]);
+    }
+
+    /**
+     * Armazena no cache um "sinal" de novos itens para o SSE pegar.
+     * Também garante que todos os itens passados estejam com enviado_cozinha = false.
+     */
+    private function notificarCozinha(Order $order, $itensNovos): void
+    {
+        // Garante que os itens novos estão com flag false no banco
+        $ids = $itensNovos->pluck('item.id')->filter();
+        if ($ids->isNotEmpty()) {
+            OrderItem::whereIn('id', $ids)->update([
+                'enviado_cozinha'    => false,
+                'enviado_cozinha_em' => null,
+            ]);
+        }
+    }
+
     public function updateStatus(Request $request, Order $order)
     {
         if (!Auth::user() || Auth::user()->role !== 'garcom') {
@@ -273,10 +465,7 @@ class OrderController extends Controller
             'status' => 'required|in:aberto,em_preparo,pronto,pronto_entrega,entregue,aguardando_pagamento,pago,cancelado',
         ]);
 
-        $novoStatus = $request->status;
-
-        // "entregue" pelo garçom → vira aguardando_pagamento no Order
-        // mas os order_items ficam marcados como 'entregue'
+        $novoStatus   = $request->status;
         $statusPedido = $novoStatus;
         if ($novoStatus === 'entregue') {
             $statusPedido = 'aguardando_pagamento';
@@ -287,14 +476,10 @@ class OrderController extends Controller
 
             if ($statusPedido === 'aguardando_pagamento') {
                 $updates['horario_entrega'] = now();
-
-                // ✅ FIX: Marcar todos os itens do pedido como 'entregue'
                 $order->items()->update(['status' => 'entregue']);
             }
 
             $order->update($updates);
-
-            // Garantir que a mesa continua como 'ocupada' (aguardando pagamento)
             $order->table?->update(['status' => 'ocupada']);
         });
 
@@ -315,8 +500,7 @@ class OrderController extends Controller
         }
 
         DB::transaction(function () use ($order) {
-            // Cancelar os itens também
-            $order->items()->update(['status' => 'entregue']); // marcar como finalizado
+            $order->items()->update(['status' => 'entregue']);
             $order->update(['status' => 'cancelado']);
 
             $pedidosAtivos = Order::where('table_id', $order->table_id)

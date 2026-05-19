@@ -27,6 +27,7 @@
 
 @section('content')
 
+<div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:12px"><div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:700;color:var(--muted)"><i class="fas fa-satellite-dish" style="font-size:11px;margin-right:5px"></i> Cozinha <span id="status-sse" style="color:#f87171">● conectando…</span></div></div>
 <div class="cards-grid" style="grid-template-columns:repeat(3,1fr); margin-bottom:24px">
     <div class="stat-card" style="--card-color:#f97316">
         <div class="sc-header"><div class="sc-icon">🔥</div></div>
@@ -234,6 +235,122 @@
 
 @section('scripts')
 <script>
-    setTimeout(() => location.reload(), 30000);
+// ─── NOTIFICAÇÃO SONORA ───────────────────────────────────────────────────────
+function tocarSom() {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        [0, 0.25].forEach(offset => {
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.value = 880;
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.4, ctx.currentTime + offset);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + offset + 0.18);
+            osc.start(ctx.currentTime + offset);
+            osc.stop(ctx.currentTime + offset + 0.2);
+        });
+    } catch(e) {}
+}
+
+// ─── TOAST DE NOVOS ITENS ─────────────────────────────────────────────────────
+function mostrarToast(pedidos) {
+    if (!document.getElementById('toast-style')) {
+        const s = document.createElement('style');
+        s.id = 'toast-style';
+        s.textContent = `
+            @keyframes slideIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+            .toast-cozinha{position:fixed;top:20px;right:20px;z-index:9999;background:#1a1a2e;
+                border:2px solid #f97316;border-radius:14px;padding:16px 20px;min-width:300px;
+                max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,.6);animation:slideIn .3s ease;}
+        `;
+        document.head.appendChild(s);
+    }
+
+    pedidos.forEach((pedido, idx) => {
+        const toast = document.createElement('div');
+        toast.className = 'toast-cozinha';
+        toast.style.top = (20 + idx * 10) + 'px';
+
+        const itensHtml = pedido.itens
+            .map(i => `<div style="display:flex;justify-content:space-between;padding:4px 0;
+                border-bottom:1px solid rgba(255,255,255,.07)">
+                <span style="color:#fff;font-size:13px">${i.nome}</span>
+                <span style="color:#f97316;font-weight:800;font-size:13px">${i.quantidade}×</span>
+            </div>`).join('');
+
+        toast.innerHTML = `
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+                <span style="font-size:20px">🔔</span>
+                <div>
+                    <div style="font-weight:800;color:#f97316;font-size:15px">
+                        Pedido #${pedido.numero} — Mesa ${pedido.mesa}
+                    </div>
+                    <div style="font-size:11px;color:#9ca3af">
+                        ${pedido.garcom}${pedido.viagem ? ' &nbsp;🛵 VIAGEM' : ''}
+                    </div>
+                </div>
+                <button onclick="this.closest('.toast-cozinha').remove()"
+                    style="margin-left:auto;background:none;border:none;color:#9ca3af;
+                           font-size:20px;cursor:pointer;line-height:1">×</button>
+            </div>
+            <div>${itensHtml}</div>
+            ${pedido.obs ? `<div style="font-size:11px;color:#facc15;margin-top:8px;padding:6px 8px;
+                background:rgba(234,179,8,.1);border-radius:6px">⚠️ ${pedido.obs}</div>` : ''}
+        `;
+
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 15000);
+    });
+}
+
+// ─── SSE — CONEXÃO COM O SERVIDOR ────────────────────────────────────────────
+let sse;
+let tentativas = 0;
+
+function atualizarStatusBadge(texto, cor) {
+    const el = document.getElementById('status-sse');
+    if (el) el.innerHTML = `<span style="color:${cor}">● ${texto}</span>`;
+}
+
+function conectarSSE() {
+    if (sse) sse.close();
+    sse = new EventSource('{{ route("cozinha.stream") }}');
+
+    sse.addEventListener('connected', () => {
+        tentativas = 0;
+        atualizarStatusBadge('ao vivo', '#4ade80');
+    });
+
+    sse.addEventListener('novos_itens', (e) => {
+        const pedidos = JSON.parse(e.data);
+        if (!pedidos.length) return;
+        tocarSom();
+        mostrarToast(pedidos);
+        // Recarrega após breve delay para os itens aparecerem na lista
+        setTimeout(() => location.reload(), 900);
+    });
+
+    sse.addEventListener('reconectar', () => {
+        sse.close();
+        setTimeout(conectarSSE, 1000);
+    });
+
+    sse.onerror = () => {
+        atualizarStatusBadge('reconectando…', '#f87171');
+        sse.close();
+        tentativas++;
+        setTimeout(conectarSSE, Math.min(1000 * Math.pow(2, tentativas), 30000));
+    };
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    conectarSSE();
+    // Fallback: recarrega a cada 60s se SSE falhar silenciosamente
+    setInterval(() => {
+        if (!sse || sse.readyState === EventSource.CLOSED) location.reload();
+    }, 60000);
+});
 </script>
 @endsection
