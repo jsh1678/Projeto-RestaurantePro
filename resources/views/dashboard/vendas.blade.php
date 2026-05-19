@@ -66,40 +66,8 @@ tailwind.config = {
       </span>
     </div>
   </div>
-  @php $maxVal = $vendasGrafico->max('total') ?: 1; @endphp
-  <div style="overflow-x:auto">
-    <div style="display:flex;align-items:flex-end;gap:5px;height:190px;padding-bottom:28px;min-width:{{ max(600, $vendasGrafico->count()*34) }}px;position:relative;padding-top:26px;">
-      @foreach($vendasGrafico as $dv)
-        @php
-          $isPico = in_array($dv->dia, $topDiasIds);
-          $h      = max(4, round(($dv->total / $maxVal) * 140));
-          $rank   = array_search($dv->dia, $topDiasIds);
-          $medals = ['🥇','🥈','🥉'];
-        @endphp
-        <div style="flex:1;min-width:26px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;position:relative;cursor:default;"
-             title="{{ \Carbon\Carbon::parse($dv->dia)->format('d/m') }}: R$ {{ number_format($dv->total,2,',','.') }}">
-
-          @if($isPico && $rank !== false)
-            <div class="pico-icon" style="position:absolute;top:0;left:50%;font-size:14px;line-height:1;">
-              {{ $medals[$rank] ?? '🏅' }}
-            </div>
-          @endif
-
-          <div class="bar" style="
-            width:100%;
-            height:{{ $h }}px;
-            background:{{ $isPico ? '#f97316' : '#3b82f6' }};
-            border-radius:3px 3px 0 0;
-            {{ $isPico ? 'box-shadow:0 0 12px rgba(249,115,22,.35)' : '' }};
-            transition:opacity .15s;
-          "></div>
-
-          <div style="position:absolute;bottom:-20px;font-size:10px;color:var(--muted);white-space:nowrap;">
-            {{ \Carbon\Carbon::parse($dv->dia)->format('d') }}
-          </div>
-        </div>
-      @endforeach
-    </div>
+  <div style="position:relative;height:220px;padding:4px 0 8px">
+    <canvas id="chartVendas"></canvas>
   </div>
 </div>
 @endif
@@ -180,11 +148,94 @@ tailwind.config = {
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
+// ── Gráfico de vendas por dia ────────────────────────────────────────────────
+@if($vendasGrafico->isNotEmpty())
+(function () {
+    const labels = @json($vendasGrafico->map(fn($d) => \Carbon\Carbon::parse($d->dia)->format('d/m')));
+    const values = @json($vendasGrafico->map(fn($d) => round($d->total, 2)));
+    const picos  = @json($topDiasIds);
+    const dias   = @json($vendasGrafico->map(fn($d) => $d->dia));
+
+    const cores = dias.map(d => picos.includes(d) ? '#f97316' : '#3b82f6');
+    const sombras = dias.map(d => picos.includes(d) ? 'rgba(249,115,22,.18)' : 'rgba(59,130,246,.12)');
+
+    const ctx = document.getElementById('chartVendas').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                data: values,
+                backgroundColor: cores,
+                hoverBackgroundColor: cores.map(c => c === '#f97316' ? '#fb923c' : '#60a5fa'),
+                borderRadius: 5,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ' R$ ' + ctx.parsed.y.toLocaleString('pt-BR', {minimumFractionDigits:2})
+                    },
+                    backgroundColor: '#1e1e2e',
+                    borderColor: 'rgba(255,255,255,.1)',
+                    borderWidth: 1,
+                    titleColor: '#fff',
+                    bodyColor: '#94a3b8',
+                    padding: 10,
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { color: '#6b7280', font: { size: 11 } },
+                    border: { display: false },
+                },
+                y: {
+                    grid: { color: 'rgba(255,255,255,.05)', drawBorder: false },
+                    ticks: {
+                        color: '#6b7280',
+                        font: { size: 11 },
+                        callback: v => 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:0})
+                    },
+                    border: { display: false },
+                    beginAtZero: true,
+                }
+            },
+            animation: { duration: 500, easing: 'easeOutQuart' },
+        }
+    });
+})();
+@endif
+
+// ── Filtro da tabela ──────────────────────────────────────────────────────────
 function filtrar(q){
-  document.querySelectorAll('#tv tbody tr').forEach(r=>{
-    r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
-  });
+    document.querySelectorAll('#tv tbody tr').forEach(r => {
+        r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+    });
 }
 </script>
 @endsection
+
+@extends('layouts.app')
+
+@section('content')
+<div style="text-align:center; padding: 4rem 2rem;">
+    <h1 style="font-size: 4rem;">🔒 403</h1>
+    <h2>Acesso Negado</h2>
+    <p>Você não tem permissão para acessar esta página.</p>
+    <a href="{{ url('/dashboard') }}"
+       style="display:inline-block; margin-top:1rem; padding:.75rem 2rem;
+              background:#c0a060; color:#fff; border-radius:8px; text-decoration:none;">
+        ← Voltar ao Dashboard
+    </a>
+</div>
+@endsection
+
+@extends('layouts.app')
