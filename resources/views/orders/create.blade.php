@@ -1,4 +1,3 @@
-<file path="resources/views/orders/create.blade.php">
 @extends('layouts.app')
 @section('page-title', $pedido ? 'Editar Pedido #'.str_pad($pedido->id,4,'0',STR_PAD_LEFT) : 'Novo Pedido')
 @section('breadcrumb', $pedido ? 'Editar pedido existente' : 'Criar pedido para mesa')
@@ -230,9 +229,9 @@
                     <div class="menu-card-serves">👤 Serve {{ $item->serves_count }} pessoas</div>
                     @endif
                     <div class="menu-card-ctrl" onclick="event.stopPropagation()">
-                        <button type="button" class="qty-btn minus" onclick="changeQty({{ $item->id }}, -1)" aria-label="Diminuir quantidade de {{ $item->nome }}">−</button>
+                        <button type="button" class="qty-btn minus" onclick="changeQty({{ $item->id }}, -1)">−</button>
                         <span class="qty-num" id="qty-{{ $item->id }}">0</span>
-                        <button type="button" class="qty-btn plus"  onclick="changeQty({{ $item->id }}, 1)" aria-label="Aumentar quantidade de {{ $item->nome }}">+</button>
+                        <button type="button" class="qty-btn plus"  onclick="changeQty({{ $item->id }}, 1)">+</button>
                     </div>
                 </div>
                 @endforeach
@@ -319,4 +318,153 @@
 
 </div>
 </form>
+@endsection
+
+@section('scripts')
+<script>
+const precos = {
+    @foreach($categorias as $cat)
+    @foreach($cat->menuItems as $item)
+    {{ $item->id }}: { nome: @json($item->nome), preco: {{ $item->preco }}, serves: {{ $item->serves_count ?? 1 }} },
+    @endforeach
+    @endforeach
+};
+
+const qtds = {};
+
+// EDIÇÃO: pré-preencher quantidades se for edição de pedido existente
+@if($pedido && $pedido->items)
+    @foreach($pedido->items as $oi)
+    qtds[{{ $oi->menu_item_id }}] = {{ $oi->quantidade }};
+    @endforeach
+    document.addEventListener('DOMContentLoaded', () => {
+        for (const id in qtds) {
+            if (qtds[id] > 0) {
+                const el = document.getElementById('qty-' + id);
+                if (el) el.textContent = qtds[id];
+                const card = document.getElementById('card-' + id);
+                if (card) card.classList.add('active');
+            }
+        }
+        updateResumo();
+    });
+@endif
+
+function addItem(id) { changeQty(id, 1); }
+
+function changeQty(id, delta) {
+    qtds[id] = Math.max(0, (qtds[id] || 0) + delta);
+    document.getElementById('qty-' + id).textContent = qtds[id];
+    const card = document.getElementById('card-' + id);
+    if (card) card.classList.toggle('active', qtds[id] > 0);
+    updateResumo();
+}
+
+function clearAll() {
+    for (const id in qtds) {
+        qtds[id] = 0;
+        const el = document.getElementById('qty-' + id);
+        if (el) el.textContent = 0;
+        const card = document.getElementById('card-' + id);
+        if (card) card.classList.remove('active');
+    }
+    updateResumo();
+}
+
+function updateResumo() {
+    let total = 0, hasItems = false, resumoHtml = '', hiddenHtml = '', idx = 0;
+    for (const id in qtds) {
+        if (qtds[id] > 0) {
+            hasItems = true;
+            const p = precos[id];
+            const sub = p.preco * qtds[id];
+            total += sub;
+            resumoHtml += `<div class="resumo-row">
+                <span style="color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${qtds[id]}× ${p.nome}</span>
+                <span style="font-weight:700;color:#fff;white-space:nowrap;margin-left:8px">R$ ${sub.toFixed(2).replace('.',',')}</span>
+            </div>`;
+            hiddenHtml += `<input type="hidden" name="itens[${idx}][menu_item_id]" value="${id}">`;
+            hiddenHtml += `<input type="hidden" name="itens[${idx}][quantidade]" value="${qtds[id]}">`;
+            idx++;
+        }
+    }
+    document.getElementById('resumo-items').innerHTML = hasItems ? resumoHtml
+        : '<div style="text-align:center;color:var(--muted);font-size:13px;padding:18px 0">'
+        + '<i class="fas fa-cart-plus" style="font-size:24px;opacity:.25;display:block;margin-bottom:8px"></i>'
+        + 'Nenhum item selecionado</div>';
+    document.getElementById('hidden-inputs').innerHTML = hiddenHtml;
+    document.getElementById('total-display').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+    document.getElementById('btn-submit').disabled = !hasItems;
+}
+
+// Busca
+document.getElementById('search-input').addEventListener('input', function () {
+    const q = this.value.toLowerCase().trim();
+    document.querySelectorAll('.menu-card').forEach(c => {
+        c.style.display = (!q || c.dataset.nome.includes(q)) ? '' : 'none';
+    });
+    document.querySelectorAll('.categoria-block').forEach(b => {
+        const vis = [...b.querySelectorAll('.menu-card')].some(c => c.style.display !== 'none');
+        b.style.display = vis ? '' : 'none';
+    });
+});
+
+// MELHORIA 4: Filtros por tipo + subtipo
+let tipoAtual = 'todos';
+let subtipoAtual = 'todos';
+
+function filtrarTipo(tipo, btn) {
+    tipoAtual = tipo;
+    subtipoAtual = 'todos';
+
+    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('ativo'));
+    btn.classList.add('ativo');
+
+    // Coletar subtipos disponíveis para este tipo
+    const subtipos = new Set();
+    document.querySelectorAll('.categoria-block').forEach(bloco => {
+        const blocoTipo = bloco.dataset.tipo;
+        const mostrarBloco = (tipo === 'todos' || blocoTipo === tipo);
+        bloco.style.display = mostrarBloco ? '' : 'none';
+
+        if (mostrarBloco) {
+            bloco.querySelectorAll('.menu-card').forEach(card => {
+                card.style.display = '';
+                if (card.dataset.subtipo) subtipos.add(card.dataset.subtipo);
+            });
+        }
+    });
+
+    // Mostrar subtipo bar se existir subtipos
+    const subtContainer = document.getElementById('subtipo-container');
+    const subtBar = document.getElementById('subtipo-bar');
+    if (subtipos.size > 0 && tipo !== 'todos') {
+        let html = '<button type="button" class="subtipo-btn ativo" data-sub="todos" onclick="filtrarSubtipo(\'todos\',this)">Todos</button>';
+        subtipos.forEach(s => {
+            if (s) html += `<button type="button" class="subtipo-btn" data-sub="${s}" onclick="filtrarSubtipo('${s}',this)">${s.charAt(0).toUpperCase()+s.slice(1)}</button>`;
+        });
+        subtBar.innerHTML = html;
+        subtContainer.style.display = '';
+    } else {
+        subtContainer.style.display = 'none';
+    }
+}
+
+function filtrarSubtipo(subtipo, btn) {
+    subtipoAtual = subtipo;
+    document.querySelectorAll('.subtipo-btn').forEach(b => b.classList.remove('ativo'));
+    btn.classList.add('ativo');
+
+    document.querySelectorAll('.categoria-block').forEach(bloco => {
+        if (bloco.style.display === 'none') return;
+        bloco.querySelectorAll('.menu-card').forEach(card => {
+            if (subtipo === 'todos') {
+                card.style.display = '';
+            } else {
+                card.style.display = card.dataset.subtipo === subtipo ? '' : 'none';
+            }
+        });
+    });
+}
+</script>
 @endsection
