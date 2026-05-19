@@ -176,6 +176,16 @@ class DashboardController extends Controller
             ->orderBy('dia')
             ->get();
         
+        // ===== NOVAS VARIÁVEIS =====
+        $totalCompras = Purchase::whereBetween('created_at', [$dataInicio, $dataFim])
+            ->where('status', 'recebido')
+            ->sum('total');
+        
+        $totalSangrias = Sangria::whereBetween('created_at', [$dataInicio, $dataFim])
+            ->sum('valor');
+        
+        $lucroEstimado = $totalVendas - $totalCompras - $totalSangrias;
+        
         return view('dashboard.relatorios', compact(
             'dataInicio',
             'dataFim',
@@ -183,7 +193,10 @@ class DashboardController extends Controller
             'totalVendas',
             'totalPedidos',
             'ticketMedio',
-            'vendasPorDia'
+            'vendasPorDia',
+            'totalCompras',
+            'totalSangrias',
+            'lucroEstimado'
         ));
     }
 }
