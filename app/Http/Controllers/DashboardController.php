@@ -156,13 +156,14 @@ class DashboardController extends Controller
             ? Carbon::parse(request('data_fim'))->endOfDay()
             : Carbon::today()->endOfDay();
         
-        $vendas = Payment::whereBetween('created_at', [$dataInicio, $dataFim])
+        // ===== PAGAMENTOS =====
+        $pagamentos = Payment::whereBetween('created_at', [$dataInicio, $dataFim])
             ->where('status', 'confirmado')
             ->with('order.table')
             ->orderByDesc('created_at')
             ->get();
         
-        $totalVendas = $vendas->sum('valor_final');
+        $totalVendas = $pagamentos->sum('valor_final');
         $totalPedidos = Order::whereBetween('created_at', [$dataInicio, $dataFim])
             ->where('status', '!=', 'cancelado')
             ->count();
@@ -173,13 +174,17 @@ class DashboardController extends Controller
         
         $ticketMedio = $totalPedidos > 0 ? round($totalVendas / $totalPedidos, 2) : 0;
         
+        // ===== VENDAS POR DIA =====
         $vendasPorDia = Payment::whereBetween('created_at', [$dataInicio, $dataFim])
             ->where('status', 'confirmado')
             ->selectRaw('DATE(created_at) as dia, SUM(valor_final) as total')
             ->groupBy('dia')
             ->orderBy('dia')
-            ->get();
+            ->get()
+            ->pluck('total', 'dia')
+            ->toArray();
         
+        // ===== COMPRAS E SANGRIA =====
         $totalCompras = Purchase::whereBetween('created_at', [$dataInicio, $dataFim])
             ->where('status', 'recebido')
             ->sum('total');
@@ -189,6 +194,7 @@ class DashboardController extends Controller
         
         $lucroEstimado = $totalVendas - $totalCompras - $totalSangrias;
         
+        // ===== ITENS MAIS VENDIDOS =====
         $itensMaisVendidos = OrderItem::with('menuItem')
             ->whereHas('order', function($q) use ($dataInicio, $dataFim) {
                 $q->whereBetween('created_at', [$dataInicio, $dataFim])
@@ -206,7 +212,20 @@ class DashboardController extends Controller
             ->sortByDesc('quantidade')
             ->take(10);
         
-        $desempenhoGarcom = Order::whereBetween('created_at', [$dataInicio, $dataFim])
+        // ===== FORMA DE PAGAMENTO =====
+        $porMetodo = Payment::whereBetween('created_at', [$dataInicio, $dataFim])
+            ->where('status', 'confirmado')
+            ->get()
+            ->groupBy('metodo')
+            ->map(function($g) {
+                return [
+                    'qtd' => $g->count(),
+                    'total' => $g->sum('valor_final'),
+                ];
+            });
+        
+        // ===== DESEMPENHO POR GARÇOM =====
+        $porGarcom = Order::whereBetween('created_at', [$dataInicio, $dataFim])
             ->where('status', '!=', 'cancelado')
             ->with('user')
             ->get()
@@ -221,21 +240,31 @@ class DashboardController extends Controller
             ->sortByDesc('total')
             ->take(5);
         
-        $metodosPagamento = Payment::whereBetween('created_at', [$dataInicio, $dataFim])
-            ->where('status', 'confirmado')
+        // ===== MESAS MAIS USADAS =====
+        $porMesa = Order::whereBetween('created_at', [$dataInicio, $dataFim])
+            ->where('status', '!=', 'cancelado')
+            ->with('table')
             ->get()
-            ->groupBy('metodo')
+            ->groupBy('table_id')
             ->map(function($g) {
                 return [
-                    'quantidade' => $g->count(),
-                    'total' => $g->sum('valor_final'),
+                    'mesa' => $g->first()->table->numero ?? '—',
+                    'pedidos' => $g->count(),
+                    'total' => $g->sum('total'),
                 ];
-            });
+            })
+            ->sortByDesc('pedidos')
+            ->take(5);
+        
+        // ===== ESTOQUE CRÍTICO =====
+        $estoqueCritico = StockItem::whereRaw('quantidade_atual <= quantidade_minima')
+            ->where('quantidade_atual', '>', 0)
+            ->get();
         
         return view('dashboard.relatorios', compact(
             'dataInicio',
             'dataFim',
-            'vendas',
+            'pagamentos',
             'totalVendas',
             'totalPedidos',
             'pedidosCancelados',
@@ -245,8 +274,10 @@ class DashboardController extends Controller
             'totalSangrias',
             'lucroEstimado',
             'itensMaisVendidos',
-            'desempenhoGarcom',
-            'metodosPagamento'
+            'porMetodo',
+            'porGarcom',
+            'porMesa',
+            'estoqueCritico'
         ));
     }
 }
