@@ -104,7 +104,7 @@
             </div>
             <div style="text-align:right; flex-shrink:0; margin-left:10px">
                 <div style="font-weight:800; color:#fff">{{ $item['quantidade'] }}x</div>
-                <div style="font-size:11px; color:var(--muted)">R$ {{ number_format($item['total'],2,',','.') }}</div>
+            <div style="font-size:11px; color:var(--muted)">R$ {{ number_format($item['receita'],2,',','.') }}</div>   
             </div>
         </div>
         @empty
