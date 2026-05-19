@@ -176,8 +176,7 @@ class ChefController extends Controller
 }
 
 
-<file path="app/Http/Controllers/ControleEstoqueController.php">
-<?php
+
 
 namespace App\Http\Controllers;
 
