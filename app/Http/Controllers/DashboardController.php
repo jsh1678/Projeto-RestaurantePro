@@ -46,14 +46,12 @@ class DashboardController extends Controller
             ]),
 
             'garcom' => view('dashboard.garcom', [
-                // Mesas com pedidos ativos (não pagos/cancelados)
                 'mesas' => Table::with([
                     'orders' => fn($q) => $q->whereIn('status', [
                         'aberto', 'em_preparo', 'pronto', 'pronto_entrega', 'aguardando_pagamento',
                     ]),
                 ])->orderBy('numero')->get(),
 
-                // Pedidos do garçom SOMENTE de hoje, com todos os status relevantes
                 'pedidosGarcom' => Order::where('user_id', $user->id)
                     ->whereDate('created_at', $dataHoje)
                     ->with('table', 'items')
@@ -63,12 +61,9 @@ class DashboardController extends Controller
                 'categorias'    => Category::with('menuItems')->get(),
                 'mesasOcupadas' => $mesasOcupadas,
                 'totalMesas'    => $totalMesas,
-
-                // "Para entregar" = pedidos prontos pela cozinha (status 'pronto')
                 'pedidosProntosPagamento' => Order::whereIn('status', ['pronto', 'pronto_entrega'])
                     ->with('table', 'items')
                     ->get(),
-
                 'pagamentosDia'      => Payment::whereDate('created_at', $dataHoje)
                     ->where('status', 'confirmado')
                     ->with('order')
@@ -152,6 +147,43 @@ class DashboardController extends Controller
     public function relatorios()
     {
         if (Auth::user()->role !== 'gerente') abort(403);
-        return view('dashboard.relatorios');
+        
+        $dataInicio = request('data_inicio') 
+            ? Carbon::parse(request('data_inicio'))->startOfDay()
+            : Carbon::today()->subDays(29)->startOfDay();
+        
+        $dataFim = request('data_fim')
+            ? Carbon::parse(request('data_fim'))->endOfDay()
+            : Carbon::today()->endOfDay();
+        
+        $vendas = Payment::whereBetween('created_at', [$dataInicio, $dataFim])
+            ->where('status', 'confirmado')
+            ->with('order.table')
+            ->orderByDesc('created_at')
+            ->get();
+        
+        $totalVendas = $vendas->sum('valor_final');
+        $totalPedidos = Order::whereBetween('created_at', [$dataInicio, $dataFim])
+            ->where('status', '!=', 'cancelado')
+            ->count();
+        
+        $ticketMedio = $totalPedidos > 0 ? round($totalVendas / $totalPedidos, 2) : 0;
+        
+        $vendasPorDia = Payment::whereBetween('created_at', [$dataInicio, $dataFim])
+            ->where('status', 'confirmado')
+            ->selectRaw('DATE(created_at) as dia, SUM(valor_final) as total')
+            ->groupBy('dia')
+            ->orderBy('dia')
+            ->get();
+        
+        return view('dashboard.relatorios', compact(
+            'dataInicio',
+            'dataFim',
+            'vendas',
+            'totalVendas',
+            'totalPedidos',
+            'ticketMedio',
+            'vendasPorDia'
+        ));
     }
 }
