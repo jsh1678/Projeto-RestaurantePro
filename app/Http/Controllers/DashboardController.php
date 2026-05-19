@@ -53,7 +53,7 @@ class DashboardController extends Controller
                     ]),
                 ])->orderBy('numero')->get(),
 
-                // ✅ FIX: Pedidos do garçom SOMENTE de hoje, com todos os status relevantes
+                // Pedidos do garçom SOMENTE de hoje, com todos os status relevantes
                 'pedidosGarcom' => Order::where('user_id', $user->id)
                     ->whereDate('created_at', $dataHoje)
                     ->with('table', 'items')
@@ -65,7 +65,6 @@ class DashboardController extends Controller
                 'totalMesas'    => $totalMesas,
 
                 // "Para entregar" = pedidos prontos pela cozinha (status 'pronto')
-                // 'pronto_entrega' e 'aguardando_pagamento' = conta já fechada, vai para o caixa
                 'pedidosProntosPagamento' => Order::whereIn('status', ['pronto', 'pronto_entrega'])
                     ->with('table', 'items')
                     ->get(),
@@ -153,3 +152,6 @@ class DashboardController extends Controller
     public function relatorios()
     {
         if (Auth::user()->role !== 'gerente') abort(403);
+        return view('dashboard.relatorios');
+    }
+}
