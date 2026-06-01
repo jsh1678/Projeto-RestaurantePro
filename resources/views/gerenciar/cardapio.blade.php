@@ -28,6 +28,10 @@
 .cardapio-table th:nth-child(8),.cardapio-table td:nth-child(8){min-width:150px;white-space:nowrap}
 .cardapio-thumb{width:54px;height:44px;border-radius:8px;object-fit:cover;border:1px solid var(--border);background:var(--bg2)}
 .cardapio-thumb-empty{width:54px;height:44px;border-radius:8px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);background:rgba(255,255,255,.03)}
+.cardapio-photo-form{margin:0}
+.cardapio-photo-btn{display:block;width:54px;height:44px;padding:0;border:0;background:transparent;cursor:pointer}
+.cardapio-photo-btn:hover .cardapio-thumb,.cardapio-photo-btn:hover .cardapio-thumb-empty{border-color:var(--accent);filter:brightness(1.12)}
+.cardapio-photo-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .cardapio-preview{width:100%;height:130px;border-radius:10px;object-fit:cover;border:1px solid var(--border);background:var(--bg2);margin-bottom:8px}
 .cardapio-item-name{display:block;line-height:1.25;white-space:normal;overflow-wrap:break-word;word-break:normal}
 .cardapio-item-desc{font-size:11px;color:var(--muted);line-height:1.35;white-space:normal;overflow-wrap:break-word}
@@ -117,13 +121,25 @@
             <thead><tr><th>Foto</th><th>Item</th><th>Categoria</th><th>Preço</th><th>Serve</th><th>Subtipo</th><th>Status</th><th>Ações</th></tr></thead>
             <tbody id="tbody-cardapio">
             @foreach($itens as $item)
+            @php
+                $imagemUrl = $item->imagem
+                    ? (preg_match('/^https?:\/\//i', $item->imagem) ? $item->imagem : url(ltrim($item->imagem, '/')))
+                    : null;
+            @endphp
             <tr data-nome="{{ strtolower($item->nome) }}">
                 <td>
-                    @if($item->imagem)
-                        <img src="{{ asset($item->imagem) }}" alt="{{ $item->nome }}" class="cardapio-thumb">
-                    @else
-                        <div class="cardapio-thumb-empty"><i class="fas fa-image"></i></div>
-                    @endif
+                    <form method="POST" action="{{ route('gerenciar.cardapio.imagem', $item) }}" enctype="multipart/form-data" class="cardapio-photo-form">
+                        @csrf @method('PATCH')
+                        <button type="button" class="cardapio-photo-btn" title="Adicionar ou trocar foto de {{ $item->nome }}" onclick="document.getElementById('foto-item-{{ $item->id }}').click()">
+                            @if($imagemUrl)
+                                <img src="{{ $imagemUrl }}" alt="{{ $item->nome }}" class="cardapio-thumb" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                                <span class="cardapio-thumb-empty" style="display:none"><i class="fas fa-image"></i></span>
+                            @else
+                                <span class="cardapio-thumb-empty"><i class="fas fa-image"></i></span>
+                            @endif
+                        </button>
+                        <input type="file" name="imagem" id="foto-item-{{ $item->id }}" class="cardapio-photo-input" accept="image/jpeg,image/png,image/webp" onchange="this.form.submit()">
+                    </form>
                 </td>
                 <td class="td-primary"><span class="cardapio-item-name">{{ $item->nome }}</span><div class="cardapio-item-desc">{{ Str::limit($item->descricao,70) }}</div></td>
                 <td style="color:var(--muted)">{{ $item->category->nome ?? '—' }}</td>
@@ -133,11 +149,11 @@
                 <td><span class="badge badge-{{ $item->disponivel?'success':'danger' }}">{{ $item->disponivel?'Disponível':'Indisponível' }}</span></td>
                 <td>
                     <div class="cardapio-actions">
-                        <button class="btn-edit" title="Editar"
-                            onclick="editItem({{ $item->id }}, @json($item->nome), {{ $item->category_id }}, {{ $item->preco }}, @json($item->descricao ?? ''), {{ $item->stock_item_id??'null' }}, {{ $item->disponivel?1:0 }}, {{ $item->serves_count??1 }}, @json($item->subtipo ?? ''), @json($item->imagem ? asset($item->imagem) : ''))">
+                        <button type="button" class="btn-edit" title="Editar"
+                            onclick="editItem({{ $item->id }}, @json($item->nome), {{ $item->category_id }}, {{ $item->preco }}, @json($item->descricao ?? ''), {{ $item->stock_item_id??'null' }}, {{ $item->disponivel?1:0 }}, {{ $item->serves_count??1 }}, @json($item->subtipo ?? ''), @json($imagemUrl ?? ''))">
                             <i class="fas fa-pencil"></i>
                         </button>
-                        <form method="POST" action="{{ route('gerenciar.cardapio.destroy',$item) }}" onsubmit="return confirm('Remover {{ $item->nome }}?')">
+                        <form method="POST" action="{{ route('gerenciar.cardapio.destroy',$item) }}" onsubmit="return confirm(@json('Remover '.$item->nome.'?'))">
                             @csrf @method('DELETE')
                             <button type="submit" class="btn-del">🗑️ Excluir</button>
                         </form>
@@ -204,6 +220,8 @@
 @endsection
 @section('scripts')
 <script>
+const editItemUrlTemplate = @json(route('gerenciar.cardapio.update', ['item' => '__ITEM_ID__']));
+
 function editItem(id,nome,catId,preco,desc,stockId,disp,serves,subtipo,imagemUrl) {
     document.getElementById('ei-nome').value    = nome;
     document.getElementById('ei-cat').value     = catId;
@@ -222,7 +240,7 @@ function editItem(id,nome,catId,preco,desc,stockId,disp,serves,subtipo,imagemUrl
         preview.removeAttribute('src');
         preview.style.display = 'none';
     }
-    document.getElementById('form-edit-item').action = '/gerenciar/cardapio/' + id;
+    document.getElementById('form-edit-item').action = editItemUrlTemplate.replace('__ITEM_ID__', id);
     document.getElementById('modal-item').style.display = 'flex';
 }
 document.getElementById('search-cardapio').addEventListener('input', function() {

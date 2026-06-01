@@ -236,14 +236,20 @@
             </div>
             <div class="item-grid">
                 @foreach($categoria->menuItems as $item)
+                @php
+                    $imagemUrl = $item->imagem
+                        ? (preg_match('/^https?:\/\//i', $item->imagem) ? $item->imagem : url(ltrim($item->imagem, '/')))
+                        : null;
+                @endphp
                 <div class="menu-card"
                      id="card-{{ $item->id }}"
                      data-id="{{ $item->id }}"
                      data-nome="{{ strtolower($item->nome) }}"
                      data-subtipo="{{ strtolower($item->subtipo ?? '') }}"
                      onclick="addItem({{ $item->id }})">
-                    @if($item->imagem)
-                    <img src="{{ asset($item->imagem) }}" alt="{{ $item->nome }}" class="menu-card-img">
+                    @if($imagemUrl)
+                    <img src="{{ $imagemUrl }}" alt="{{ $item->nome }}" class="menu-card-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                    <div class="menu-card-img-empty" style="display:none"><i class="fas fa-image"></i></div>
                     @else
                     <div class="menu-card-img-empty"><i class="fas fa-image"></i></div>
                     @endif
