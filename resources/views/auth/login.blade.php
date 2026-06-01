@@ -551,47 +551,6 @@ body::before {
       </div>
       <h1>Gestão Inteligente de Restaurante</h1>
       <p>Acesse o sistema e gerencie pedidos, mesas, cozinha e atendimento em tempo real.</p>
-
-      <div class="rotator" aria-label="Recursos do sistema">
-        <div class="rotator-track">
-          <div class="rotator-item"><i class="fa-solid fa-chair"></i> Controle de Mesas</div>
-          <div class="rotator-item"><i class="fa-solid fa-clipboard-list"></i> Gestão de Pedidos</div>
-          <div class="rotator-item"><i class="fa-solid fa-kitchen-set"></i> Painel da Cozinha</div>
-          <div class="rotator-item"><i class="fa-solid fa-cash-register"></i> Controle Financeiro</div>
-          <div class="rotator-item"><i class="fa-solid fa-bell-concierge"></i> Atendimento em Tempo Real</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="metrics-grid" aria-label="Indicadores demonstrativos">
-      <div class="info-card">
-        <div class="metric-icon"><i class="fa-solid fa-clipboard-list"></i></div>
-        <div>
-          <strong>Pedidos Ativos</strong>
-          <span>32 em fluxo</span>
-        </div>
-      </div>
-      <div class="info-card">
-        <div class="metric-icon"><i class="fa-solid fa-utensils"></i></div>
-        <div>
-          <strong>Mesas em Atendimento</strong>
-          <span>18 ocupadas</span>
-        </div>
-      </div>
-      <div class="info-card">
-        <div class="metric-icon"><i class="fa-solid fa-kitchen-set"></i></div>
-        <div>
-          <strong>Cozinha Operando</strong>
-          <span>Tempo médio 12 min</span>
-        </div>
-      </div>
-      <div class="info-card">
-        <div class="metric-icon"><i class="fa-solid fa-cash-register"></i></div>
-        <div>
-          <strong>Caixa Online</strong>
-          <span>Turno aberto</span>
-        </div>
-      </div>
     </div>
   </section>
 
