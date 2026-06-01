@@ -1,0 +1,51 @@
+# Ambiente
+.env
+.env.backup
+.env.local
+
+# Dependências
+/vendor/
+/node_modules/
+
+# Cache Laravel
+/bootstrap/cache/*.php
+/storage/*.key
+
+# Logs
+/storage/logs/*.log
+
+# Sessões
+/storage/framework/sessions/*
+
+# Views compiladas
+/storage/framework/views/*
+
+# Cache de dados
+/storage/framework/cache/data/*
+
+# Storage público (gerado pelo storage:link)
+/public/storage
+
+# Composer
+composer.phar
+
+# Scripts utilitários (não devem ir para produção)
+add_more_dishes.php
+add_stock.php
+public/clear-cache.php
+public/conexao.php
+public/migrar.php
+public/rodar_seeder.php
+.router.php
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+/public/build

@@ -1,0 +1,284 @@
+@extends('layouts.app')
+@section('page-title', 'Gerenciar Cardápio')
+@section('breadcrumb', 'Itens do menu')
+@section('styles')
+<style>
+.ger-tabs{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap}
+.ger-tab{padding:8px 18px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:700;color:var(--muted);background:var(--bg2);border:1px solid var(--border);transition:.15s}
+.ger-tab.active,.ger-tab:hover{background:rgba(249,115,22,.12);color:var(--accent);border-color:rgba(249,115,22,.3)}
+.btn-edit{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;border:1px solid rgba(59,130,246,.3);background:rgba(59,130,246,.1);color:#60a5fa;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s;white-space:nowrap;text-decoration:none}
+.btn-edit:hover{background:rgba(59,130,246,.2);border-color:rgba(59,130,246,.5)}
+.btn-del{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.1);color:#f87171;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn-del:hover{background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.5)}
+.badge-serves{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(99,102,241,.12);color:#a5b4fc;border:1px solid rgba(99,102,241,.2)}
+.cardapio-layout{display:grid;grid-template-columns:minmax(320px,380px) minmax(0,1fr);gap:20px;align-items:start}
+.cardapio-form-panel{position:sticky;top:86px;max-height:calc(100vh - 104px);overflow-y:auto;overscroll-behavior:contain}
+.cardapio-form-panel::-webkit-scrollbar{width:6px}
+.cardapio-form-panel::-webkit-scrollbar-thumb{background:rgba(250,178,105,.28);border-radius:999px}
+.cardapio-table-wrap{min-width:0}
+.cardapio-table{min-width:900px;table-layout:auto}
+.cardapio-table th,.cardapio-table td{overflow-wrap:normal;word-break:normal}
+.cardapio-table th:nth-child(1),.cardapio-table td:nth-child(1){min-width:70px;width:70px}
+.cardapio-table th:nth-child(2),.cardapio-table td:nth-child(2){min-width:230px;width:30%}
+.cardapio-table th:nth-child(3),.cardapio-table td:nth-child(3){min-width:130px}
+.cardapio-table th:nth-child(4),.cardapio-table td:nth-child(4){min-width:95px;white-space:nowrap}
+.cardapio-table th:nth-child(5),.cardapio-table td:nth-child(5){min-width:120px;white-space:nowrap}
+.cardapio-table th:nth-child(6),.cardapio-table td:nth-child(6){min-width:110px}
+.cardapio-table th:nth-child(7),.cardapio-table td:nth-child(7){min-width:130px;white-space:nowrap}
+.cardapio-table th:nth-child(8),.cardapio-table td:nth-child(8){min-width:150px;white-space:nowrap}
+.cardapio-thumb{width:54px;height:44px;border-radius:8px;object-fit:cover;border:1px solid var(--border);background:var(--bg2)}
+.cardapio-thumb-empty{width:54px;height:44px;border-radius:8px;border:1px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);background:rgba(255,255,255,.03)}
+.cardapio-thumb-empty.is-hidden{display:none}
+.cardapio-photo-form{margin:0}
+.cardapio-photo-btn{display:block;width:54px;height:44px;padding:0;border:0;background:transparent;cursor:pointer}
+.cardapio-photo-btn:hover .cardapio-thumb,.cardapio-photo-btn:hover .cardapio-thumb-empty{border-color:var(--accent);filter:brightness(1.12)}
+.cardapio-photo-input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.cardapio-preview{width:100%;height:130px;border-radius:10px;object-fit:cover;border:1px solid var(--border);background:var(--bg2);margin-bottom:8px}
+.cardapio-item-name{display:block;line-height:1.25;white-space:normal;overflow-wrap:break-word;word-break:normal}
+.cardapio-item-desc{font-size:11px;color:var(--muted);line-height:1.35;white-space:normal;overflow-wrap:break-word}
+.cardapio-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end}
+@media(max-width:1024px){.cardapio-layout{grid-template-columns:1fr}.cardapio-form-panel{position:relative;top:auto;max-height:70vh}.cardapio-table{min-width:860px}}
+@media(max-width:768px){[style*="grid-template-columns:360px"]{display:block!important}[style*="grid-template-columns:340px"]{display:block!important}.panel[style*="sticky"]{position:static!important}.cardapio-form-panel{max-height:none;overflow:visible}.cardapio-table{min-width:820px}}
+</style>
+@endsection
+@section('content')
+
+<div class="cardapio-layout">
+    <div class="panel cardapio-form-panel">
+        <div class="panel-header"><div class="panel-title"><i class="fas fa-plus"></i> Novo Item</div></div>
+        <form method="POST" action="{{ route('gerenciar.cardapio.store') }}" enctype="multipart/form-data">
+            @csrf
+            <div class="form-group">
+                <label>Nome</label>
+                <input type="text" name="nome" class="form-control {{ $errors->has('nome')?'is-invalid':'' }}" value="{{ old('nome') }}" required>
+                @error('nome')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select name="category_id" class="form-select" required>
+                        <option value="">— Selecione —</option>
+                        @foreach($categorias as $cat)
+                        <option value="{{ $cat->id }}" {{ old('category_id')==$cat->id?'selected':'' }}>{{ $cat->nome }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Preço (R$)</label>
+                    <input type="number" name="preco" step="0.01" min="0.01" class="form-control" value="{{ old('preco') }}" required>
+                </div>
+            </div>
+            <div class="form-row">
+                {{-- MELHORIA 3: Campo "Quantas pessoas serve?" --}}
+                <div class="form-group">
+                    <label>🍽️ Serve quantas pessoas? <span style="color:#f87171">*</span></label>
+                    <input type="number" name="serves_count" min="1" max="50" class="form-control {{ $errors->has('serves_count')?'is-invalid':'' }}" value="{{ old('serves_count', 1) }}" required>
+                    @error('serves_count')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+                {{-- MELHORIA 4: Subtipo --}}
+                <div class="form-group">
+                    <label>Subtipo <small style="color:var(--muted)">(opcional)</small></label>
+                    <input type="text" name="subtipo" class="form-control" value="{{ old('subtipo') }}" placeholder="Carne, Frango, Vegano...">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Descrição</label>
+                <input type="text" name="descricao" class="form-control" value="{{ old('descricao') }}" placeholder="Descrição breve...">
+            </div>
+            <div class="form-group">
+                <label>Foto do prato</label>
+                <input type="file" name="imagem" class="form-control {{ $errors->has('imagem')?'is-invalid':'' }}" accept="image/jpeg,image/png,image/webp">
+                @error('imagem')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+            <div class="form-group">
+                <label>Ingrediente Principal (estoque)</label>
+                <select name="stock_item_id" class="form-select">
+                    <option value="">— Nenhum —</option>
+                    @foreach($estoque as $s)
+                    <option value="{{ $s->id }}" {{ old('stock_item_id')==$s->id?'selected':'' }}>{{ $s->nome }} ({{ $s->unidade }})</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                    <input type="checkbox" name="disponivel" value="1" checked style="width:16px;height:16px"> Disponível no cardápio
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">
+                <i class="fas fa-save"></i> Adicionar Item
+            </button>
+        </form>
+    </div>
+
+    <div class="table-wrap cardapio-table-wrap">
+        <div class="table-header">
+            <h2><i class="fas fa-utensils"></i> Itens do Cardápio ({{ $itens->count() }})</h2>
+            <input type="text" id="search-cardapio" placeholder="Buscar..." class="form-control" style="width:200px;padding:7px 12px;font-size:13px">
+        </div>
+        @if($itens->isEmpty())
+            <div class="empty-state"><i class="fas fa-utensils"></i><p>Nenhum item cadastrado</p></div>
+        @else
+        <table class="cardapio-table">
+            <thead><tr><th>Foto</th><th>Item</th><th>Categoria</th><th>Preço</th><th>Serve</th><th>Subtipo</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody id="tbody-cardapio">
+            @foreach($itens as $item)
+            @php
+                $imagemUrl = null;
+                if ($item->imagem) {
+                    $imagemUrl = str_starts_with($item->imagem, 'cardapio/')
+                        ? route('cardapio.imagem', ['arquivo' => basename($item->imagem)])
+                        : asset($item->imagem);
+                }
+            @endphp
+            <tr data-nome="{{ strtolower($item->nome) }}">
+                <td>
+                    <form method="POST" action="{{ route('gerenciar.cardapio.imagem', $item) }}" enctype="multipart/form-data" class="cardapio-photo-form">
+                        @csrf @method('PATCH')
+                        <label class="cardapio-photo-btn" title="Adicionar ou trocar foto de {{ $item->nome }}">
+                            @if($imagemUrl)
+                                <img src="{{ $imagemUrl }}" alt="{{ $item->nome }}" class="cardapio-thumb" onerror="this.style.display='none';this.nextElementSibling.classList.remove('is-hidden')">
+                                <span class="cardapio-thumb-empty is-hidden"><i class="fas fa-image"></i></span>
+                            @else
+                                <span class="cardapio-thumb-empty"><i class="fas fa-image"></i></span>
+                            @endif
+                            <input type="file" name="imagem" class="cardapio-photo-input" accept="image/jpeg,image/png,image/webp" onchange="this.form.submit()">
+                        </label>
+                    </form>
+                </td>
+                <td class="td-primary"><span class="cardapio-item-name">{{ $item->nome }}</span><div class="cardapio-item-desc">{{ Str::limit($item->descricao,70) }}</div></td>
+                <td style="color:var(--muted)">{{ $item->category->nome ?? '—' }}</td>
+                <td class="td-mono" style="color:var(--accent);font-weight:700">R$ {{ number_format($item->preco,2,',','.') }}</td>
+                <td><span class="badge-serves">👤 {{ $item->serves_count ?? 1 }} {{ ($item->serves_count ?? 1) == 1 ? 'pessoa' : 'pessoas' }}</span></td>
+                <td style="font-size:12px;color:var(--muted)">{{ $item->subtipo ?? '—' }}</td>
+                <td><span class="badge badge-{{ $item->disponivel?'success':'danger' }}">{{ $item->disponivel?'Disponível':'Indisponível' }}</span></td>
+                <td>
+                    <div class="cardapio-actions">
+                        <button type="button" class="btn-edit js-edit-item" title="Editar"
+                            data-id="{{ $item->id }}"
+                            data-nome="{{ e($item->nome) }}"
+                            data-category-id="{{ $item->category_id }}"
+                            data-preco="{{ number_format((float) $item->preco, 2, '.', '') }}"
+                            data-descricao="{{ e($item->descricao ?? '') }}"
+                            data-stock-id="{{ $item->stock_item_id ?? '' }}"
+                            data-disponivel="{{ $item->disponivel ? 1 : 0 }}"
+                            data-serves="{{ $item->serves_count ?? 1 }}"
+                            data-subtipo="{{ e($item->subtipo ?? '') }}"
+                            data-imagem-url="{{ $imagemUrl ?? '' }}"
+                            data-update-url="{{ route('gerenciar.cardapio.update', $item) }}">
+                            <i class="fas fa-pencil"></i>
+                        </button>
+                        <form method="POST" action="{{ route('gerenciar.cardapio.destroy',$item) }}" onsubmit="return confirm('Remover {{ $item->nome }}?')">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="btn-del">🗑️ Excluir</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            @endforeach
+            </tbody>
+        </table>
+        @endif
+    </div>
+</div>
+
+<div id="modal-item" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center">
+    <div class="panel" style="width:460px;margin:0;max-height:90vh;overflow-y:auto">
+        <div class="panel-header">
+            <div class="panel-title">Editar Item</div>
+            <button onclick="document.getElementById('modal-item').style.display='none'" class="btn btn-secondary btn-sm btn-icon">×</button>
+        </div>
+        <form method="POST" id="form-edit-item" enctype="multipart/form-data">
+            @csrf @method('PUT')
+            <div class="form-group"><label>Nome</label><input type="text" name="nome" id="ei-nome" class="form-control" required></div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select name="category_id" id="ei-cat" class="form-select" required>
+                        @foreach($categorias as $cat)
+                        <option value="{{ $cat->id }}">{{ $cat->nome }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group"><label>Preço</label><input type="number" name="preco" id="ei-preco" step="0.01" min="0.01" class="form-control" required></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>🍽️ Serve quantas pessoas? <span style="color:#f87171">*</span></label>
+                    <input type="number" name="serves_count" id="ei-serves" min="1" max="50" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Subtipo</label>
+                    <input type="text" name="subtipo" id="ei-subtipo" class="form-control" placeholder="Carne, Frango, Vegano...">
+                </div>
+            </div>
+            <div class="form-group"><label>Descrição</label><input type="text" name="descricao" id="ei-desc" class="form-control"></div>
+            <div class="form-group">
+                <label>Foto do prato</label>
+                <img id="ei-preview" src="" alt="" class="cardapio-preview" style="display:none">
+                <input type="file" name="imagem" id="ei-imagem" class="form-control" accept="image/jpeg,image/png,image/webp">
+            </div>
+            <div class="form-group">
+                <label>Ingrediente Principal</label>
+                <select name="stock_item_id" id="ei-stock" class="form-select">
+                    <option value="">— Nenhum —</option>
+                    @foreach($estoque as $s)
+                    <option value="{{ $s->id }}">{{ $s->nome }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" name="disponivel" id="ei-disp" value="1" style="width:16px;height:16px"> Disponível</label></div>
+            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Salvar</button>
+        </form>
+    </div>
+</div>
+@endsection
+@section('scripts')
+<script>
+function editItem(id,nome,catId,preco,desc,stockId,disp,serves,subtipo,imagemUrl,updateUrl) {
+    document.getElementById('ei-nome').value    = nome;
+    document.getElementById('ei-cat').value     = catId;
+    document.getElementById('ei-preco').value   = preco;
+    document.getElementById('ei-desc').value    = desc;
+    document.getElementById('ei-stock').value   = stockId || '';
+    document.getElementById('ei-disp').checked  = disp == 1;
+    document.getElementById('ei-serves').value  = serves || 1;
+    document.getElementById('ei-subtipo').value = subtipo || '';
+    document.getElementById('ei-imagem').value  = '';
+    const preview = document.getElementById('ei-preview');
+    if (imagemUrl) {
+        preview.src = imagemUrl;
+        preview.style.display = 'block';
+    } else {
+        preview.removeAttribute('src');
+        preview.style.display = 'none';
+    }
+    document.getElementById('form-edit-item').action = updateUrl || ('/gerenciar/cardapio/' + id);
+    document.getElementById('modal-item').style.display = 'flex';
+}
+
+document.querySelectorAll('.js-edit-item').forEach((button) => {
+    button.addEventListener('click', () => {
+        editItem(
+            button.dataset.id,
+            button.dataset.nome || '',
+            button.dataset.categoryId || '',
+            button.dataset.preco || '0.00',
+            button.dataset.descricao || '',
+            button.dataset.stockId || '',
+            button.dataset.disponivel || 0,
+            button.dataset.serves || 1,
+            button.dataset.subtipo || '',
+            button.dataset.imagemUrl || '',
+            button.dataset.updateUrl || ''
+        );
+    });
+});
+
+document.getElementById('search-cardapio').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('#tbody-cardapio tr').forEach(r => {
+        r.style.display = r.dataset.nome.includes(q) ? '' : 'none';
+    });
+});
+</script>
+@endsection
