@@ -4,12 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Payment;
 use App\Models\Order;
+<<<<<<< HEAD
 use App\Models\CaixaFechamento;
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 use App\Models\Sangria;
 use App\Models\Purchase;
 use App\Models\Table;
 use Carbon\Carbon;
+<<<<<<< HEAD
 use Illuminate\Support\Facades\DB;
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -20,7 +26,11 @@ class CaixaController extends Controller
 {
     public function dashboard(): View
     {
+<<<<<<< HEAD
         if (!in_array(Auth::user()?->role, ['caixa', 'gerente'])) {
+=======
+        if (!Auth::user() || !in_array(Auth::user()->role, ['caixa', 'gerente'])) {
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             abort(403);
         }
 
@@ -33,9 +43,15 @@ class CaixaController extends Controller
 
         $pagamentosHoje = Payment::whereDate('created_at', $dataHoje)->with('order.table')->orderByDesc('created_at')->get();
 
+<<<<<<< HEAD
         // Pedidos enviados ao caixa pelo fechamento da conta.
         $pedidosProntosPagamento = Order::where('status', 'aguardando_pagamento')
             ->with('table', 'user', 'items.menuItem', 'payments')
+=======
+        // Soft hide: só mostra pedidos que ainda não foram pagos
+        $pedidosProntosPagamento = Order::whereIn('status', ['pronto_entrega', 'aguardando_pagamento'])
+            ->with('table', 'user', 'items')
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             ->orderBy('created_at')
             ->get();
 
@@ -62,7 +78,11 @@ class CaixaController extends Controller
 
     public function registrarSangria(): RedirectResponse
     {
+<<<<<<< HEAD
         if (!in_array(Auth::user()?->role, ['caixa', 'gerente'])) {
+=======
+        if (!Auth::user() || !in_array(Auth::user()->role, ['caixa', 'gerente'])) {
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             abort(403);
         }
         $validated = request()->validate([
@@ -85,6 +105,7 @@ class CaixaController extends Controller
      */
     public function confirmarPagamento(Order $order): RedirectResponse|JsonResponse
     {
+<<<<<<< HEAD
         if (!in_array(Auth::user()?->role, ['caixa', 'gerente', 'garcom'])) {
             abort(403);
         }
@@ -95,14 +116,34 @@ class CaixaController extends Controller
                 return response()->json(['success' => false, 'message' => '🔒 Caixa fechado.'], 403);
             }
             return back()->with('error', '🔒 Caixa fechado. Nenhum pagamento pode ser feito até amanhã às 10h.');
+=======
+        if (!Auth::user() || !in_array(Auth::user()->role, ['caixa', 'gerente', 'garcom'])) {
+            abort(403);
+        }
+
+        $caixaFechadoEm = cache()->get('caixa_fechado_em');
+        if ($caixaFechadoEm) {
+            $reabreEm = Carbon::parse($caixaFechadoEm)->addDay()->setTime(10, 0, 0);
+            if (now()->lessThan($reabreEm)) {
+                if (request()->expectsJson()) {
+                    return response()->json(['success' => false, 'message' => '🔒 Caixa fechado.'], 403);
+                }
+                return back()->with('error', '🔒 Caixa fechado. Nenhum pagamento pode ser feito até amanhã às 10h.');
+            }
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         }
 
         try {
             $validated = request()->validate([
+<<<<<<< HEAD
                 'metodo'      => 'required|in:dinheiro,cartao_credito,cartao_debito,pix',
                 'valor_pago'  => 'required|numeric|min:0.01',
                 'taxa_garcom' => 'nullable|boolean',
                 'parcelas'    => 'nullable|required_if:metodo,cartao_credito|integer|min:1|max:12',
+=======
+                'metodo'     => 'required|in:dinheiro,cartao_credito,cartao_debito,pix',
+                'valor_pago' => 'required|numeric|min:0.01',
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             ]);
         } catch (ValidationException $e) {
             if (request()->expectsJson()) {
@@ -113,6 +154,7 @@ class CaixaController extends Controller
 
         $order->load('items');
         $total = $order->items->sum('subtotal');
+<<<<<<< HEAD
         $totalPagoAntes = $order->payments()->where('status', 'confirmado')->sum('valor_final');
         $taxaAntes = $order->payments()->where('status', 'confirmado')->sum('taxa');
         $taxaNova = (request()->boolean('taxa_garcom') && $taxaAntes <= 0)
@@ -141,10 +183,19 @@ class CaixaController extends Controller
             'valor_final'    => $valorPago,
             'metodo'         => $validated['metodo'],
             'parcelas'       => $validated['metodo'] === 'cartao_credito' ? (int) ($validated['parcelas'] ?? 1) : 1,
+=======
+
+        Payment::create([
+            'order_id'       => $order->id,
+            'valor'          => $total,
+            'valor_final'    => $validated['valor_pago'],
+            'metodo'         => $validated['metodo'],
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             'status'         => 'confirmado',
             'data_pagamento' => now(),
         ]);
 
+<<<<<<< HEAD
         $quitado = ($totalPagoAntes + $valorPago) + 0.009 >= $totalDevido;
 
         if ($quitado) {
@@ -157,6 +208,13 @@ class CaixaController extends Controller
         } elseif ($order->table_id) {
             $order->table?->update(['status' => 'ocupada']);
         }
+=======
+        // ✅ FIX: Marca como pago com timestamp para soft hide
+        $order->update([
+            'status'  => 'pago',
+            'pago_em' => now(),
+        ]);
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 
         // ✅ FIX: Verifica se TODOS os pedidos da mesa foram pagos/cancelados
         // Se sim, libera a mesa → próximo cliente pode usar
@@ -166,12 +224,17 @@ class CaixaController extends Controller
                 ->where('id', '!=', $order->id)
                 ->count();
 
+<<<<<<< HEAD
             if ($quitado && $pedidosAtivos === 0) {
+=======
+            if ($pedidosAtivos === 0) {
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                 $order->table?->update(['status' => 'disponivel']);
             }
         }
 
         if (request()->expectsJson()) {
+<<<<<<< HEAD
             return response()->json([
                 'success' => true,
                 'quitado' => $quitado,
@@ -186,16 +249,28 @@ class CaixaController extends Controller
                 ? '✅ Pagamento confirmado! Mesa liberada.'
                 : '✅ Pagamento parcial confirmado! A mesa continua ocupada ate quitar o restante.'
             );
+=======
+            return response()->json(['success' => true, 'message' => 'Pagamento confirmado!']);
+        }
+
+        return redirect()->route('dashboard')
+            ->with('success', '✅ Pagamento confirmado! Mesa liberada.');
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     }
 
     public function diaria(): View
     {
+<<<<<<< HEAD
         if (!in_array(Auth::user()?->role, ['caixa', 'gerente'])) {
+=======
+        if (!Auth::user() || !in_array(Auth::user()->role, ['caixa', 'gerente'])) {
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             abort(403);
         }
 
         $dataHoje = Carbon::today();
 
+<<<<<<< HEAD
         $fechamentoAtual = CaixaFechamento::fechadoAtual();
         $caixaAberto     = !$fechamentoAtual;
         $caixaFechadoEm  = $fechamentoAtual?->fechado_em?->toIso8601String();
@@ -210,6 +285,25 @@ class CaixaController extends Controller
         $conciliacao = collect($metodos)->map(function ($metodo) use ($periodoInicio, $periodoFim) {
             $pagamentos = $this->pagamentosDoPeriodo($periodoInicio, $periodoFim)
                 ->where('metodo', $metodo);
+=======
+        $caixaFechadoEm = cache()->get('caixa_fechado_em');
+        $caixaAberto    = true;
+
+        if ($caixaFechadoEm) {
+            $fechadoEm   = Carbon::parse($caixaFechadoEm);
+            $reabreEm    = $fechadoEm->copy()->addDay()->setTime(10, 0, 0);
+            $caixaAberto = now()->greaterThanOrEqualTo($reabreEm);
+            if ($caixaAberto) {
+                cache()->forget('caixa_fechado_em');
+            }
+        }
+
+        $metodos = ['pix', 'cartao_credito', 'cartao_debito', 'dinheiro'];
+        $conciliacao = collect($metodos)->map(function ($metodo) use ($dataHoje) {
+            $pagamentos = Payment::whereDate('created_at', $dataHoje)
+                ->where('metodo', $metodo)
+                ->where('status', 'confirmado');
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             return [
                 'metodo'     => $metodo,
                 'label'      => ucfirst(str_replace('_', ' ', $metodo)),
@@ -218,6 +312,7 @@ class CaixaController extends Controller
             ];
         });
 
+<<<<<<< HEAD
         $totalDia        = $resumoPeriodo['total_vendido'];
         $totalPedidos    = $resumoPeriodo['total_pagamentos'];
         $totalCancelados = Order::whereBetween('created_at', [$periodoInicio, $periodoFim])
@@ -239,23 +334,39 @@ class CaixaController extends Controller
             ->reverse()
             ->values()
             ->all();
+=======
+        $totalDia        = Payment::whereDate('created_at', $dataHoje)->where('status', 'confirmado')->sum('valor_final');
+        $totalPedidos    = Payment::whereDate('created_at', $dataHoje)->where('status', 'confirmado')->count();
+        $totalCancelados = Order::whereDate('created_at', $dataHoje)->where('status', 'cancelado')->count();
+
+        $fechamentos = cache()->get('caixa_historico_fechamentos', []);
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 
         return view('caixa.diaria', compact(
             'conciliacao', 'totalDia', 'totalPedidos',
             'totalCancelados', 'caixaAberto', 'caixaFechadoEm',
+<<<<<<< HEAD
             'caixaReabreEm', 'fechamentos', 'dataHoje',
             'periodoInicio', 'periodoFim', 'resumoPeriodo',
             'comandasAbertas', 'valorPendente'
+=======
+            'fechamentos', 'dataHoje'
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         ));
     }
 
     public function fecharCaixa(): RedirectResponse
     {
+<<<<<<< HEAD
         if (!in_array(Auth::user()?->role, ['caixa', 'gerente'])) {
+=======
+        if (!Auth::user() || !in_array(Auth::user()->role, ['caixa', 'gerente'])) {
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             abort(403);
         }
 
         $agora = now();
+<<<<<<< HEAD
 
         if (CaixaFechamento::fechadoAtual()) {
             return redirect()->route('caixa.diaria')->with('error', '🔒 Caixa já está fechado.');
@@ -299,10 +410,24 @@ class CaixaController extends Controller
 
         return redirect()->route('caixa.diaria')
             ->with('success', '✅ Caixa fechado com relatório salvo.');
+=======
+        cache()->put('caixa_fechado_em', $agora->toIso8601String(), now()->addDays(2));
+
+        $historico   = cache()->get('caixa_historico_fechamentos', []);
+        $historico[] = [
+            'fechado_em' => $agora->format('d/m/Y H:i'),
+            'usuario'    => Auth::user()->name,
+            'total'      => Payment::whereDate('created_at', $agora)->where('status', 'confirmado')->sum('valor_final'),
+        ];
+        cache()->put('caixa_historico_fechamentos', array_slice($historico, -10), now()->addDays(30));
+
+        return redirect()->route('caixa.diaria')->with('success', '✅ Caixa fechado! Reabre automaticamente amanhã às 10h.');
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     }
 
     public function abrirCaixa(): RedirectResponse
     {
+<<<<<<< HEAD
         if (Auth::user()?->role !== 'gerente') {
             abort(403);
         }
@@ -318,11 +443,18 @@ class CaixaController extends Controller
             ]);
         }
 
+=======
+        if (!Auth::user() || Auth::user()->role !== 'gerente') {
+            abort(403);
+        }
+        cache()->forget('caixa_fechado_em');
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         return redirect()->route('caixa.diaria')->with('success', '✅ Caixa reaberto pelo gerente.');
     }
 
     public function pagarMesa(): View
     {
+<<<<<<< HEAD
         if (!in_array(Auth::user()?->role, ['caixa', 'gerente'])) {
             abort(403);
         }
@@ -330,10 +462,22 @@ class CaixaController extends Controller
         // Só mesas com conta fechada e aguardando pagamento.
         $mesas = Table::with([
             'orders' => fn($q) => $q->where('status', 'aguardando_pagamento'),
+=======
+        if (!Auth::user() || !in_array(Auth::user()->role, ['caixa', 'gerente'])) {
+            abort(403);
+        }
+
+        // Soft hide: só mesas com pedidos ativos (não pagos)
+        $mesas = Table::with([
+            'orders' => fn($q) => $q->whereIn('status', [
+                'aberto', 'em_preparo', 'pronto_entrega', 'pronto', 'aguardando_pagamento',
+            ]),
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         ])->get()->filter(fn($m) => $m->orders->isNotEmpty());
 
         return view('caixa.pagar-mesa', compact('mesas'));
     }
+<<<<<<< HEAD
 
     private function periodoInicioAtual(): Carbon
     {
@@ -400,3 +544,6 @@ class CaixaController extends Controller
         ])->values()->all();
     }
 }
+=======
+}
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568

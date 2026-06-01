@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OrderItem extends Model
 {
+<<<<<<< HEAD
     protected $fillable = [
         'order_id',
         'menu_item_id',
@@ -29,6 +30,17 @@ class OrderItem extends Model
     protected $attributes = [
         'status'          => 'pendente',
         'enviado_cozinha' => false,
+=======
+    protected $fillable = ['order_id', 'menu_item_id', 'quantidade', 'preco_unitario', 'subtotal', 'observacoes', 'status', 'horario_pronto'];
+
+    protected $casts = [
+        'horario_pronto' => 'datetime',
+    ];
+
+    // Status padrão ao criar um item
+    protected $attributes = [
+        'status' => 'pendente',
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     ];
 
     public function order(): BelongsTo
@@ -40,4 +52,8 @@ class OrderItem extends Model
     {
         return $this->belongsTo(MenuItem::class);
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568

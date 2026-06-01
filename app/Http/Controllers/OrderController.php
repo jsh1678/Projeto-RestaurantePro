@@ -183,19 +183,28 @@ class OrderController extends Controller
                 ->with('error', '❌ A conta desta mesa já foi fechada. Não é possível adicionar novos pedidos.');
         }
 
+<<<<<<< HEAD
         // ─── FIX #1: Validação de estoque considerando ingredientes compostos ───
         // Acumula quanto de cada stock_item será necessário, considerando:
         // (a) ingredientes compostos via MenuItemIngredient
         // (b) stockItem direto do menu_item (fallback)
+=======
+        // Validação de estoque
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         $requiredByStock = [];
         $menuItemsCache  = [];
 
         foreach ($validated['itens'] as $item) {
+<<<<<<< HEAD
             $menuItem = MenuItem::with('ingredients.stockItem', 'stockItem')->find($item['menu_item_id']);
+=======
+            $menuItem = MenuItem::find($item['menu_item_id']);
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             if (!$menuItem) {
                 return back()->with('error', "Item de menu não encontrado (ID: {$item['menu_item_id']}).");
             }
             $menuItemsCache[$menuItem->id] = $menuItem;
+<<<<<<< HEAD
 
             if ($menuItem->ingredients->isNotEmpty()) {
                 // Prato com ingredientes compostos: verifica cada ingrediente
@@ -231,10 +240,17 @@ class OrderController extends Controller
                     $requiredByStock[$stockId] = ['stock' => $stock, 'necessario' => 0];
                 }
                 $requiredByStock[$stockId]['necessario'] += $qtdPorcao * $item['quantidade'];
+=======
+            if ($menuItem->stockItem) {
+                $stockId = $menuItem->stockItem->id;
+                if (!isset($requiredByStock[$stockId])) $requiredByStock[$stockId] = 0;
+                $requiredByStock[$stockId] += $item['quantidade'];
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             }
         }
 
         $insuficientes = [];
+<<<<<<< HEAD
         foreach ($requiredByStock as $stockId => $entry) {
             $stock = $entry['stock']->fresh(); // lê quantidade atual do banco
             if ($stock->quantidade_atual < $entry['necessario']) {
@@ -244,10 +260,17 @@ class OrderController extends Controller
                     'required'  => $entry['necessario'],
                     'unidade'   => $stock->unidade,
                 ];
+=======
+        foreach ($requiredByStock as $stockId => $requiredQty) {
+            $stockItem = StockItem::find($stockId);
+            if (!$stockItem || $stockItem->quantidade_atual < $requiredQty) {
+                $insuficientes[] = ['stock' => $stockItem, 'required' => $requiredQty];
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             }
         }
 
         if (count($insuficientes) > 0) {
+<<<<<<< HEAD
             $messages = array_map(fn($inc) =>
                 "{$inc['nome']} — disponível: {$inc['available']} {$inc['unidade']}, necessário: {$inc['required']} {$inc['unidade']}",
                 $insuficientes
@@ -255,6 +278,16 @@ class OrderController extends Controller
             return back()->with('error', 'Estoque insuficiente: ' . implode('; ', $messages));
         }
         // ─── fim FIX #1 ──────────────────────────────────────────────────────────
+=======
+            $messages = [];
+            foreach ($insuficientes as $inc) {
+                $nome      = $inc['stock'] ? $inc['stock']->nome : 'Item removido';
+                $available = $inc['stock'] ? $inc['stock']->quantidade_atual : 0;
+                $messages[] = "{$nome} — disponível: {$available}, necessário: {$inc['required']}";
+            }
+            return back()->with('error', 'Estoque insuficiente: ' . implode('; ', $messages));
+        }
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 
         $pedido = DB::transaction(function () use ($validated, $menuItemsCache, $request) {
             $total  = 0;
@@ -326,7 +359,11 @@ class OrderController extends Controller
             if ($statusPedido === 'aguardando_pagamento') {
                 $updates['horario_entrega'] = now();
 
+<<<<<<< HEAD
                 // Marcar todos os itens do pedido como 'entregue'
+=======
+                // ✅ FIX: Marcar todos os itens do pedido como 'entregue'
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                 $order->items()->update(['status' => 'entregue']);
             }
 
@@ -353,6 +390,7 @@ class OrderController extends Controller
         }
 
         DB::transaction(function () use ($order) {
+<<<<<<< HEAD
             // ─── FIX #2: Reverter estoque ao cancelar pedido ─────────────────────
             // Só reverte itens que já foram marcados como 'pronto' pelo chef
             // (esses são os únicos que tiveram estoque descontado)
@@ -421,6 +459,10 @@ class OrderController extends Controller
             // ─── FIX #3: usar status 'cancelado' nos itens, não 'entregue' ────────
             $order->items()->update(['status' => 'cancelado']);
             // ─── fim FIX #3 ──────────────────────────────────────────────────────
+=======
+            // Cancelar os itens também
+            $order->items()->update(['status' => 'entregue']); // marcar como finalizado
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             $order->update(['status' => 'cancelado']);
 
             $pedidosAtivos = Order::where('table_id', $order->table_id)

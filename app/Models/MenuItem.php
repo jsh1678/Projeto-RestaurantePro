@@ -10,12 +10,16 @@ class MenuItem extends Model
 {
     protected $fillable = [
         'category_id', 'nome', 'descricao', 'preco', 'disponivel',
+<<<<<<< HEAD
         'stock_item_id', 'serves_count', 'subtipo', 'imagem', 'imagem_dados', 'imagem_mime', 'arquivado_em'
     ];
 
     protected $casts = [
         'disponivel' => 'boolean',
         'arquivado_em' => 'datetime',
+=======
+        'stock_item_id', 'serves_count', 'subtipo'
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     ];
 
     public function category(): BelongsTo

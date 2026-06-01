@@ -149,7 +149,10 @@ class DatabaseSeeder extends Seeder
                 ]);
             }
         }
+<<<<<<< HEAD
 
         $this->call(RestaurantMenuSeeder::class);
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     }
 }

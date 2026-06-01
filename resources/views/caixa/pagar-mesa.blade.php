@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('page-title', 'Pagar Mesa')
 @section('breadcrumb', 'Selecione a mesa para processar pagamento')
+<<<<<<< HEAD
 
 @section('styles')
 <style>
@@ -170,11 +171,34 @@
                 <form method="POST" action="{{ route('caixa.pagamento', $p) }}" class="pagamento-form pay-form" data-total="{{ $p->total }}" data-pedido="{{ str_pad($p->id,4,'0',STR_PAD_LEFT) }}" data-pix-payload="{{ e(\App\Support\PixPayload::make((float) $p->total, 'PED' . str_pad($p->id,4,'0',STR_PAD_LEFT))) }}">
                     @csrf
                     <select name="metodo" class="form-select js-metodo-pagamento" required>
+=======
+@section('content')
+<div class="mesas-grid">
+    @forelse($mesas as $mesa)
+    @php $pedidos = $mesa->orders; @endphp
+    <div class="mesa-card {{ $pedidos->isNotEmpty() ? 'ocupada' : 'disponivel' }}" style="cursor:default">
+        <div class="mc-number">{{ $mesa->numero }}</div>
+        <div class="mc-seats">{{ $mesa->assentos }} lugares</div>
+        @if($pedidos->isNotEmpty())
+            <span class="badge badge-danger" style="margin:6px 0">{{ $pedidos->count() }} pedido(s)</span>
+            @foreach($pedidos as $p)
+            <div style="margin-top:8px; background:var(--bg3); border-radius:10px; padding:12px; font-size:13px; text-align:left">
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px">
+                    <span class="td-mono" style="color:var(--accent); font-weight:700">#{{ str_pad($p->id,4,'0',STR_PAD_LEFT) }}</span>
+                    <strong>R$ {{ number_format($p->total,2,',','.') }}</strong>
+                </div>
+                <span class="badge badge-{{ $p->status==='pronto_entrega'?'success':'warning' }}">{{ str_replace('_',' ',ucfirst($p->status)) }}</span>
+                @if($p->status==='pronto_entrega')
+                <form method="POST" action="{{ route('caixa.pagamento',$p) }}" style="margin-top:10px">
+                    @csrf
+                    <select name="metodo" class="form-select" style="font-size:12px; padding:6px; margin-bottom:8px" required>
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                         <option value="dinheiro">💵 Dinheiro</option>
                         <option value="cartao_credito">💳 Crédito</option>
                         <option value="cartao_debito">💳 Débito</option>
                         <option value="pix">📱 PIX</option>
                     </select>
+<<<<<<< HEAD
 
                     <div class="pay-extra pay-credit js-credito-extra" style="display:none">
                         <label>Parcelas no crédito</label>
@@ -193,6 +217,10 @@
 
                     <input type="hidden" name="valor_pago" value="{{ $p->total }}">
                     <button type="submit" class="btn btn-success btn-sm pay-confirm">✓ Confirmar Pag.</button>
+=======
+                    <input type="hidden" name="valor_pago" value="{{ $p->total }}">
+                    <button type="submit" class="btn btn-success btn-sm" style="width:100%; justify-content:center">✓ Confirmar Pag.</button>
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                 </form>
                 @endif
             </div>
@@ -206,6 +234,7 @@
     @endforelse
 </div>
 @endsection
+<<<<<<< HEAD
 
 @section('scripts')
 <script>
@@ -254,3 +283,5 @@ document.querySelectorAll('.pagamento-form').forEach((form) => {
 });
 </script>
 @endsection
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568

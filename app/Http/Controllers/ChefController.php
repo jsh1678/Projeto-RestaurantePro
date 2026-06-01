@@ -25,7 +25,11 @@ class ChefController extends Controller
             abort(403, 'Acesso negado. Área do chef apenas para usuários com papel de chef.');
         }
 
+<<<<<<< HEAD
         // O chef só vê pedidos em 'em_preparo'.
+=======
+        // ✅ FIX: O chef só vê pedidos em 'em_preparo'.
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         // Pedidos 'pronto_entrega' e 'aguardando_pagamento' já foram finalizados pelo chef
         // e entregues (ou aguardando o garçom), então não precisam aparecer aqui.
         $pedidosEmPreparo = Order::where('status', 'em_preparo')
@@ -38,9 +42,12 @@ class ChefController extends Controller
 
         foreach ($pedidosEmPreparo as $pedido) {
             foreach ($pedido->items as $item) {
+<<<<<<< HEAD
                 // ─── FIX #3: Itens cancelados não entram na contagem do chef ──────
                 if ($item->status === 'cancelado') continue;
                 // ─── fim FIX #3 ───────────────────────────────────────────────────
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                 $totalItems++;
                 if ($item->status === 'pronto') {
                     $itensProntos++;
@@ -146,6 +153,7 @@ class ChefController extends Controller
 
             $item->save();
 
+<<<<<<< HEAD
             // Verificar se TODOS os itens NÃO-CANCELADOS do pedido estão prontos
             $pedido = $item->order;
             $pedido->load('items');
@@ -157,6 +165,15 @@ class ChefController extends Controller
             $todosProntos = $itensAtivos->isNotEmpty()
                 && $itensAtivos->every(fn($it) => $it->status === 'pronto');
             // ─── fim FIX #3 ────────────────────────────────────────────────────────
+=======
+            // Verificar se TODOS os itens do pedido estão prontos
+            $pedido = $item->order;
+            $pedido->load('items');
+
+            // ✅ FIX: Só muda o status do pedido se ele ainda está 'em_preparo'
+            // Evita sobrescrever status já avançados (ex: garçom cancelou enquanto chef preparava)
+            $todosProntos = $pedido->items->every(fn($it) => $it->status === 'pronto');
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 
             if ($todosProntos && $pedido->status === 'em_preparo') {
                 $pedido->update([

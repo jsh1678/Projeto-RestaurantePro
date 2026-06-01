@@ -11,6 +11,7 @@
 .btn-del{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:7px;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.1);color:#f87171;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s;white-space:nowrap}
 .btn-del:hover{background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.5)}
 .badge-serves{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(99,102,241,.12);color:#a5b4fc;border:1px solid rgba(99,102,241,.2)}
+<<<<<<< HEAD
 .cardapio-layout{display:grid;grid-template-columns:minmax(320px,380px) minmax(0,1fr);gap:20px;align-items:start}
 .cardapio-form-panel{position:sticky;top:86px;max-height:calc(100vh - 104px);overflow-y:auto;overscroll-behavior:contain}
 .cardapio-form-panel::-webkit-scrollbar{width:6px}
@@ -39,14 +40,24 @@
 .cardapio-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end}
 @media(max-width:1024px){.cardapio-layout{grid-template-columns:1fr}.cardapio-form-panel{position:relative;top:auto;max-height:70vh}.cardapio-table{min-width:860px}}
 @media(max-width:768px){[style*="grid-template-columns:360px"]{display:block!important}[style*="grid-template-columns:340px"]{display:block!important}.panel[style*="sticky"]{position:static!important}.cardapio-form-panel{max-height:none;overflow:visible}.cardapio-table{min-width:820px}}
+=======
+@media(max-width:768px){[style*="grid-template-columns:360px"]{display:block!important}[style*="grid-template-columns:340px"]{display:block!important}.panel[style*="sticky"]{position:static!important}}
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 </style>
 @endsection
 @section('content')
 
+<<<<<<< HEAD
 <div class="cardapio-layout">
     <div class="panel cardapio-form-panel">
         <div class="panel-header"><div class="panel-title"><i class="fas fa-plus"></i> Novo Item</div></div>
         <form method="POST" action="{{ route('gerenciar.cardapio.store') }}" enctype="multipart/form-data">
+=======
+<div style="display:grid;grid-template-columns:380px 1fr;gap:20px;align-items:start">
+    <div class="panel" style="position:sticky;top:80px">
+        <div class="panel-header"><div class="panel-title"><i class="fas fa-plus"></i> Novo Item</div></div>
+        <form method="POST" action="{{ route('gerenciar.cardapio.store') }}">
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             @csrf
             <div class="form-group">
                 <label>Nome</label>
@@ -86,11 +97,14 @@
                 <input type="text" name="descricao" class="form-control" value="{{ old('descricao') }}" placeholder="Descrição breve...">
             </div>
             <div class="form-group">
+<<<<<<< HEAD
                 <label>Foto do prato</label>
                 <input type="file" name="imagem" class="form-control {{ $errors->has('imagem')?'is-invalid':'' }}" accept="image/jpeg,image/png,image/webp">
                 @error('imagem')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="form-group">
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                 <label>Ingrediente Principal (estoque)</label>
                 <select name="stock_item_id" class="form-select">
                     <option value="">— Nenhum —</option>
@@ -110,7 +124,11 @@
         </form>
     </div>
 
+<<<<<<< HEAD
     <div class="table-wrap cardapio-table-wrap">
+=======
+    <div class="table-wrap">
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         <div class="table-header">
             <h2><i class="fas fa-utensils"></i> Itens do Cardápio ({{ $itens->count() }})</h2>
             <input type="text" id="search-cardapio" placeholder="Buscar..." class="form-control" style="width:200px;padding:7px 12px;font-size:13px">
@@ -118,6 +136,7 @@
         @if($itens->isEmpty())
             <div class="empty-state"><i class="fas fa-utensils"></i><p>Nenhum item cadastrado</p></div>
         @else
+<<<<<<< HEAD
         <table class="cardapio-table">
             <thead><tr><th>Foto</th><th>Item</th><th>Categoria</th><th>Preço</th><th>Serve</th><th>Subtipo</th><th>Status</th><th>Ações</th></tr></thead>
             <tbody id="tbody-cardapio">
@@ -146,12 +165,21 @@
                     </form>
                 </td>
                 <td class="td-primary"><span class="cardapio-item-name">{{ $item->nome }}</span><div class="cardapio-item-desc">{{ Str::limit($item->descricao,70) }}</div></td>
+=======
+        <table>
+            <thead><tr><th>Item</th><th>Categoria</th><th>Preço</th><th>Serve</th><th>Subtipo</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody id="tbody-cardapio">
+            @foreach($itens as $item)
+            <tr data-nome="{{ strtolower($item->nome) }}">
+                <td class="td-primary">{{ $item->nome }}<div style="font-size:11px;color:var(--muted)">{{ Str::limit($item->descricao,40) }}</div></td>
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                 <td style="color:var(--muted)">{{ $item->category->nome ?? '—' }}</td>
                 <td class="td-mono" style="color:var(--accent);font-weight:700">R$ {{ number_format($item->preco,2,',','.') }}</td>
                 <td><span class="badge-serves">👤 {{ $item->serves_count ?? 1 }} {{ ($item->serves_count ?? 1) == 1 ? 'pessoa' : 'pessoas' }}</span></td>
                 <td style="font-size:12px;color:var(--muted)">{{ $item->subtipo ?? '—' }}</td>
                 <td><span class="badge badge-{{ $item->disponivel?'success':'danger' }}">{{ $item->disponivel?'Disponível':'Indisponível' }}</span></td>
                 <td>
+<<<<<<< HEAD
                     <div class="cardapio-actions">
                         <button type="button" class="btn-edit js-edit-item" title="Editar"
                             data-id="{{ $item->id }}"
@@ -165,6 +193,11 @@
                             data-subtipo="{{ e($item->subtipo ?? '') }}"
                             data-imagem-url="{{ $imagemUrl ?? '' }}"
                             data-update-url="{{ route('gerenciar.cardapio.update', $item) }}">
+=======
+                    <div style="display:flex;gap:6px">
+                        <button class="btn-edit" title="Editar"
+                            onclick="editItem({{ $item->id }},'{{ addslashes($item->nome) }}',{{ $item->category_id }},{{ $item->preco }},'{{ addslashes($item->descricao??'') }}',{{ $item->stock_item_id??'null' }},{{ $item->disponivel?1:0 }},{{ $item->serves_count??1 }},'{{ addslashes($item->subtipo??'') }}')">
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                             <i class="fas fa-pencil"></i>
                         </button>
                         <form method="POST" action="{{ route('gerenciar.cardapio.destroy',$item) }}" onsubmit="return confirm('Remover {{ $item->nome }}?')">
@@ -187,7 +220,11 @@
             <div class="panel-title">Editar Item</div>
             <button onclick="document.getElementById('modal-item').style.display='none'" class="btn btn-secondary btn-sm btn-icon">×</button>
         </div>
+<<<<<<< HEAD
         <form method="POST" id="form-edit-item" enctype="multipart/form-data">
+=======
+        <form method="POST" id="form-edit-item">
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             @csrf @method('PUT')
             <div class="form-group"><label>Nome</label><input type="text" name="nome" id="ei-nome" class="form-control" required></div>
             <div class="form-row">
@@ -213,11 +250,14 @@
             </div>
             <div class="form-group"><label>Descrição</label><input type="text" name="descricao" id="ei-desc" class="form-control"></div>
             <div class="form-group">
+<<<<<<< HEAD
                 <label>Foto do prato</label>
                 <img id="ei-preview" src="" alt="" class="cardapio-preview" style="display:none">
                 <input type="file" name="imagem" id="ei-imagem" class="form-control" accept="image/jpeg,image/png,image/webp">
             </div>
             <div class="form-group">
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                 <label>Ingrediente Principal</label>
                 <select name="stock_item_id" id="ei-stock" class="form-select">
                     <option value="">— Nenhum —</option>
@@ -234,7 +274,11 @@
 @endsection
 @section('scripts')
 <script>
+<<<<<<< HEAD
 function editItem(id,nome,catId,preco,desc,stockId,disp,serves,subtipo,imagemUrl,updateUrl) {
+=======
+function editItem(id,nome,catId,preco,desc,stockId,disp,serves,subtipo) {
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     document.getElementById('ei-nome').value    = nome;
     document.getElementById('ei-cat').value     = catId;
     document.getElementById('ei-preco').value   = preco;
@@ -243,6 +287,7 @@ function editItem(id,nome,catId,preco,desc,stockId,disp,serves,subtipo,imagemUrl
     document.getElementById('ei-disp').checked  = disp == 1;
     document.getElementById('ei-serves').value  = serves || 1;
     document.getElementById('ei-subtipo').value = subtipo || '';
+<<<<<<< HEAD
     document.getElementById('ei-imagem').value  = '';
     const preview = document.getElementById('ei-preview');
     if (imagemUrl) {
@@ -274,6 +319,11 @@ document.querySelectorAll('.js-edit-item').forEach((button) => {
     });
 });
 
+=======
+    document.getElementById('form-edit-item').action = '/gerenciar/cardapio/' + id;
+    document.getElementById('modal-item').style.display = 'flex';
+}
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 document.getElementById('search-cardapio').addEventListener('input', function() {
     const q = this.value.toLowerCase();
     document.querySelectorAll('#tbody-cardapio tr').forEach(r => {

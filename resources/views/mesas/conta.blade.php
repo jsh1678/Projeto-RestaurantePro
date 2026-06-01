@@ -28,6 +28,7 @@ Mesa {{ $mesa->numero }} — Conta
     border-radius:10px; padding:12px 16px; margin-bottom:16px;
     display:flex; align-items:center; gap:10px; font-size:13px; color:#fb923c;
 }
+<<<<<<< HEAD
 .conta-layout {
     display:grid;
     grid-template-columns:minmax(0, 1fr) 430px;
@@ -290,6 +291,8 @@ Mesa {{ $mesa->numero }} — Conta
         z-index: 5;
     }
 }
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 </style>
 @endsection
 
@@ -310,7 +313,11 @@ Mesa {{ $mesa->numero }} — Conta
     </div>
     <div style="display:flex; gap:10px; flex-wrap:wrap">
         {{-- Só mostra "Novo Pedido" se a conta NÃO estiver fechada --}}
+<<<<<<< HEAD
         @if(!$contaFechada && in_array(Auth::user()?->role, ['garcom','gerente']))
+=======
+        @if(!$contaFechada && in_array(Auth::user()->role, ['garcom','gerente']))
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         <a href="{{ route('orders.create', ['table_id' => $mesa->id]) }}" class="btn btn-primary">
             <i class="fas fa-plus"></i> Novo Pedido
         </a>
@@ -342,7 +349,11 @@ Mesa {{ $mesa->numero }} — Conta
 <div class="empty-state" style="margin-top:60px">
     <i class="fas fa-utensils"></i>
     <p>Nenhum pedido em aberto para esta mesa</p>
+<<<<<<< HEAD
     @if(in_array(Auth::user()?->role, ['garcom','gerente']))
+=======
+    @if(in_array(Auth::user()->role, ['garcom','gerente']))
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     <a href="{{ route('orders.create', ['table_id' => $mesa->id]) }}" class="btn btn-primary" style="margin-top:16px">
         <i class="fas fa-plus"></i> Criar Pedido
     </a>
@@ -350,6 +361,7 @@ Mesa {{ $mesa->numero }} — Conta
 </div>
 @else
 
+<<<<<<< HEAD
 @php
     $pedidoInicial = $pedidos->sortBy('created_at')->first();
     $abertaHa = $pedidoInicial?->created_at ? $pedidoInicial->created_at->diffForHumans(null, true) : 'agora';
@@ -373,6 +385,9 @@ Mesa {{ $mesa->numero }} — Conta
 </div>
 
 <div class="conta-layout">
+=======
+<div style="display:grid; grid-template-columns:1fr 340px; gap:20px; align-items:start">
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 
     {{-- Lista de pedidos --}}
     <div>
@@ -380,8 +395,13 @@ Mesa {{ $mesa->numero }} — Conta
         @php
             $cores  = ['em_preparo'=>'warning','pronto'=>'success','pronto_entrega'=>'warning','aguardando_pagamento'=>'info','entregue'=>'info','aberto'=>'secondary'];
             $labels = ['em_preparo'=>'Em preparo','pronto'=>'Pronto','pronto_entrega'=>'Aguardando pagamento','aguardando_pagamento'=>'Aguardando pagamento','entregue'=>'Entregue','aberto'=>'Aberto'];
+<<<<<<< HEAD
             $podeCancelItem = !in_array($pedido->status, ['pago','aguardando_pagamento','cancelado'])
                               && in_array(Auth::user()?->role, ['garcom','gerente']);
+=======
+            $podeCancel = !in_array($pedido->status, ['pago','pronto_entrega','aguardando_pagamento','cancelado'])
+                          && in_array(Auth::user()->role, ['garcom','gerente']);
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         @endphp
         <div class="pedido-bloco">
             <div class="pedido-bloco-header">
@@ -398,6 +418,21 @@ Mesa {{ $mesa->numero }} — Conta
                         {{ $pedido->created_at->format('H:i') }}
                         @if($pedido->user) · {{ $pedido->user->name }} @endif
                     </span>
+<<<<<<< HEAD
+=======
+                    {{-- Botão cancelar pedido --}}
+                    @if($podeCancel)
+                    <form method="POST" action="{{ route('orders.cancelar', $pedido) }}">
+                        @csrf
+                        @php $numPedido = str_pad($pedido->id,4,'0',STR_PAD_LEFT); @endphp
+                        <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('Cancelar o pedido #{{ $numPedido }}? Esta ação não pode ser desfeita.')"
+                                style="font-size:12px; padding:4px 10px">
+                            <i class="fas fa-times"></i> Cancelar Pedido
+                        </button>
+                    </form>
+                    @endif
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                 </div>
             </div>
 
@@ -412,6 +447,7 @@ Mesa {{ $mesa->numero }} — Conta
                 <span style="font-family:monospace; font-weight:700; color:#fff; white-space:nowrap">
                     R$ {{ number_format($item->subtotal,2,',','.') }}
                 </span>
+<<<<<<< HEAD
                 @if($podeCancelItem)
                 <form method="POST" action="{{ route('order-items.cancelar', $item) }}">
                     @csrf
@@ -422,6 +458,8 @@ Mesa {{ $mesa->numero }} — Conta
                     </button>
                 </form>
                 @endif
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             </div>
             @endforeach
 
@@ -439,7 +477,11 @@ Mesa {{ $mesa->numero }} — Conta
     </div>
 
     {{-- Resumo fixo --}}
+<<<<<<< HEAD
     <div class="conta-resumo">
+=======
+    <div style="position:sticky; top:80px">
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         <div class="panel">
             <div class="panel-header">
                 <div class="panel-title"><i class="fas fa-receipt"></i> Resumo da Conta</div>
@@ -468,6 +510,7 @@ Mesa {{ $mesa->numero }} — Conta
             </div>
 
             {{-- Fechar conta (garçom) — só se ainda não fechada --}}
+<<<<<<< HEAD
             @if(($totalPago ?? 0) > 0 || ($taxaGarcom ?? 0) > 0)
             <div style="background:rgba(34,197,94,.06); border:1px solid rgba(34,197,94,.18); border-radius:10px; padding:12px; margin-bottom:14px; font-size:13px">
                 @if(($taxaGarcom ?? 0) > 0)
@@ -488,6 +531,9 @@ Mesa {{ $mesa->numero }} — Conta
             @endif
 
             @if(!$contaFechada && in_array(Auth::user()?->role, ['garcom','gerente']))
+=======
+            @if(!$contaFechada && in_array(Auth::user()->role, ['garcom','gerente']))
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             <form method="POST" action="{{ route('mesas.fechar-conta', $mesa) }}">
                 @csrf
                 <button type="submit" class="btn btn-warning"
@@ -499,7 +545,11 @@ Mesa {{ $mesa->numero }} — Conta
             @endif
 
             {{-- Já fechada: aviso para garçom --}}
+<<<<<<< HEAD
             @if($contaFechada && in_array(Auth::user()?->role, ['garcom']) && !in_array(Auth::user()?->role, ['caixa','gerente']))
+=======
+            @if($contaFechada && in_array(Auth::user()->role, ['garcom']) && !in_array(Auth::user()->role, ['caixa','gerente']))
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             <div style="text-align:center; color:var(--muted); font-size:13px; padding:10px 0">
                 <i class="fas fa-hourglass-half"></i> Aguardando pagamento no caixa
             </div>
@@ -536,11 +586,16 @@ Mesa {{ $mesa->numero }} — Conta
             </div>
 
             {{-- Pagar (caixa/gerente) --}}
+<<<<<<< HEAD
             @if(in_array(Auth::user()?->role, ['caixa','gerente']))
+=======
+            @if(in_array(Auth::user()->role, ['caixa','gerente']))
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             <div style="border-top:1px solid var(--border); padding-top:16px">
                 <div style="font-size:13px; font-weight:700; color:#fff; margin-bottom:12px">
                     <i class="fas fa-credit-card"></i> Registrar Pagamento
                 </div>
+<<<<<<< HEAD
                 <form method="POST" action="{{ route('mesas.pagar-conta', $mesa) }}" class="pagamento-form js-ajax-payment" data-total="{{ $saldoRestante > 0 ? $saldoRestante : $totalConta }}" data-base-total="{{ $totalConta }}" data-taxa-aplicada="{{ $taxaGarcom > 0 ? 1 : 0 }}" data-pedido="MESA-{{ $mesa->numero }}" data-pix-payload="{{ e(\App\Support\PixPayload::make((float) ($saldoRestante > 0 ? $saldoRestante : $totalConta), 'MESA' . $mesa->numero)) }}">
                     @csrf
                     @php
@@ -646,6 +701,13 @@ Mesa {{ $mesa->numero }} — Conta
                     <div class="form-group">
                         <label>Forma de Pagamento</label>
                         <select name="metodo" class="form-select js-metodo-pagamento" required>
+=======
+                <form method="POST" action="{{ route('mesas.pagar-conta', $mesa) }}">
+                    @csrf
+                    <div class="form-group">
+                        <label>Forma de Pagamento</label>
+                        <select name="metodo" class="form-select" required>
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                             <option value="dinheiro">💵 Dinheiro</option>
                             <option value="pix">📱 Pix</option>
                             <option value="cartao_debito">💳 Débito</option>
@@ -655,6 +717,7 @@ Mesa {{ $mesa->numero }} — Conta
                     <div class="form-group">
                         <label>Valor Recebido (R$)</label>
                         <input type="number" name="valor_pago" id="valor_pago_input" step="0.01"
+<<<<<<< HEAD
                                min="0.01" max="{{ number_format($saldoRestante > 0 ? $saldoRestante : $totalConta,2,'.','') }}"
                                inputmode="decimal" class="form-control"
                                value="{{ number_format($saldoRestante > 0 ? $saldoRestante : $totalConta,2,'.','') }}" required>
@@ -670,6 +733,18 @@ Mesa {{ $mesa->numero }} — Conta
                     @endif
                     @php $totalFmt = number_format($saldoRestante > 0 ? $saldoRestante : $totalConta,2,',','.'); @endphp
                     <button type="submit" class="btn btn-success payment-confirm">
+=======
+                               min="0.01" class="form-control"
+                               value="{{ number_format($totalConta,2,'.','') }}" required>
+                        <div style="font-size:11px; color:var(--muted); margin-top:4px" id="label-total-conta">
+                            Total da conta: <strong style="color:#fff">R$ {{ number_format($totalConta,2,',','.') }}</strong>
+                        </div>
+                    </div>
+                    @php $totalFmt = number_format($totalConta,2,',','.'); @endphp
+                    <button type="submit" class="btn btn-success"
+                            style="width:100%; justify-content:center; padding:12px"
+                            onclick="return confirm('Confirmar pagamento de R$ {{ $totalFmt }}?')">
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                         <i class="fas fa-money-bill-wave"></i> Confirmar Pagamento
                     </button>
                 </form>
@@ -683,9 +758,13 @@ Mesa {{ $mesa->numero }} — Conta
 
 @section('scripts')
 <script>
+<<<<<<< HEAD
 const totalConta = {{ ($saldoRestante ?? $totalConta) > 0 ? ($saldoRestante ?? $totalConta) : ($totalConta ?? 0) }};
 const totalBaseConta = {{ $totalConta ?? 0 }};
 const taxaJaAplicada = {{ ($taxaGarcom ?? 0) > 0 ? 'true' : 'false' }};
+=======
+const totalConta = {{ $totalConta ?? 0 }};
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 
 function calcDivisao(n) {
     const pessoas = parseInt(n) || parseInt(document.getElementById('divisao-pessoas').value) || 0;
@@ -719,6 +798,7 @@ function calcDivisao(n) {
         labelTotal.textContent = 'Valor por pessoa (' + pessoas + 'x) — total: R$ ' + totalConta.toLocaleString('pt-BR', {minimumFractionDigits:2});
     }
 }
+<<<<<<< HEAD
 
 document.querySelectorAll('.pagamento-form').forEach((form) => {
     const metodo = form.querySelector('.js-metodo-pagamento');
@@ -949,5 +1029,7 @@ document.querySelectorAll('.js-ajax-payment').forEach((form) => {
         }
     });
 });
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 </script>
 @endsection

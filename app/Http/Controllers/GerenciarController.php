@@ -9,14 +9,21 @@ use App\Models\StockItem;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+<<<<<<< HEAD
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 
 class GerenciarController extends Controller
 {
     private function soGerente()
     {
+<<<<<<< HEAD
         if (Auth::user()?->role !== 'gerente') abort(403);
+=======
+        if (Auth::user()->role !== 'gerente') abort(403);
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     }
 
     public function mesas()
@@ -29,15 +36,20 @@ class GerenciarController extends Controller
     public function cardapio()
     {
         $this->soGerente();
+<<<<<<< HEAD
         $itens      = MenuItem::with('category','stockItem')
             ->whereNull('arquivado_em')
             ->orderBy('category_id')
             ->get();
+=======
+        $itens      = MenuItem::with('category','stockItem')->orderBy('category_id')->get();
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         $categorias = Category::orderBy('nome')->get();
         $estoque    = StockItem::orderBy('nome')->get();
         return view('gerenciar.cardapio', compact('itens','categorias','estoque'));
     }
 
+<<<<<<< HEAD
     public function imagemCardapio(string $arquivo)
     {
         abort_if(str_contains($arquivo, '/') || str_contains($arquivo, '\\'), 404);
@@ -63,6 +75,8 @@ class GerenciarController extends Controller
         abort(404);
     }
 
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     public function cardapioStore(Request $request)
     {
         $this->soGerente();
@@ -71,15 +85,21 @@ class GerenciarController extends Controller
             'category_id'   => 'required|exists:categories,id',
             'preco'         => 'required|numeric|min:0.01',
             'descricao'     => 'nullable|string|max:500',
+<<<<<<< HEAD
             'imagem'        => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             'stock_item_id' => 'nullable|exists:stock_items,id',
             'disponivel'    => 'nullable|boolean',
             'serves_count'  => 'required|integer|min:1|max:50',
             'subtipo'       => 'nullable|string|max:100',
         ]);
+<<<<<<< HEAD
         if ($request->hasFile('imagem')) {
             $v = array_merge($v, $this->salvarImagemCardapio($request));
         }
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         $v['disponivel'] = $request->has('disponivel');
         MenuItem::create($v);
         return back()->with('success', '✅ Item adicionado ao cardápio!');
@@ -93,21 +113,28 @@ class GerenciarController extends Controller
             'category_id'   => 'required|exists:categories,id',
             'preco'         => 'required|numeric|min:0.01',
             'descricao'     => 'nullable|string|max:500',
+<<<<<<< HEAD
             'imagem'        => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             'stock_item_id' => 'nullable|exists:stock_items,id',
             'disponivel'    => 'nullable|boolean',
             'serves_count'  => 'required|integer|min:1|max:50',
             'subtipo'       => 'nullable|string|max:100',
         ]);
+<<<<<<< HEAD
         if ($request->hasFile('imagem')) {
             $this->removerImagemCardapio($item->imagem);
             $v = array_merge($v, $this->salvarImagemCardapio($request));
         }
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         $v['disponivel'] = $request->has('disponivel');
         $item->update($v);
         return back()->with('success', '✅ Item atualizado!');
     }
 
+<<<<<<< HEAD
     public function cardapioImagem(Request $request, MenuItem $item)
     {
         $this->soGerente();
@@ -135,10 +162,16 @@ class GerenciarController extends Controller
         }
 
         $this->removerImagemCardapio($item->imagem);
+=======
+    public function cardapioDestroy(MenuItem $item)
+    {
+        $this->soGerente();
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         $item->delete();
         return back()->with('success', '✅ Item removido do cardápio!');
     }
 
+<<<<<<< HEAD
     private function salvarImagemCardapio(Request $request): array
     {
         $arquivo = $request->file('imagem');
@@ -172,6 +205,8 @@ class GerenciarController extends Controller
         }
     }
 
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     public function funcionarios()
     {
         $this->soGerente();
@@ -216,11 +251,14 @@ class GerenciarController extends Controller
     public function produtosDestroy(StockItem $item)
     {
         $this->soGerente();
+<<<<<<< HEAD
 
         if ($item->movimentos()->exists() || $item->menuItems()->exists() || $item->ingredientes()->exists()) {
             return back()->with('error', 'Este produto possui historico ou vinculos no cardapio. Ajuste o estoque ou desvincule o item em vez de excluir.');
         }
 
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         $item->delete();
         return back()->with('success', '✅ Produto removido!');
     }

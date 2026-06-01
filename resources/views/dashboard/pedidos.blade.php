@@ -18,7 +18,11 @@
             <button id="btn-mostrar-todos" class="btn btn-secondary btn-sm" onclick="mostrarTodos()" style="display:none">
                 <i class="fas fa-list"></i> Todos os Pedidos
             </button>
+<<<<<<< HEAD
             @if(Auth::user()?->role === 'garcom')
+=======
+            @if(Auth::user()->role === 'garcom')
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             <a href="{{ route('orders.create') }}" class="btn btn-primary btn-sm">➕ Novo</a>
             @endif
         </div>
@@ -28,7 +32,11 @@
     @else
     <table>
         <thead>
+<<<<<<< HEAD
             <tr><th>#</th><th>Mesa</th><th>Garçom</th><th>Itens</th><th>Total</th><th>Status</th><th>Horário</th></tr>
+=======
+            <tr><th>#</th><th>Mesa</th><th>Garçom</th><th>Itens</th><th>Total</th><th>Status</th><th>Horário</th><th></th></tr>
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         </thead>
         <tbody id="pedidos-table">
         @foreach($pedidos as $p)
@@ -41,6 +49,12 @@
             <td class="td-mono">R$ {{ number_format($p->total,2,',','.') }}</td>
             <td><span class="badge badge-{{ $cores[$p->status] ?? 'secondary' }}">{{ str_replace('_',' ',ucfirst($p->status)) }}</span></td>
             <td style="color:var(--muted); font-size:12px">{{ $p->created_at->format('d/m H:i') }}</td>
+<<<<<<< HEAD
+=======
+            <td onclick="event.stopPropagation()">
+                <a href="{{ route('orders.show', $p) }}" class="btn btn-secondary btn-sm btn-icon">👁</a>
+            </td>
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         </tr>
         @endforeach
         </tbody>

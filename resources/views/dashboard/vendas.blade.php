@@ -66,8 +66,45 @@ tailwind.config = {
       </span>
     </div>
   </div>
+<<<<<<< HEAD
   <div style="position:relative;height:220px;padding:4px 0 8px">
     <canvas id="chartVendas"></canvas>
+=======
+  @php $maxVal = $vendasGrafico->max('total') ?: 1; @endphp
+  <div style="overflow-x:auto">
+    <div style="display:flex;align-items:flex-end;gap:5px;height:190px;padding-bottom:28px;min-width:{{ max(600, $vendasGrafico->count()*34) }}px;position:relative;padding-top:26px;">
+      @foreach($vendasGrafico as $dv)
+        @php
+          $isPico = in_array($dv->dia, $topDiasIds);
+          $h      = max(4, round(($dv->total / $maxVal) * 140));
+          $rank   = array_search($dv->dia, $topDiasIds);
+          $medals = ['🥇','🥈','🥉'];
+        @endphp
+        <div style="flex:1;min-width:26px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;position:relative;cursor:default;"
+             title="{{ \Carbon\Carbon::parse($dv->dia)->format('d/m') }}: R$ {{ number_format($dv->total,2,',','.') }}">
+
+          @if($isPico && $rank !== false)
+            <div class="pico-icon" style="position:absolute;top:0;left:50%;font-size:14px;line-height:1;">
+              {{ $medals[$rank] ?? '🏅' }}
+            </div>
+          @endif
+
+          <div class="bar" style="
+            width:100%;
+            height:{{ $h }}px;
+            background:{{ $isPico ? '#f97316' : '#3b82f6' }};
+            border-radius:3px 3px 0 0;
+            {{ $isPico ? 'box-shadow:0 0 12px rgba(249,115,22,.35)' : '' }};
+            transition:opacity .15s;
+          "></div>
+
+          <div style="position:absolute;bottom:-20px;font-size:10px;color:var(--muted);white-space:nowrap;">
+            {{ \Carbon\Carbon::parse($dv->dia)->format('d') }}
+          </div>
+        </div>
+      @endforeach
+    </div>
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
   </div>
 </div>
 @endif
@@ -148,6 +185,7 @@ tailwind.config = {
 @endsection
 
 @section('scripts')
+<<<<<<< HEAD
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 // ── Gráfico de vendas por dia ────────────────────────────────────────────────
@@ -239,3 +277,13 @@ function filtrar(q){
 @endsection
 
 @extends('layouts.app')
+=======
+<script>
+function filtrar(q){
+  document.querySelectorAll('#tv tbody tr').forEach(r=>{
+    r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+</script>
+@endsection
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568

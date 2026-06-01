@@ -7,7 +7,10 @@ return [
     'connections' => [
         'mysql' => [
             'driver'    => 'mysql',
+<<<<<<< HEAD
             'url'       => env('DATABASE_URL'),
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             'host'      => env('DB_HOST', '127.0.0.1'),
             'port'      => env('DB_PORT', '3306'),
             'database'  => env('DB_DATABASE', 'restaurante'),

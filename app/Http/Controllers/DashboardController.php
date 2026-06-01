@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+<<<<<<< HEAD
 use App\Models\KitchenEvent;
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Payment;
@@ -13,7 +16,10 @@ use App\Models\Table;
 use App\Models\StockItem;
 use App\Models\User;
 use Carbon\Carbon;
+<<<<<<< HEAD
 use Illuminate\Http\Request;
+=======
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 
@@ -48,10 +54,21 @@ class DashboardController extends Controller
             ]),
 
             'garcom' => view('dashboard.garcom', [
+<<<<<<< HEAD
                 'mesas' => Table::with([
                     'orders' => fn($q) => $q->whereNotIn('status', ['pago', 'cancelado']),
                 ])->orderBy('numero')->get(),
 
+=======
+                // Mesas com pedidos ativos (não pagos/cancelados)
+                'mesas' => Table::with([
+                    'orders' => fn($q) => $q->whereIn('status', [
+                        'aberto', 'em_preparo', 'pronto', 'pronto_entrega', 'aguardando_pagamento',
+                    ]),
+                ])->orderBy('numero')->get(),
+
+                // ✅ FIX: Pedidos do garçom SOMENTE de hoje, com todos os status relevantes
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                 'pedidosGarcom' => Order::where('user_id', $user->id)
                     ->whereDate('created_at', $dataHoje)
                     ->with('table', 'items')
@@ -61,6 +78,7 @@ class DashboardController extends Controller
                 'categorias'    => Category::with('menuItems')->get(),
                 'mesasOcupadas' => $mesasOcupadas,
                 'totalMesas'    => $totalMesas,
+<<<<<<< HEAD
                 'pedidosProntosPagamento' => Order::where('status', 'pronto_entrega')
                     ->with('table', 'user', 'items.menuItem')
                     ->orderByRaw('CASE WHEN user_id = ? THEN 0 ELSE 1 END', [$user->id])
@@ -68,6 +86,15 @@ class DashboardController extends Controller
                     ->orderBy('created_at')
                     ->get(),
                 'cozinhaEventCursor' => KitchenEvent::max('id') ?? 0,
+=======
+
+                // ✅ FIX: "Para entregar" = pedidos prontos pela cozinha (pronto_entrega)
+                // "aguardando_pagamento" já foi entregue, não precisa aparecer aqui
+                'pedidosProntosPagamento' => Order::whereIn('status', ['pronto_entrega'])
+                    ->with('table', 'items')
+                    ->get(),
+
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                 'pagamentosDia'      => Payment::whereDate('created_at', $dataHoje)
                     ->where('status', 'confirmado')
                     ->with('order')
@@ -148,6 +175,7 @@ class DashboardController extends Controller
         return view('dashboard.pedidos', compact('pedidos'));
     }
 
+<<<<<<< HEAD
     public function relatorios(Request $request)
     {
         /** @var User|null $user */
@@ -290,3 +318,86 @@ class DashboardController extends Controller
         ));
     }
 }
+=======
+    public function relatorios()
+    {
+        if (Auth::user()->role !== 'gerente') abort(403);
+
+        $dataInicio = request('data_inicio')
+            ? Carbon::parse(request('data_inicio'))->startOfDay()
+            : Carbon::today()->subDays(29)->startOfDay();
+        $dataFim = request('data_fim')
+            ? Carbon::parse(request('data_fim'))->endOfDay()
+            : Carbon::today()->endOfDay();
+
+        $pedidos    = Order::with('user', 'table')
+            ->whereBetween('created_at', [$dataInicio, $dataFim])->get();
+        $pagamentos = Payment::with('order.table')
+            ->whereBetween('created_at', [$dataInicio, $dataFim])
+            ->where('status', 'confirmado')->get();
+
+        $totalVendas       = $pagamentos->sum('valor_final');
+        $totalPedidos      = $pedidos->count();
+        $pedidosCancelados = $pedidos->where('status', 'cancelado')->count();
+        $ticketMedio       = $pagamentos->count() > 0 ? $totalVendas / $pagamentos->count() : 0;
+
+        $porMetodo = $pagamentos->groupBy('metodo')->map(fn($g) => [
+            'qtd'   => $g->count(),
+            'total' => $g->sum('valor_final'),
+        ]);
+
+        $itensMaisVendidos = OrderItem::with('menuItem')
+            ->whereHas('order', fn($q) => $q->whereBetween('created_at', [$dataInicio, $dataFim])
+                ->where('status', '!=', 'cancelado'))
+            ->get()
+            ->groupBy('menu_item_id')
+            ->map(fn($g) => [
+                'nome'       => $g->first()->menuItem->nome ?? '—',
+                'quantidade' => $g->sum('quantidade'),
+                'total'      => $g->sum('subtotal'),
+            ])
+            ->sortByDesc('quantidade')
+            ->take(10);
+
+        $vendasPorDia = $pagamentos->groupBy(fn($p) => $p->created_at->format('d/m'))
+            ->map(fn($g) => $g->sum('valor_final'))
+            ->sortKeys();
+
+        $totalCompras  = Purchase::whereBetween('created_at', [$dataInicio, $dataFim])
+            ->where('status', 'recebido')->sum('total');
+        $totalSangrias = Sangria::whereBetween('created_at', [$dataInicio, $dataFim])->sum('valor');
+        $lucroEstimado = $totalVendas - $totalCompras - $totalSangrias;
+
+        $porGarcom = $pedidos->where('status', '!=', 'cancelado')
+            ->groupBy('user_id')
+            ->map(fn($g) => [
+                'nome'    => $g->first()->user->name ?? '—',
+                'pedidos' => $g->count(),
+                'total'   => $g->sum('total'),
+            ])
+            ->sortByDesc('total')
+            ->take(10);
+
+        $porMesa = $pedidos->where('status', '!=', 'cancelado')
+            ->groupBy('table_id')
+            ->map(fn($g) => [
+                'mesa'    => 'Mesa ' . ($g->first()->table->numero ?? '?'),
+                'pedidos' => $g->count(),
+                'total'   => $g->sum('total'),
+            ])
+            ->sortByDesc('total')
+            ->take(10);
+
+        $estoqueCritico = StockItem::whereColumn('quantidade_atual', '<=', 'quantidade_minima')
+            ->orderBy('quantidade_atual')->get();
+
+        return view('dashboard.relatorios', compact(
+            'pedidos', 'pagamentos', 'totalVendas', 'totalPedidos',
+            'pedidosCancelados', 'ticketMedio', 'porMetodo',
+            'itensMaisVendidos', 'vendasPorDia', 'totalCompras',
+            'totalSangrias', 'lucroEstimado', 'porGarcom', 'porMesa',
+            'estoqueCritico', 'dataInicio', 'dataFim'
+        ));
+    }
+}
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568

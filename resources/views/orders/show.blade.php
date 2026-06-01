@@ -55,7 +55,11 @@ Pedido #{{ str_pad($pedido->id, 4, '0', STR_PAD_LEFT) }}
         </div>
         @endif
 
+<<<<<<< HEAD
         @if(Auth::user()?->role==='garcom' && !in_array($pedido->status,['pago','cancelado']))
+=======
+        @if(Auth::user()->role==='garcom' && !in_array($pedido->status,['pago','cancelado']))
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         <div class="panel" style="margin-bottom:20px">
             <div class="panel-header"><div class="panel-title">✏️ Atualizar Status</div></div>
             <form method="POST" action="{{ route('orders.updateStatus',$pedido) }}">

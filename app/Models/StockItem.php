@@ -23,6 +23,7 @@ class StockItem extends Model
     {
         return $this->hasMany(MenuItemIngredient::class);
     }
+<<<<<<< HEAD
 
     // ── [FIX #5] Lógica de negócio movida do @php no Blade para o Model ──────
 
@@ -76,3 +77,6 @@ class StockItem extends Model
         return 'success';
     }
 }
+=======
+}
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568

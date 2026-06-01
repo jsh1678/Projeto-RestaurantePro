@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+<<<<<<< HEAD
 
         // Erro 419 — CSRF token expirado (sessão expirou)
         $exceptions->render(function (
@@ -55,4 +56,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
+=======
+        //
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     })->create();

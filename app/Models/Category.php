@@ -11,8 +11,12 @@ class Category extends Model
 
     public function menuItems(): HasMany
     {
+<<<<<<< HEAD
         return $this->hasMany(MenuItem::class)
             ->where('disponivel', true)
             ->orderBy('nome');
+=======
+        return $this->hasMany(MenuItem::class);
+>>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     }
 }
