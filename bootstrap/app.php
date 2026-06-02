@@ -14,16 +14,15 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-<<<<<<< HEAD
 
-        // Erro 419 — CSRF token expirado (sessão expirou)
+        // Erro 419: CSRF token expirado.
         $exceptions->render(function (
             \Illuminate\Session\TokenMismatchException $e,
             \Illuminate\Http\Request $request
         ) {
             if ($request->expectsJson()) {
                 return response()->json([
-                    'message' => 'Sessão expirada. Recarregue a página.',
+                    'message' => 'Sessao expirada. Recarregue a pagina.',
                     'reload'  => true,
                 ], 419);
             }
@@ -33,7 +32,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->with('error', 'Sua sessao expirou. Entre novamente para continuar.');
         });
 
-        // Erros 500 — exceções inesperadas
+        // Erros 500: excecoes inesperadas.
         $exceptions->render(function (
             \Throwable $e,
             \Illuminate\Http\Request $request
@@ -43,10 +42,10 @@ return Application::configure(basePath: dirname(__DIR__))
                     'message' => 'Erro interno do servidor. Tente novamente.',
                 ], 500);
             }
-            // Para requisições normais, deixa o Laravel renderizar errors/500.blade.php
+            // Para requisicoes normais, deixa o Laravel renderizar errors/500.blade.php.
         });
 
-        // Erros 403 — acesso negado
+        // Erros 403: acesso negado.
         $exceptions->render(function (
             \Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException $e,
             \Illuminate\Http\Request $request
@@ -56,7 +55,4 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-=======
-        //
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     })->create();
