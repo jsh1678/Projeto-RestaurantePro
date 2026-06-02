@@ -147,23 +147,15 @@
 
 /* Botões de ação nos cards */
 .btn-edit,
-<<<<<<< HEAD
 .btn-view,
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 .btn-del,
 .btn-toggle {
     display: inline-flex;
     align-items: center;
-<<<<<<< HEAD
     justify-content: center;
     gap: 6px;
     min-height: 36px;
     padding: 7px 10px;
-=======
-    gap: 6px;
-    padding: 6px 12px;
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     border-radius: 8px;
     font-size: 11px;
     font-weight: 600;
@@ -175,7 +167,6 @@
     border: none;
 }
 
-<<<<<<< HEAD
 .btn-view {
     background: rgba(250, 178, 105, 0.12);
     color: var(--gold);
@@ -186,8 +177,6 @@
     transform: translateY(-1px);
 }
 
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 .btn-edit {
     background: rgba(59, 130, 246, 0.12);
     color: #60a5fa;
@@ -227,7 +216,6 @@
     background: rgba(239, 68, 68, 0.25);
 }
 
-<<<<<<< HEAD
 .btn-toggle.locked {
     background: rgba(244, 232, 208, 0.06);
     color: var(--text-muted);
@@ -239,27 +227,18 @@
     transform: none;
 }
 
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 /* Cards de funcionários */
 .funcionario-card {
     background: var(--bg2);
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 14px;
-<<<<<<< HEAD
     display: grid;
     grid-template-columns: 44px minmax(0, 1fr);
     align-items: center;
     gap: 14px;
     transition: all 0.2s;
     cursor: pointer;
-=======
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    transition: all 0.2s;
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 }
 
 .funcionario-card:hover {
@@ -318,7 +297,6 @@
 }
 
 .acoes {
-<<<<<<< HEAD
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
@@ -456,16 +434,6 @@
     overflow-wrap: anywhere;
 }
 
-=======
-    display: flex;
-    gap: 6px;
-    flex-shrink: 0;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-}
-
-/* Grid de funcionários */
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 .funcionarios-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -529,28 +497,8 @@
         gap: 15px;
     }
     
-<<<<<<< HEAD
     .acoes {
         grid-template-columns: 1fr;
-=======
-    .funcionario-card {
-        flex-wrap: wrap;
-    }
-    
-    .acoes {
-        width: 100%;
-        justify-content: flex-start;
-        margin-top: 8px;
-        padding-top: 8px;
-        border-top: 1px solid var(--border);
-    }
-    
-    .btn-edit,
-    .btn-del,
-    .btn-toggle {
-        flex: 1;
-        justify-content: center;
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     }
     
     .ger-tab {
@@ -654,7 +602,6 @@ html {
                 <div style="padding: 16px;">
                     <div class="funcionarios-grid">
                         @foreach($grupo as $u)
-<<<<<<< HEAD
                         <div class="funcionario-card"
                              onclick="abrirDetalhesUsuario(this, event)"
                              data-name="{{ e($u->name) }}"
@@ -665,9 +612,6 @@ html {
                              data-updated="{{ optional($u->updated_at)->format('d/m/Y H:i') ?? '-' }}"
                              data-initial="{{ strtoupper(substr($u->name, 0, 1)) }}"
                              data-color="{{ $g['cor'] }}">
-=======
-                        <div class="funcionario-card">
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                             <div class="avatar" style="background:{{ $g['cor'] }}20; color:{{ $g['cor'] }};">
                                 {{ strtoupper(substr($u->name, 0, 1)) }}
                             </div>
@@ -679,7 +623,6 @@ html {
                                 @endif
                             </div>
                             <div class="acoes">
-<<<<<<< HEAD
                                 <button type="button" class="btn-view" onclick="abrirDetalhesUsuario(this.closest('.funcionario-card'), event, true)">
                                     <i class="fas fa-eye"></i> Ver
                                 </button>
@@ -699,18 +642,6 @@ html {
                                         </button>
                                     </form>
                                 @endif
-=======
-                                <a href="{{ route('usuarios.edit', $u) }}" class="btn-edit">
-                                    <i class="fas fa-pencil-alt"></i> Editar
-                                </a>
-                                <form method="POST" action="{{ route('usuarios.toggle', $u) }}" style="display:inline">
-                                    @csrf @method('PATCH')
-                                    <button type="submit" class="btn-toggle {{ $u->ativo ? 'ativo' : '' }}">
-                                        <i class="fas {{ $u->ativo ? 'fa-ban' : 'fa-check-circle' }}"></i>
-                                        {{ $u->ativo ? 'Desativar' : 'Ativar' }}
-                                    </button>
-                                </form>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                                 @if($u->id !== Auth::id())
                                 <form method="POST" action="{{ route('usuarios.destroy', $u) }}" 
                                       onsubmit="return confirm('⚠️ Tem certeza que deseja excluir {{ $u->name }}? Esta ação não pode ser desfeita.')" 
@@ -731,7 +662,6 @@ html {
         @endforeach
     </div>
 </div>
-<<<<<<< HEAD
 
 <div class="user-details-overlay" id="user-details-modal" onclick="fecharDetalhesUsuario(event)">
     <div class="user-details-card" onclick="event.stopPropagation()">
@@ -770,13 +700,10 @@ html {
         </div>
     </div>
 </div>
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 @endsection
 
 @section('scripts')
 <script>
-<<<<<<< HEAD
 function abrirDetalhesUsuario(card, event, force) {
     if (!card) return;
     if (event && !force && event.target.closest('a, button, form, input, select, textarea')) {
@@ -815,8 +742,6 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 function validarEmail(input) {
     const hint = document.getElementById('email-hint');
     if (!hint) return;
@@ -845,8 +770,4 @@ function validarEmail(input) {
     }
 }
 </script>
-<<<<<<< HEAD
 @endsection
-=======
-@endsection
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568

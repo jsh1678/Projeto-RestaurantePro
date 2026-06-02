@@ -12,17 +12,13 @@
     margin:2px;
 }
 .ing-tag.baixo { background:rgba(239,68,68,.12); color:#fca5a5; border-color:rgba(239,68,68,.2); }
-<<<<<<< HEAD
 
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 .item-row {
     background:rgba(255,255,255,.03);
     border:1px solid rgba(255,255,255,.06);
     border-radius:10px; padding:12px 14px;
     transition:.2s;
 }
-<<<<<<< HEAD
 .item-row.pendente {
     border-color:rgba(249,115,22,.35);
     background:rgba(249,115,22,.05);
@@ -99,11 +95,6 @@
     .item-row {
         padding: 12px;
     }
-=======
-.item-row.pronto {
-    border-color:rgba(34,197,94,.25);
-    background:rgba(34,197,94,.04);
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 }
 </style>
 @endsection
@@ -135,7 +126,6 @@
     <div style="color:var(--muted); font-size:14px">Nenhum pedido em preparo no momento</div>
 </div>
 @else
-<<<<<<< HEAD
 <div class="kitchen-mobile-tabs" aria-label="Filtro de pedidos da cozinha">
     <button type="button" class="active" data-kitchen-filter="todos" onclick="filtrarCozinha('todos', this)">Todos</button>
     <button type="button" data-kitchen-filter="novos" onclick="filtrarCozinha('novos', this)">Novos</button>
@@ -168,23 +158,6 @@
         foreach($pedido->items->whereNotIn('status', ['pronto','entregue']) as $orderItem) {
             $menuItem = $orderItem->menuItem;
             if (!$menuItem) continue;
-=======
-<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(400px,1fr)); gap:20px">
-    @foreach($pedidosEmPreparo as $pedido)
-    @php
-        $prontos  = $pedido->items->where('status','pronto')->count();
-        $total    = $pedido->items->count();
-        $pct      = $total > 0 ? round($prontos/$total*100) : 0;
-        $minutos  = $pedido->horario_pedido ? now()->diffInMinutes($pedido->horario_pedido) : 0;
-        $isViagem = !empty($pedido->pedido_viagem);
-
-        // Agregar TODOS os ingredientes do pedido inteiro
-        $ingredientesAgregados = collect();
-        foreach($pedido->items as $orderItem) {
-            $menuItem = $orderItem->menuItem;
-            if (!$menuItem) continue;
-
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             if ($menuItem->ingredients->isNotEmpty()) {
                 foreach($menuItem->ingredients as $ing) {
                     $stock = $ing->stockItem;
@@ -194,7 +167,6 @@
                     $qtdTotal = $qtdPorcao * $orderItem->quantidade;
                     $chave = $stock->id;
                     if ($ingredientesAgregados->has($chave)) {
-<<<<<<< HEAD
                         $agregado = $ingredientesAgregados->get($chave);
                         $agregado['qtd'] += $qtdTotal;
                         $agregado['suficiente'] = $agregado['atual'] >= $agregado['qtd'];
@@ -207,17 +179,6 @@
                             'atual'      => $stock->quantidade_atual,
                             'suficiente' => $stock->quantidade_atual >= $qtdTotal,
                         ]);
-=======
-                        $ingredientesAgregados[$chave]['qtd'] += $qtdTotal;
-                    } else {
-                        $ingredientesAgregados[$chave] = [
-                            'nome'    => $stock->nome,
-                            'unidade' => $stock->unidade,
-                            'qtd'     => $qtdTotal,
-                            'atual'   => $stock->quantidade_atual,
-                            'suficiente' => $stock->quantidade_atual >= $qtdTotal,
-                        ];
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                     }
                 }
             } elseif ($menuItem->stockItem) {
@@ -227,7 +188,6 @@
                 $qtdTotal = $qtdPorcao * $orderItem->quantidade;
                 $chave = $stock->id;
                 if ($ingredientesAgregados->has($chave)) {
-<<<<<<< HEAD
                     $agregado = $ingredientesAgregados->get($chave);
                     $agregado['qtd'] += $qtdTotal;
                     $agregado['suficiente'] = $agregado['atual'] >= $agregado['qtd'];
@@ -240,65 +200,34 @@
                         'atual'      => $stock->quantidade_atual,
                         'suficiente' => $stock->quantidade_atual >= $qtdTotal,
                     ]);
-=======
-                    $ingredientesAgregados[$chave]['qtd'] += $qtdTotal;
-                } else {
-                    $ingredientesAgregados[$chave] = [
-                        'nome'    => $stock->nome,
-                        'unidade' => $stock->unidade,
-                        'qtd'     => $qtdTotal,
-                        'atual'   => $stock->quantidade_atual,
-                        'suficiente' => $stock->quantidade_atual >= $qtdTotal,
-                    ];
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                 }
             }
         }
     @endphp
 
-<<<<<<< HEAD
     <div class="panel"
          data-pedido-id="{{ $pedido->id }}"
          data-kitchen-card
          data-kitchen-status="{{ $temNovos ? 'novos' : ($itensEmPreparo->isNotEmpty() ? 'preparo' : 'prontos') }}"
          style="margin-bottom:0; border-color:{{ $minutos > 20 ? 'rgba(239,68,68,.35)' : ($temNovos ? 'rgba(249,115,22,.4)' : 'rgba(255,255,255,.07)') }}">
-=======
-    <div class="panel" style="margin-bottom:0; border-color:{{ $minutos > 20 ? 'rgba(239,68,68,.35)' : 'rgba(255,255,255,.07)' }}">
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 
         {{-- Cabeçalho --}}
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px">
             <div>
-<<<<<<< HEAD
                 <div style="display:flex; align-items:center; gap:8px; font-size:18px; font-weight:800; color:#fff">
                     Pedido <span style="color:var(--accent); font-family:monospace">#{{ str_pad($pedido->id,4,'0',STR_PAD_LEFT) }}</span>
                     @if($temNovos)<span class="badge-novo">🆕 novo item</span>@endif
-=======
-                <div style="font-size:18px; font-weight:800; color:#fff">
-                    Pedido <span style="color:var(--accent); font-family:monospace">#{{ str_pad($pedido->id,4,'0',STR_PAD_LEFT) }}</span>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                 </div>
                 <div style="font-size:13px; color:var(--muted); margin-top:3px">
                     Mesa {{ $pedido->table->numero ?? '—' }}
                     @if($isViagem)<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:20px;background:rgba(249,115,22,.2);border:1px solid rgba(249,115,22,.4);color:#fb923c;font-size:10px;font-weight:800;margin-left:6px;vertical-align:middle;letter-spacing:.5px">🛵 VIAGEM</span>@endif
                     @if($pedido->user) · {{ $pedido->user->name }} @endif
-<<<<<<< HEAD
                     · <span style="color:{{ $minutos > 20 ? '#f87171' : ($minutos > 10 ? '#facc15' : '#4ade80') }}; font-weight:700">
                         {{ $minutos }} min
                     </span>
                 </div>
             </div>
             <span class="badge badge-{{ $pct===100 ? 'success' : 'warning' }}">{{ $totalFeitos }}/{{ $totalAtivos }}</span>
-=======
-                    @if($pedido->horario_pedido)
-                    · <span style="color:{{ $minutos > 20 ? '#f87171' : ($minutos > 10 ? '#facc15' : '#4ade80') }}; font-weight:700">
-                        {{ $minutos }} min
-                    </span>
-                    @endif
-                </div>
-            </div>
-            <span class="badge badge-{{ $pct===100 ? 'success' : 'warning' }}">{{ $prontos }}/{{ $total }}</span>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         </div>
 
         {{-- Barra de progresso --}}
@@ -313,11 +242,7 @@
         </div>
         @endif
 
-<<<<<<< HEAD
         {{-- Ingredientes necessários --}}
-=======
-        {{-- Ingredientes necessários para o pedido inteiro --}}
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         @if($ingredientesAgregados->isNotEmpty())
         <div style="background:rgba(99,102,241,.06); border:1px solid rgba(99,102,241,.15); border-radius:10px; padding:10px 12px; margin-bottom:14px">
             <div style="font-size:11px; font-weight:700; color:#a5b4fc; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px">
@@ -339,7 +264,6 @@
         </div>
         @endif
 
-<<<<<<< HEAD
         {{-- ITENS POR GRUPO --}}
         <div style="display:flex; flex-direction:column; gap:6px">
 
@@ -367,69 +291,6 @@
             @endforeach
             @endif
 
-=======
-        {{-- Itens do pedido --}}
-        <div style="display:flex; flex-direction:column; gap:8px">
-            @foreach($pedido->items as $item)
-            @php
-                // Ingredientes deste item específico
-                $ingItem = collect();
-                $menuItem = $item->menuItem;
-                if ($menuItem) {
-                    if ($menuItem->ingredients->isNotEmpty()) {
-                        foreach($menuItem->ingredients as $ing) {
-                            if (!$ing->stockItem) continue;
-                            $qtdP = $ing->quantidade > 0 ? $ing->quantidade
-                                : ($ing->quantidade_gramas > 0 ? ($ing->stockItem->unidade === 'kg' ? $ing->quantidade_gramas/1000 : $ing->quantidade_gramas) : 0);
-                            $ingItem->push($ing->stockItem->nome . ' ' . number_format($qtdP * $item->quantidade, 3, ',', '.') . ' ' . $ing->stockItem->unidade);
-                        }
-                    } elseif ($menuItem->stockItem) {
-                        $u = strtolower($menuItem->stockItem->unidade);
-                        $qp = in_array($u, ['kg','g','l','ml']) ? 0.3 : 1;
-                        $ingItem->push($menuItem->stockItem->nome . ' ' . number_format($qp * $item->quantidade, 3, ',', '.') . ' ' . $menuItem->stockItem->unidade);
-                    }
-                }
-            @endphp
-            <div class="item-row {{ $item->status === 'pronto' ? 'pronto' : '' }}">
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px">
-                    <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0">
-                        <div style="width:30px; height:30px; border-radius:8px; flex-shrink:0;
-                             background:{{ $item->status==='pronto' ? 'rgba(34,197,94,.15)' : 'rgba(255,255,255,.05)' }};
-                             display:flex; align-items:center; justify-content:center;
-                             font-weight:800; font-size:14px;
-                             color:{{ $item->status==='pronto' ? '#4ade80' : '#fff' }}">
-                            {{ $item->quantidade }}
-                        </div>
-                        <div style="min-width:0">
-                            <div style="font-weight:700; color:#fff; font-size:13.5px">
-                                {{ $item->menuItem->nome ?? 'Item' }}
-                            </div>
-                            @if($ingItem->isNotEmpty())
-                            <div style="font-size:11px; color:#a5b4fc; margin-top:2px">
-                                <i class="fas fa-leaf" style="font-size:10px"></i>
-                                {{ $ingItem->implode(' · ') }}
-                            </div>
-                            @endif
-                        </div>
-                    </div>
-                    <form method="POST" action="{{ route('chef.item.status', $item) }}">
-                        @csrf @method('PATCH')
-                        @if($item->status !== 'pronto')
-                            <input type="hidden" name="status" value="pronto">
-                            <button type="submit" class="btn btn-success btn-sm">
-                                <i class="fas fa-check"></i> Pronto
-                            </button>
-                        @else
-                            <input type="hidden" name="status" value="em_preparo">
-                            <button type="submit" class="btn btn-warning btn-sm">
-                                <i class="fas fa-undo"></i>
-                            </button>
-                        @endif
-                    </form>
-                </div>
-            </div>
-            @endforeach
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         </div>
     </div>
     @endforeach
@@ -439,7 +300,6 @@
 
 @section('scripts')
 <script>
-<<<<<<< HEAD
 function tocarSom() {
     try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -586,8 +446,5 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!sse || sse.readyState === EventSource.CLOSED) location.reload();
     }, 60000);
 });
-=======
-    setTimeout(() => location.reload(), 30000);
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 </script>
 @endsection

@@ -12,11 +12,7 @@ class ControleEstoqueController extends Controller
 {
     public function index()
     {
-<<<<<<< HEAD
         if (Auth::user()?->role !== 'gerente') abort(403);
-=======
-        if (Auth::user()->role !== 'gerente') abort(403);
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 
         $itens = StockItem::orderBy('nome')->get();
 
@@ -82,11 +78,7 @@ class ControleEstoqueController extends Controller
 
     public function entrada(Request $request)
     {
-<<<<<<< HEAD
         if (Auth::user()?->role !== 'gerente') abort(403);
-=======
-        if (Auth::user()->role !== 'gerente') abort(403);
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         $v = $request->validate([
             'stock_item_id' => 'required|exists:stock_items,id',
             'quantidade'    => 'required|numeric|min:0.001|max:9999999',
@@ -119,11 +111,7 @@ class ControleEstoqueController extends Controller
 
     public function saida(Request $request)
     {
-<<<<<<< HEAD
         if (Auth::user()?->role !== 'gerente') abort(403);
-=======
-        if (Auth::user()->role !== 'gerente') abort(403);
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         $v = $request->validate([
             'stock_item_id' => 'required|exists:stock_items,id',
             'quantidade'    => 'required|numeric|min:0.001|max:9999999',
@@ -164,11 +152,7 @@ class ControleEstoqueController extends Controller
      */
     public function ajuste(Request $request)
     {
-<<<<<<< HEAD
         if (Auth::user()?->role !== 'gerente') abort(403);
-=======
-        if (Auth::user()->role !== 'gerente') abort(403);
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         $v = $request->validate([
             'stock_item_id'   => 'required|exists:stock_items,id',
             'quantidade_real' => 'required|numeric|min:0|max:9999999',

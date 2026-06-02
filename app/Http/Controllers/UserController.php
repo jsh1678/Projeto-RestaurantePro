@@ -5,23 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-<<<<<<< HEAD
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Throwable;
-=======
-use Illuminate\Support\Facades\Hash;
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 
 class UserController extends Controller
 {
     public function index()
     {
-<<<<<<< HEAD
         if (Auth::user()?->role !== 'gerente') abort(403);
-=======
-        if (Auth::user()->role !== 'gerente') abort(403);
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 
         $usuarios = User::orderBy('role')->orderBy('name')->get();
         return view('usuarios.index', compact('usuarios'));
@@ -29,21 +21,13 @@ class UserController extends Controller
 
     public function create()
     {
-<<<<<<< HEAD
         if (Auth::user()?->role !== 'gerente') abort(403);
-=======
-        if (Auth::user()->role !== 'gerente') abort(403);
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         return view('usuarios.create');
     }
 
     public function store(Request $request)
     {
-<<<<<<< HEAD
         if (Auth::user()?->role !== 'gerente') abort(403);
-=======
-        if (Auth::user()->role !== 'gerente') abort(403);
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 
         $validated = $request->validate([
             'name'     => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZÀ-ÿ\s]+$/u'],
@@ -72,21 +56,13 @@ class UserController extends Controller
 
     public function edit(User $usuario)
     {
-<<<<<<< HEAD
         if (Auth::user()?->role !== 'gerente') abort(403);
-=======
-        if (Auth::user()->role !== 'gerente') abort(403);
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         return view('usuarios.edit', compact('usuario'));
     }
 
     public function update(Request $request, User $usuario)
     {
-<<<<<<< HEAD
         if (Auth::user()?->role !== 'gerente') abort(403);
-=======
-        if (Auth::user()->role !== 'gerente') abort(403);
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 
         $validated = $request->validate([
             'name'  => ['required', 'string', 'max:255', 'regex:/^[a-zA-ZÀ-ÿ\s]+$/u'],
@@ -98,7 +74,6 @@ class UserController extends Controller
             'email.email'  => '❌ Digite um e-mail válido (ex: nome@dominio.com)',
         ]);
 
-<<<<<<< HEAD
         if (
             $usuario->role === 'gerente'
             && $validated['role'] !== 'gerente'
@@ -109,8 +84,6 @@ class UserController extends Controller
                 ->with('error', 'Nao e possivel remover o ultimo gerente do sistema.');
         }
 
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         $usuario->update([
             'name'  => $validated['name'],
             'email' => $validated['email'],
@@ -134,7 +107,6 @@ class UserController extends Controller
 
     public function toggleAtivo(User $usuario)
     {
-<<<<<<< HEAD
         if (Auth::user()?->role !== 'gerente') abort(403);
         if ($usuario->id === Auth::id()) {
             return back()->with('error', '❌ Você não pode desativar sua própria conta.');
@@ -143,12 +115,6 @@ class UserController extends Controller
             return back()->with('error', 'Nao e permitido desativar contas de gerente.');
         }
 
-=======
-        if (Auth::user()->role !== 'gerente') abort(403);
-        if ($usuario->id === Auth::id()) {
-            return back()->with('error', '❌ Você não pode desativar sua própria conta.');
-        }
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         $usuario->update(['ativo' => !$usuario->ativo]);
         $status = $usuario->ativo ? 'ativado' : 'desativado';
         return back()->with('success', "✅ Usuário {$status}!");
@@ -156,7 +122,6 @@ class UserController extends Controller
 
     public function destroy(User $usuario)
     {
-<<<<<<< HEAD
         if (Auth::user()?->role !== 'gerente') abort(403);
         if ($usuario->id === Auth::id()) {
             return back()->with('error', '❌ Você não pode excluir sua própria conta.');
@@ -207,13 +172,3 @@ class UserController extends Controller
         return back()->with('success', '✅ Usuário removido!');
     }
 }
-=======
-        if (Auth::user()->role !== 'gerente') abort(403);
-        if ($usuario->id === Auth::id()) {
-            return back()->with('error', '❌ Você não pode excluir sua própria conta.');
-        }
-        $usuario->delete();
-        return back()->with('success', '✅ Usuário removido!');
-    }
-}
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568

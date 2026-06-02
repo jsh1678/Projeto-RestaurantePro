@@ -27,11 +27,7 @@ class PurchaseController extends Controller
 
     public function store(): RedirectResponse
     {
-<<<<<<< HEAD
         if (Auth::user()?->role !== 'gerente') {
-=======
-        if (!Auth::user() || Auth::user()->role !== 'gerente') {
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             abort(403, 'Acesso negado. Apenas gerente pode registrar compras.');
         }
 

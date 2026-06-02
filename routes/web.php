@@ -1,10 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-<<<<<<< HEAD
 use Illuminate\Http\Request;
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
@@ -23,7 +20,6 @@ Route::get('/', fn() => redirect()->route('login'));
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-<<<<<<< HEAD
 Route::get('/cardapio/imagens/{arquivo}', [GerenciarController::class, 'imagemCardapio'])
     ->where('arquivo', '[A-Za-z0-9_.-]+')
     ->name('cardapio.imagem');
@@ -35,8 +31,6 @@ Route::get('/csrf-token', function (Request $request) {
         'token' => csrf_token(),
     ]);
 })->name('csrf-token');
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 
 Route::middleware('auth')->group(function () {
 
@@ -59,11 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/pedidos/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::patch('/pedidos/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::post('/pedidos/{order}/cancelar', [OrderController::class, 'cancelar'])->name('orders.cancelar');
-<<<<<<< HEAD
     Route::post('/itens-pedido/{item}/cancelar', [OrderController::class, 'cancelarItem'])->name('order-items.cancelar');
-=======
-    // Editar pedido existente (garçom adiciona/remove itens)
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     Route::get('/pedidos/{order}/editar', [OrderController::class, 'edit'])->name('orders.edit');
     Route::put('/pedidos/{order}', [OrderController::class, 'update'])->name('orders.update');
 
@@ -72,20 +62,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/mesas',                       [TableController::class, 'store'])->name('mesas.store');
     Route::get('/mesas/{mesa}/conta',           [TableController::class, 'conta'])->name('mesas.conta');
     Route::post('/mesas/{mesa}/fechar-conta',   [TableController::class, 'fecharConta'])->name('mesas.fechar-conta');
-<<<<<<< HEAD
     Route::post('/mesas/{mesa}/juntar',         [TableController::class, 'juntar'])->name('mesas.juntar');
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     Route::post('/mesas/{mesa}/pagar-conta',    [TableController::class, 'pagarConta'])->name('mesas.pagar-conta');
     Route::get('/mesas/{table}',                [TableController::class, 'show'])->name('mesas.show');
     Route::get('/mesas/{table}/editar',         [TableController::class, 'edit'])->name('mesas.edit');
     Route::put('/mesas/{table}',                [TableController::class, 'update'])->name('mesas.update');
     Route::delete('/mesas/{table}',             [TableController::class, 'destroy'])->name('mesas.destroy');
-<<<<<<< HEAD
     Route::patch('/mesas/{mesa}/atualizar',     [TableController::class, 'atualizar'])->name('mesas.atualizar');
-=======
-    Route::patch('/mesas/{mesa}/atualizar',    [TableController::class, 'atualizar'])->name('mesas.atualizar');
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 
     Route::get('/estoque', [StockController::class, 'index'])->name('dashboard.estoque');
     Route::post('/estoque/{item}/movimento', [StockController::class, 'registrarMovimento'])->name('estoque.movimento');
@@ -97,22 +80,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/chef/preparo', [ChefController::class, 'preparo'])->name('chef.preparo');
     Route::get('/chef/estoque', [ChefController::class, 'estoque'])->name('chef.estoque');
     Route::patch('/chef/item/{item}/status', [ChefController::class, 'marcarItemComo'])->name('chef.item.status');
-<<<<<<< HEAD
     // ↓ ADICIONAR:
     Route::get('/cozinha/stream', [OrderController::class, 'cozinhaStream'])->name('cozinha.stream');
 
-=======
-
-    // ── Gerenciamento (Gerente) ─────────────────────────────
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     Route::get('/gerenciar',               fn() => redirect()->route('gerenciar.mesas'))->name('gerenciar');
     Route::get('/gerenciar/mesas',         [GerenciarController::class, 'mesas'])->name('gerenciar.mesas');
     Route::get('/gerenciar/cardapio',      [GerenciarController::class, 'cardapio'])->name('gerenciar.cardapio');
     Route::post('/gerenciar/cardapio',     [GerenciarController::class, 'cardapioStore'])->name('gerenciar.cardapio.store');
-<<<<<<< HEAD
     Route::patch('/gerenciar/cardapio/{item}/imagem', [GerenciarController::class, 'cardapioImagem'])->name('gerenciar.cardapio.imagem');
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     Route::put('/gerenciar/cardapio/{item}', [GerenciarController::class, 'cardapioUpdate'])->name('gerenciar.cardapio.update');
     Route::delete('/gerenciar/cardapio/{item}', [GerenciarController::class, 'cardapioDestroy'])->name('gerenciar.cardapio.destroy');
     Route::get('/gerenciar/funcionarios',  [GerenciarController::class, 'funcionarios'])->name('gerenciar.funcionarios');
@@ -121,17 +96,9 @@ Route::middleware('auth')->group(function () {
     Route::put('/gerenciar/produtos/{item}', [GerenciarController::class, 'produtosUpdate'])->name('gerenciar.produtos.update');
     Route::delete('/gerenciar/produtos/{item}', [GerenciarController::class, 'produtosDestroy'])->name('gerenciar.produtos.destroy');
 
-<<<<<<< HEAD
     Route::get('/gestao/relatorios',       [GestaoRelatoriosController::class, 'index'])->name('gestao.relatorios');
     Route::get('/gestao/relatorios/pdf',   [GestaoRelatoriosController::class, 'pdf'])->name('gestao.relatorios.pdf');
 
-=======
-    // ── Relatórios de Gestão ────────────────────────────────
-    Route::get('/gestao/relatorios',       [GestaoRelatoriosController::class, 'index'])->name('gestao.relatorios');
-    Route::get('/gestao/relatorios/pdf',   [GestaoRelatoriosController::class, 'pdf'])->name('gestao.relatorios.pdf');
-
-    // ── Controle de Estoque ─────────────────────────────────
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     Route::get('/controle-estoque',        [ControleEstoqueController::class, 'index'])->name('controle.estoque');
     Route::post('/controle-estoque/entrada', [ControleEstoqueController::class, 'entrada'])->name('controle.estoque.entrada');
     Route::post('/controle-estoque/saida',   [ControleEstoqueController::class, 'saida'])->name('controle.estoque.saida');
@@ -145,10 +112,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/caixa/sangria', [CaixaController::class, 'registrarSangria'])->name('caixa.sangria');
     Route::post('/caixa/pagamento/{order}', [CaixaController::class, 'confirmarPagamento'])->name('caixa.pagamento');
 });
-<<<<<<< HEAD
 
 Route::get('/up', function () {
     return response()->json(['status' => 'ok', 'time' => now()]);
 });
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568

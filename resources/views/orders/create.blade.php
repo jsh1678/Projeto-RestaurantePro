@@ -81,17 +81,12 @@
     background: var(--bg2);
     border: 1.5px solid var(--border);
     border-radius: 12px;
-<<<<<<< HEAD
     padding: 10px;
-=======
-    padding: 14px;
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     cursor: pointer;
     transition: all .18s;
     display: flex;
     flex-direction: column;
     gap: 5px;
-<<<<<<< HEAD
     overflow: hidden;
 }
 .menu-card:hover  { border-color: rgba(249,115,22,.5); background: rgba(249,115,22,.05); }
@@ -117,11 +112,6 @@
     border: 1px dashed var(--border);
     margin-bottom: 4px;
 }
-=======
-}
-.menu-card:hover  { border-color: rgba(249,115,22,.5); background: rgba(249,115,22,.05); }
-.menu-card.active { border-color: var(--accent); background: rgba(249,115,22,.1); }
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 .menu-card-nome  { font-weight: 700; color: #fff; font-size: 13px; }
 .menu-card-desc  { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .menu-card-preco { font-weight: 800; color: var(--accent); font-size: 14px; }
@@ -172,7 +162,6 @@
     border-radius: 10px; padding: 10px 14px; margin-bottom: 16px;
     display: flex; align-items: center; gap: 8px; font-size: 13px; color: #93c5fd;
 }
-<<<<<<< HEAD
 
 .quick-obs {
     display: flex;
@@ -428,8 +417,6 @@
         background: var(--bg);
     }
 }
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 </style>
 @endsection
 
@@ -444,7 +431,6 @@
 @if($pedido)
 <div class="edit-banner">
     <i class="fas fa-pencil-alt"></i>
-<<<<<<< HEAD
     <strong>Adicionar itens</strong> — Pedido #{{ str_pad($pedido->id,4,'0',STR_PAD_LEFT) }} para Mesa {{ $pedido->table->numero ?? '—' }}. Selecione apenas os novos itens para enviar à cozinha.
 </div>
 @endif
@@ -453,12 +439,6 @@
     $atalhosPedido = $categorias->flatMap(fn($categoria) => $categoria->menuItems->take(3))->take(8);
 @endphp
 
-=======
-    <strong>Modo de edição</strong> — Pedido #{{ str_pad($pedido->id,4,'0',STR_PAD_LEFT) }} para Mesa {{ $pedido->table->numero ?? '—' }}. Altere os itens e salve para atualizar.
-</div>
-@endif
-
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 <form method="POST" action="{{ $pedido ? route('orders.update', $pedido) : route('orders.store') }}" id="order-form">
 @csrf
 @if($pedido) @method('PUT') @endif
@@ -473,7 +453,6 @@
                    placeholder="🔍  Buscar no cardápio...">
         </div>
 
-<<<<<<< HEAD
         @if($atalhosPedido->isNotEmpty())
         <div class="express-products" aria-label="Atalhos de produtos">
             <div class="express-products-title">Mais pedidos</div>
@@ -487,8 +466,6 @@
         </div>
         @endif
 
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         {{-- MELHORIA 4: Filtros por tipo principal --}}
         @php
             $tiposUnicos = $categorias->pluck('tipo_principal')->filter()->unique()->values();
@@ -531,33 +508,29 @@
             </div>
             <div class="item-grid">
                 @foreach($categoria->menuItems as $item)
+                @php
+                    $imagemUrl = $item->imagem_url;
+                @endphp
                 <div class="menu-card"
                      id="card-{{ $item->id }}"
                      data-id="{{ $item->id }}"
                      data-nome="{{ strtolower($item->nome) }}"
                      data-subtipo="{{ strtolower($item->subtipo ?? '') }}"
                      onclick="addItem({{ $item->id }})">
-<<<<<<< HEAD
-                    @if($item->imagem)
-                    <img src="{{ asset($item->imagem) }}" alt="{{ $item->nome }}" class="menu-card-img">
+                    @if($imagemUrl)
+                    <img src="{{ $imagemUrl }}" alt="{{ $item->nome }}" class="menu-card-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                    <div class="menu-card-img-empty" style="display:none"><i class="fas fa-image"></i></div>
                     @else
                     <div class="menu-card-img-empty"><i class="fas fa-image"></i></div>
                     @endif
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                     <div class="menu-card-nome">{{ $item->nome }}</div>
                     @if($item->descricao)
                     <div class="menu-card-desc">{{ $item->descricao }}</div>
                     @endif
                     <div class="menu-card-preco">R$ {{ number_format($item->preco,2,',','.') }}</div>
-<<<<<<< HEAD
                     @if($item->serves_count >= 1)
                     @php $serveLabel = strtolower($item->subtipo ?? '') === 'porcao' ? 'Porção para' : 'Serve'; @endphp
                     <div class="menu-card-serves">👤 {{ $serveLabel }} {{ $item->serves_count }} {{ $item->serves_count == 1 ? 'pessoa' : 'pessoas' }}</div>
-=======
-                    @if($item->serves_count > 1)
-                    <div class="menu-card-serves">👤 Serve {{ $item->serves_count }} pessoas</div>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                     @endif
                     <div class="menu-card-ctrl" onclick="event.stopPropagation()">
                         <button type="button" class="qty-btn minus" onclick="changeQty({{ $item->id }}, -1)">−</button>
@@ -578,14 +551,11 @@
 
     {{-- RESUMO --}}
     <div class="resumo-col">
-<<<<<<< HEAD
         <button type="button" class="mobile-cart-bar" onclick="toggleResumoMobile()">
             <span id="mobile-cart-items">0 itens</span>
             <span id="mobile-cart-total">R$ 0,00</span>
             <span>Continuar</span>
         </button>
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         <div class="panel">
             <div class="panel-header">
                 <div class="panel-title"><i class="fas fa-clipboard-list"></i> Resumo</div>
@@ -596,17 +566,10 @@
 
             <div class="form-group">
                 <label>Mesa</label>
-<<<<<<< HEAD
                 <select name="table_id" id="table-id-select" class="form-select {{ $errors->has('table_id') ? 'is-invalid' : '' }}" required {{ $pedido ? 'disabled' : '' }}>
                     <option value="">— Selecione —</option>
                     @foreach($mesas as $mesa)
                     <option value="{{ $mesa->id }}" {{ old('table_id', $tableId ?? null) == $mesa->id ? 'selected' : '' }}>
-=======
-                <select name="table_id" class="form-select {{ $errors->has('table_id') ? 'is-invalid' : '' }}" required {{ $pedido ? 'disabled' : '' }}>
-                    <option value="">— Selecione —</option>
-                    @foreach($mesas as $mesa)
-                    <option value="{{ $mesa->id }}" {{ old('table_id', $tableId) == $mesa->id ? 'selected' : '' }}>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                         Mesa {{ $mesa->numero }} · {{ $mesa->assentos }} lugares
                     </option>
                     @endforeach
@@ -619,16 +582,12 @@
 
             <div class="form-group">
                 <label>Observações</label>
-<<<<<<< HEAD
                 <div class="quick-obs" aria-label="Observacoes rapidas">
                     @foreach(['Sem cebola','Sem gelo','Sem acucar','Ao ponto','Bem passado','Mal passado','Pouco sal','Sem pimenta','Separar molho'] as $obsRapida)
                     <button type="button" data-quick-obs="{{ $obsRapida }}">{{ $obsRapida }}</button>
                     @endforeach
                 </div>
                 <textarea name="observacoes" id="observacoes-input" class="form-control" rows="2"
-=======
-                <textarea name="observacoes" class="form-control" rows="2"
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                           placeholder="Alergias, preferências...">{{ old('observacoes', $pedido->observacoes ?? '') }}</textarea>
             </div>
 
@@ -655,7 +614,6 @@
                 </div>
             </div>
 
-<<<<<<< HEAD
             @if($errors->has('items'))
             <div class="alert alert-error" style="margin-bottom:12px; padding:10px 14px; font-size:13px">
                 <i class="fas fa-exclamation-circle"></i> {{ $errors->first('items') }}
@@ -664,15 +622,6 @@
 
             <button type="button" id="btn-submit" class="btn-enviar" disabled
                     onclick="enviarPedido()">
-=======
-            @if($errors->has('itens'))
-            <div class="alert alert-error" style="margin-bottom:12px; padding:10px 14px; font-size:13px">
-                <i class="fas fa-exclamation-circle"></i> {{ $errors->first('itens') }}
-            </div>
-            @endif
-
-            <button type="submit" id="btn-submit" class="btn-enviar" disabled>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                 <i class="fas fa-paper-plane"></i> {{ $pedido ? 'Salvar Alterações' : 'Enviar Pedido' }}
             </button>
             <a href="{{ route('dashboard') }}" class="btn btn-secondary"
@@ -683,7 +632,6 @@
     </div>
 
 </div>
-<<<<<<< HEAD
 
 <button type="button" class="mobile-order-fab" onclick="openResumoMobile()" aria-label="Abrir resumo do pedido">
     <i class="fas fa-cart-shopping"></i>
@@ -696,8 +644,6 @@
     <span id="mobile-bar-total">R$ 0,00</span>
     <button type="button" id="mobile-bar-submit" onclick="enviarPedido()" disabled>Enviar</button>
 </div>
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 </form>
 @endsection
 
@@ -713,7 +659,6 @@ const precos = {
 
 const qtds = {};
 
-<<<<<<< HEAD
 // Chave única por pedido/mesa para o localStorage
 const STORAGE_KEY = 'carrinho_{{ $pedido ? "edit_".$pedido->id : "new_".(request()->query("table_id","0")) }}';
 
@@ -755,25 +700,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateResumo();
     document.getElementById('table-id-select')?.addEventListener('change', updateResumo);
 });
-=======
-// EDIÇÃO: pré-preencher quantidades se for edição de pedido existente
-@if($pedido && $pedido->items)
-    @foreach($pedido->items as $oi)
-    qtds[{{ $oi->menu_item_id }}] = {{ $oi->quantidade }};
-    @endforeach
-    document.addEventListener('DOMContentLoaded', () => {
-        for (const id in qtds) {
-            if (qtds[id] > 0) {
-                const el = document.getElementById('qty-' + id);
-                if (el) el.textContent = qtds[id];
-                const card = document.getElementById('card-' + id);
-                if (card) card.classList.add('active');
-            }
-        }
-        updateResumo();
-    });
-@endif
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 
 function addItem(id) { changeQty(id, 1); }
 
@@ -783,10 +709,7 @@ function changeQty(id, delta) {
     const card = document.getElementById('card-' + id);
     if (card) card.classList.toggle('active', qtds[id] > 0);
     updateResumo();
-<<<<<<< HEAD
     salvarCarrinho();
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 }
 
 function clearAll() {
@@ -800,7 +723,6 @@ function clearAll() {
     updateResumo();
 }
 
-<<<<<<< HEAD
 function toggleResumoMobile() {
     document.querySelector('.resumo-col')?.classList.toggle('open');
 }
@@ -839,32 +761,20 @@ function selectedMesaText() {
 
 function updateResumo() {
     let total = 0, totalItens = 0, hasItems = false, resumoHtml = '', hiddenHtml = '', idx = 0;
-=======
-function updateResumo() {
-    let total = 0, hasItems = false, resumoHtml = '', hiddenHtml = '';
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     for (const id in qtds) {
         if (qtds[id] > 0) {
             hasItems = true;
             const p = precos[id];
             const sub = p.preco * qtds[id];
             total += sub;
-<<<<<<< HEAD
             totalItens += qtds[id];
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             resumoHtml += `<div class="resumo-row">
                 <span style="color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${qtds[id]}× ${p.nome}</span>
                 <span style="font-weight:700;color:#fff;white-space:nowrap;margin-left:8px">R$ ${sub.toFixed(2).replace('.',',')}</span>
             </div>`;
-<<<<<<< HEAD
             hiddenHtml += `<input type="hidden" name="items[${idx}][menu_item_id]" value="${id}">`;
             hiddenHtml += `<input type="hidden" name="items[${idx}][quantidade]" value="${qtds[id]}">`;
             idx++;
-=======
-            hiddenHtml += `<input type="hidden" name="itens[${id}][menu_item_id]" value="${id}">`;
-            hiddenHtml += `<input type="hidden" name="itens[${id}][quantidade]" value="${qtds[id]}">`;
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         }
     }
     document.getElementById('resumo-items').innerHTML = hasItems ? resumoHtml
@@ -874,7 +784,6 @@ function updateResumo() {
     document.getElementById('hidden-inputs').innerHTML = hiddenHtml;
     document.getElementById('total-display').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
     document.getElementById('btn-submit').disabled = !hasItems;
-<<<<<<< HEAD
     document.getElementById('mobile-cart-items').textContent = totalItens + (totalItens === 1 ? ' item' : ' itens');
     document.getElementById('mobile-cart-total').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
     document.getElementById('mobile-fab-count').textContent = totalItens;
@@ -882,8 +791,6 @@ function updateResumo() {
     document.getElementById('mobile-bar-items').textContent = totalItens + (totalItens === 1 ? ' item' : ' itens');
     document.getElementById('mobile-bar-total').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
     document.getElementById('mobile-bar-submit').disabled = !hasItems;
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 }
 
 // Busca
@@ -955,7 +862,6 @@ function filtrarSubtipo(subtipo, btn) {
         });
     });
 }
-<<<<<<< HEAD
 
 function enviarPedido() {
     const hasItems = Object.values(qtds).some(q => q > 0);
@@ -1021,7 +927,5 @@ function enviarPedido() {
     limparCarrinho();
     form.submit();
 }
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 </script>
 @endsection

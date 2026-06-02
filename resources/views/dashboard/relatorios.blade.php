@@ -92,7 +92,6 @@
         <div class="panel-header">
             <div class="panel-title"><i class="fas fa-trophy"></i> Itens Mais Vendidos</div>
         </div>
-<<<<<<< HEAD
         <div style="display:flex; flex-direction:column; gap:12px">
             @php
                 $maxQtd = $itensMaisVendidos->max('quantidade') ?? 1;
@@ -120,31 +119,6 @@
     <div style="display:flex; flex-direction:column; gap:20px">
 
         {{-- Forma de Pagamento --}}
-=======
-        @php $maxQtd = $itensMaisVendidos->max('quantidade') ?: 1; @endphp
-        @forelse($itensMaisVendidos as $i => $item)
-        <div class="rank-row">
-            <div class="rank-num">{{ $i+1 }}</div>
-            <div style="flex:1; min-width:0">
-                <div style="font-size:13px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ $item['nome'] }}</div>
-                <div class="rank-bar-bg" style="margin-top:5px">
-                    <div class="rank-bar" style="width:{{ ($item['quantidade']/$maxQtd)*100 }}%"></div>
-                </div>
-            </div>
-            <div style="text-align:right; flex-shrink:0; margin-left:10px">
-                <div style="font-weight:800; color:#fff">{{ $item['quantidade'] }}x</div>
-                <div style="font-size:11px; color:var(--muted)">R$ {{ number_format($item['total'],2,',','.') }}</div>
-            </div>
-        </div>
-        @empty
-        <div class="empty-state" style="padding:24px"><p>Sem dados no período</p></div>
-        @endforelse
-    </div>
-
-    {{-- Método de pagamento + Garçons --}}
-    <div style="display:flex; flex-direction:column; gap:20px">
-
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         <div class="panel" style="margin:0">
             <div class="panel-header">
                 <div class="panel-title"><i class="fas fa-credit-card"></i> Forma de Pagamento</div>
@@ -169,10 +143,7 @@
             @endforelse
         </div>
 
-<<<<<<< HEAD
         {{-- Desempenho Garçons --}}
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         <div class="panel" style="margin:0">
             <div class="panel-header">
                 <div class="panel-title"><i class="fas fa-concierge-bell"></i> Desempenho Garçons</div>
@@ -200,26 +171,15 @@
             <div class="panel-title"><i class="fas fa-chart-bar"></i> Vendas por Dia</div>
             <span style="font-size:12px; color:var(--muted)">R$ {{ number_format($totalVendas,2,',','.') }} total</span>
         </div>
-<<<<<<< HEAD
         @if(empty($vendasPorDia) || count($vendasPorDia) === 0)
         <div class="empty-state" style="padding:24px"><p>Sem dados no período</p></div>
         @else
         @php $maxVenda = max($vendasPorDia) ?: 1; @endphp
-=======
-        @if($vendasPorDia->isEmpty())
-        <div class="empty-state" style="padding:24px"><p>Sem dados no período</p></div>
-        @else
-        @php $maxVenda = $vendasPorDia->max() ?: 1; @endphp
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         <div class="chart-wrap">
             @foreach($vendasPorDia as $dia => $valor)
             <div class="chart-bar-col">
                 <div class="bar" style="height:{{ ($valor/$maxVenda)*100 }}px" title="{{ $dia }}: R$ {{ number_format($valor,2,',','.') }}"></div>
-<<<<<<< HEAD
                 <div class="lbl">{{ \Carbon\Carbon::parse($dia)->format('d/m') }}</div>
-=======
-                <div class="lbl">{{ $dia }}</div>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             </div>
             @endforeach
         </div>
@@ -257,13 +217,9 @@
         <span class="badge badge-danger">{{ $estoqueCritico->count() }} item(ns)</span>
     </div>
     <table>
-<<<<<<< HEAD
         <thead>
             <tr><th>Item</th><th>Atual</th><th>Mínimo</th><th>Situação</th></tr>
         </thead>
-=======
-        <thead><tr><th>Item</th><th>Atual</th><th>Mínimo</th><th>Situação</th></tr></thead>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         <tbody>
         @foreach($estoqueCritico as $e)
         <tr>
@@ -288,13 +244,9 @@
         <div class="empty-state"><p>Nenhum pagamento no período</p></div>
     @else
     <table>
-<<<<<<< HEAD
         <thead>
             <tr><th>Data</th><th>Pedido</th><th>Mesa</th><th>Método</th><th>Valor</th></tr>
         </thead>
-=======
-        <thead><tr><th>Data</th><th>Pedido</th><th>Mesa</th><th>Método</th><th>Valor</th></tr></thead>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         <tbody>
         @foreach($pagamentos->sortByDesc('created_at') as $pg)
         <tr>
@@ -313,8 +265,4 @@
     @endif
 </div>
 
-<<<<<<< HEAD
 @endsection
-=======
-@endsection
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568

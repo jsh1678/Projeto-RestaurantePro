@@ -1,5 +1,4 @@
 @extends('layouts.app')
-<<<<<<< HEAD
 @section('page-title', 'Mesas - Visao Geral')
 @section('breadcrumb', 'Status atual do salao')
 
@@ -82,17 +81,11 @@
     <a href="{{ route('mesas.index') }}" class="btn btn-secondary btn-sm">Gerenciar mesas</a>
 </div>
 
-=======
-@section('page-title', 'Mesas — Visão Geral')
-@section('breadcrumb', 'Status atual do salão')
-@section('content')
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 <div class="mesas-grid">
     @forelse($mesas as $mesa)
     <div class="mesa-card {{ $mesa->status }}" style="cursor:default">
         <div class="mc-number">{{ $mesa->numero }}</div>
         <div class="mc-seats">{{ $mesa->assentos }} lugares</div>
-<<<<<<< HEAD
         @if($mesa->garcom)
             <div style="font-size:11px;color:var(--muted);margin-bottom:6px">{{ $mesa->garcom->name }}</div>
         @endif
@@ -105,13 +98,6 @@
         <i class="fa-solid fa-chair"></i>
         <p>Nenhuma mesa cadastrada</p>
     </div>
-=======
-        @if($mesa->garcom)<div style="font-size:11px;color:var(--muted);margin-bottom:6px">{{ $mesa->garcom->name }}</div>@endif
-        <span class="badge badge-{{ $mesa->status==='disponivel'?'success':($mesa->status==='ocupada'?'danger':'warning') }}">{{ ucfirst($mesa->status) }}</span>
-    </div>
-    @empty
-    <div class="empty-state" style="grid-column:1/-1">🪑<p>Nenhuma mesa cadastrada</p></div>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     @endforelse
 </div>
 @endsection

@@ -21,10 +21,7 @@ class Order extends Model
         'horario_entrega',
         'horario_termino_preparo',
         'pago_em',           // ← timestamp do pagamento (soft hide)
-<<<<<<< HEAD
         'horario_pagamento',
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     ];
 
     protected $casts = [
@@ -35,10 +32,7 @@ class Order extends Model
         'horario_entrega'         => 'datetime',
         'horario_termino_preparo' => 'datetime',
         'pago_em'                 => 'datetime',
-<<<<<<< HEAD
         'horario_pagamento'       => 'datetime',
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     ];
 
     // ── RELACIONAMENTOS ──────────────────────────────────────────────────────
@@ -63,14 +57,11 @@ class Order extends Model
         return $this->hasOne(Payment::class);
     }
 
-<<<<<<< HEAD
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
     }
 
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     // ── SCOPES (soft hide) ───────────────────────────────────────────────────
 
     /**
@@ -124,8 +115,4 @@ class Order extends Model
             default                => ucfirst(str_replace('_', ' ', $this->status)),
         };
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568

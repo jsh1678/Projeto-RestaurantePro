@@ -24,7 +24,6 @@
         <div style="color:var(--muted); font-size:13px; margin-top:2px">{{ $usuarios->count() }} usuário(s) cadastrado(s)</div>
     </div>
     <a href="{{ route('usuarios.create') }}" class="btn btn-primary">
-<<<<<<< HEAD
         <i class="fa-solid fa-plus"></i> Novo Usuário
     </a>
 </div>
@@ -33,17 +32,6 @@
     $grupos = ['gerente'=>'Gerentes','garcom'=>'Garçons','chef'=>'Chefs','caixa'=>'Caixas'];
     $cores  = ['gerente'=>'#a855f7','garcom'=>'#3b82f6','chef'=>'#f97316','caixa'=>'#22c55e'];
     $icones = ['gerente'=>'fa-crown','garcom'=>'fa-bell-concierge','chef'=>'fa-utensils','caixa'=>'fa-cash-register'];
-=======
-        <i class="fas fa-plus"></i> Novo Usuário
-    </a>
-</div>
-
-{{-- Cards por cargo --}}
-@php
-    $grupos = ['gerente'=>'Gerentes','garcom'=>'Garçons','chef'=>'Chefs','caixa'=>'Caixas'];
-    $cores  = ['gerente'=>'#a855f7','garcom'=>'#3b82f6','chef'=>'#f97316','caixa'=>'#22c55e'];
-    $icones = ['gerente'=>'fa-crown','garcom'=>'fa-concierge-bell','chef'=>'fa-hat-chef','caixa'=>'fa-cash-register'];
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 @endphp
 
 @foreach($grupos as $role => $label)
@@ -52,11 +40,7 @@
 <div class="panel" style="margin-bottom:20px">
     <div class="panel-header">
         <div class="panel-title">
-<<<<<<< HEAD
             <i class="fa-solid {{ $icones[$role] }}" style="color:{{ $cores[$role] }}"></i>
-=======
-            <i class="fas {{ $icones[$role] }}" style="color:{{ $cores[$role] }}"></i>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             {{ $label }} <span style="color:var(--muted); font-weight:400">({{ $grupo->count() }})</span>
         </div>
     </div>
@@ -77,7 +61,6 @@
                 </div>
             </div>
             <div style="display:flex; gap:6px; flex-shrink:0">
-<<<<<<< HEAD
                 {{-- [FIX #16] aria-label em botões de ação ícone --}}
                 <a href="{{ route('usuarios.edit', $u) }}"
                    class="btn btn-secondary btn-sm btn-icon"
@@ -115,34 +98,11 @@
                                 '⚠️ Excluir Usuário'
                             )">
                         <i class="fa-solid fa-trash"></i>
-=======
-                <a href="{{ route('usuarios.edit', $u) }}" class="btn btn-secondary btn-sm btn-icon" title="Editar">
-                    <i class="fas fa-pencil"></i>
-                </a>
-                @if($u->id !== Auth::id())
-                <form method="POST" action="{{ route('usuarios.toggle', $u) }}">
-                    @csrf @method('PATCH')
-                    <button type="submit" class="btn btn-sm btn-icon {{ $u->ativo ? 'btn-warning' : 'btn-success' }}"
-                            title="{{ $u->ativo ? 'Desativar' : 'Ativar' }}"
-                            onclick="return confirm('{{ $u->ativo ? 'Desativar' : 'Ativar' }} este usuário?')">
-                        <i class="fas {{ $u->ativo ? 'fa-ban' : 'fa-check' }}"></i>
-                    </button>
-                </form>
-                <form method="POST" action="{{ route('usuarios.destroy', $u) }}">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="btn btn-danger btn-sm btn-icon" title="Excluir"
-                            onclick="return confirm('Excluir {{ $u->name }}? Esta ação não pode ser desfeita.')">
-                        <i class="fas fa-trash"></i>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                     </button>
                 </form>
                 @else
                 <span style="font-size:11px; color:var(--muted); padding:6px 10px; border:1px solid var(--border); border-radius:7px; white-space:nowrap">
-<<<<<<< HEAD
                     <i class="fa-solid fa-lock" style="font-size:10px"></i> Sua conta
-=======
-                    <i class="fas fa-lock" style="font-size:10px"></i> Sua conta
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                 </span>
                 @endif
             </div>

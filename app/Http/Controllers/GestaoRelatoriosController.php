@@ -16,11 +16,7 @@ class GestaoRelatoriosController extends Controller
 {
     public function index()
     {
-<<<<<<< HEAD
         if (Auth::user()?->role !== 'gerente') abort(403);
-=======
-        if (Auth::user()->role !== 'gerente') abort(403);
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 
         $di = request('data_inicio')
             ? Carbon::parse(request('data_inicio'))->startOfDay()
@@ -61,7 +57,6 @@ class GestaoRelatoriosController extends Controller
             ])->sortByDesc('qtd')->take(15);
 
         // ── 4. Tempo médio de preparo (em minutos)
-<<<<<<< HEAD
        // ── 4. Tempo médio de preparo (em minutos)
 $tempoPreparo = Order::whereBetween('created_at',[$di,$df])
     ->whereNotNull('horario_termino_preparo')
@@ -83,17 +78,6 @@ $tempoPreparo = Order::whereBetween('created_at',[$di,$df])
 $tempoMedio = $tempoPreparo->count() > 0 ? round($tempoPreparo->avg(), 1) : 0;
 $tempoMax   = $tempoPreparo->count() > 0 ? round($tempoPreparo->max(), 1) : 0;
 $tempoMin   = $tempoPreparo->count() > 0 ? round($tempoPreparo->min(), 1) : 0;
-=======
-        $tempoPreparo = Order::whereBetween('created_at',[$di,$df])
-            ->whereNotNull('horario_termino_preparo')
-            ->whereNotNull('horario_termino_preparo')
-            ->get()
-            ->map(fn($o) => $o->horario_pedido->diffInMinutes($o->horario_termino_preparo));
-        $tempoMedio = $tempoPreparo->count() > 0 ? round($tempoPreparo->avg(), 1) : 0;
-        $tempoMax   = $tempoPreparo->count() > 0 ? round($tempoPreparo->max(), 1) : 0;
-        $tempoMin   = $tempoPreparo->count() > 0 ? round($tempoPreparo->min(), 1) : 0;
-
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         // ── 5. Custo de insumos (compras)
         $custoInsumos = Purchase::whereBetween('created_at',[$di,$df])
             ->where('status','recebido')
@@ -187,11 +171,7 @@ $tempoMin   = $tempoPreparo->count() > 0 ? round($tempoPreparo->min(), 1) : 0;
 
     public function pdf()
     {
-<<<<<<< HEAD
         if (Auth::user()?->role !== 'gerente') abort(403);
-=======
-        if (Auth::user()->role !== 'gerente') abort(403);
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 
         // Usa os mesmos dados do index
         $inicio = request('inicio') ? \Carbon\Carbon::parse(request('inicio'))->startOfDay() : \Carbon\Carbon::today()->subDays(29)->startOfDay();
@@ -235,8 +215,4 @@ $tempoMin   = $tempoPreparo->count() > 0 ? round($tempoPreparo->min(), 1) : 0;
         ));
     }
 
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568

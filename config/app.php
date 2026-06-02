@@ -36,10 +36,7 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         App\Providers\AppServiceProvider::class,
-<<<<<<< HEAD
         Laragear\Poke\PokeServiceProvider::class,
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     ],
     'aliases' => Illuminate\Support\Facades\Facade::defaultAliases()->merge([])->toArray(),
 ];

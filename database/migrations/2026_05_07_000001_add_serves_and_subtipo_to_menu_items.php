@@ -30,8 +30,4 @@ return new class extends Migration
             $table->dropColumn('tipo_principal');
         });
     }
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568

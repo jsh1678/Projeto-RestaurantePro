@@ -1,7 +1,6 @@
 @extends('layouts.app')
 @section('page-title', 'Caixa')
 @section('breadcrumb', 'Controle financeiro do dia')
-<<<<<<< HEAD
 
 @section('styles')
 <style>
@@ -517,22 +516,11 @@
 <div class="cards-grid caixa-stats">
     <div class="stat-card" style="--card-color:#22c55e">
         <div class="sc-header"><div class="sc-icon">↗</div><span class="sc-badge">Hoje</span></div>
-=======
-@section('content')
-
-<div class="cards-grid">
-    <div class="stat-card" style="--card-color:#22c55e">
-        <div class="sc-header"><div class="sc-icon"></div><span class="sc-badge">Hoje</span></div>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         <div class="sc-value" style="font-size:22px">R$ {{ number_format($vendaHoje,2,',','.') }}</div>
         <div class="sc-label">Entradas do dia</div>
     </div>
     <div class="stat-card" style="--card-color:#3b82f6">
-<<<<<<< HEAD
         <div class="sc-header"><div class="sc-icon">📈</div><span class="sc-badge">Mês</span></div>
-=======
-        <div class="sc-header"><div class="sc-icon"></div><span class="sc-badge">Mês</span></div>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         <div class="sc-value" style="font-size:22px">R$ {{ number_format($vendaDoMes,2,',','.') }}</div>
         <div class="sc-label">Vendas do mês</div>
     </div>
@@ -547,11 +535,7 @@
         <div class="sc-label">Pagamentos em dinheiro</div>
     </div>
     <div class="stat-card" style="--card-color:#ef4444">
-<<<<<<< HEAD
         <div class="sc-header"><div class="sc-icon">↘</div><span class="sc-badge">Saídas</span></div>
-=======
-        <div class="sc-header"><div class="sc-icon"></div><span class="sc-badge">Saídas</span></div>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         <div class="sc-value" style="font-size:22px">R$ {{ number_format($comprasHoje,2,',','.') }}</div>
         <div class="sc-label">Compras hoje</div>
     </div>
@@ -567,23 +551,15 @@
     </div>
 </div>
 
-<<<<<<< HEAD
 <div class="caixa-layout">
 
     <div class="caixa-stack">
         <div class="panel caixa-panel">
-=======
-<div style="display:grid; grid-template-columns: 1fr 1.2fr; gap:24px">
-
-    <div>
-        <div class="panel" style="margin-bottom:20px">
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             <div class="panel-header">
                 <div class="panel-title">🕐 Aguardando Pagamento</div>
                 <span class="badge badge-warning">{{ $pedidosProntosPagamento->count() }}</span>
             </div>
             @if($pedidosProntosPagamento->isEmpty())
-<<<<<<< HEAD
                 <div class="empty-state compact-empty">✅<p>Sem pendências</p></div>
             @else
                 <div class="payment-list">
@@ -614,27 +590,10 @@
                         </div>
                         <div class="payment-method-label">Forma de pagamento</div>
                         <select name="metodo" class="form-select js-metodo-pagamento" required>
-=======
-                <div class="empty-state" style="padding:28px">✅<p>Sem pendências</p></div>
-            @else
-                @foreach($pedidosProntosPagamento as $p)
-                <div style="background:rgba(249,115,22,.06); border:1px solid rgba(249,115,22,.2); border-radius:12px; padding:16px; margin-bottom:12px">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
-                        <div>
-                            <div style="font-weight:800; color:#fff">Pedido <span style="color:var(--accent); font-family:monospace">#{{ str_pad($p->id,4,'0',STR_PAD_LEFT) }}</span></div>
-                            <div style="font-size:12px; color:var(--muted)">Mesa {{ $p->table->numero ?? '—' }} · {{ $p->items->count() }} itens</div>
-                        </div>
-                        <div style="font-size:18px; font-weight:800; color:#fff">R$ {{ number_format($p->items->sum('subtotal'),2,',','.') }}</div>
-                    </div>
-                    <form method="POST" action="{{ route('caixa.pagamento', $p) }}" style="display:flex; gap:8px">
-                        @csrf
-                        <select name="metodo" class="form-select" style="flex:1; font-size:13px" required>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                             <option value="">Pagamento...</option>
                             <option value="dinheiro">💵 Dinheiro</option>
                             <option value="cartao_credito">💳 Crédito</option>
                             <option value="cartao_debito">💳 Débito</option>
-<<<<<<< HEAD
                             <option value="pix" selected>📱 PIX</option>
                         </select>
                         <div class="money-input-wrap">
@@ -709,26 +668,12 @@
         </div>
 
         <div class="panel caixa-panel">
-=======
-                            <option value="pix">📱 PIX</option>
-                        </select>
-                        <input type="hidden" name="valor_pago" value="{{ $p->items->sum('subtotal') }}">
-                        <button type="submit" class="btn btn-success btn-sm">✓ Pagar</button>
-                    </form>
-                </div>
-                @endforeach
-            @endif
-        </div>
-
-        <div class="panel">
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             <div class="panel-header">
                 <div class="panel-title">💸 Registrar Sangria</div>
                 @if($sangriasHoje > 0)
                 <span class="badge badge-danger">Hoje: R$ {{ number_format($sangriasHoje,2,',','.') }}</span>
                 @endif
             </div>
-<<<<<<< HEAD
             <form method="POST" action="{{ route('caixa.sangria') }}" class="sangria-form">
                 @csrf
                 <div class="form-group">
@@ -736,15 +681,6 @@
                     <input type="number" name="valor" step="0.01" min="0.01" max="999999" class="form-control" placeholder="0,00" required>
                 </div>
                 <div class="form-group">
-=======
-            <form method="POST" action="{{ route('caixa.sangria') }}" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap">
-                @csrf
-                <div class="form-group" style="flex:1; min-width:120px; margin:0">
-                    <label>Valor (R$)</label>
-                    <input type="number" name="valor" step="0.01" min="0.01" max="999999" class="form-control" placeholder="0,00" required>
-                </div>
-                <div class="form-group" style="flex:2; min-width:180px; margin:0">
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                     <label>Motivo</label>
                     <input type="text" name="motivo" class="form-control" placeholder="Ex: Troco, Retirada...">
                 </div>
@@ -752,13 +688,8 @@
             </form>
 
             @if($historicoSangrias->isNotEmpty())
-<<<<<<< HEAD
             <div class="sangria-history">
                 <div class="section-kicker">Histórico de Sangrias</div>
-=======
-            <div style="margin-top:18px; border-top:1px solid var(--border); padding-top:14px">
-                <div style="font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px">Histórico de Sangrias</div>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                 <table style="width:100%">
                     <thead>
                         <tr>
@@ -774,11 +705,7 @@
                         <td style="padding:8px 0; font-size:12px; color:var(--muted)">{{ $s->created_at->format('d/m H:i') }}</td>
                         <td style="padding:8px 0; font-size:13px">{{ $s->motivo ?: '—' }}</td>
                         <td style="padding:8px 0; font-size:12px; color:var(--muted)">{{ $s->user->name ?? '—' }}</td>
-<<<<<<< HEAD
                         <td class="td-mono money-negative" style="padding:8px 0; text-align:right">- R$ {{ number_format($s->valor,2,',','.') }}</td>
-=======
-                        <td style="padding:8px 0; text-align:right; font-weight:700; color:#f87171; font-family:monospace">- R$ {{ number_format($s->valor,2,',','.') }}</td>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
                     </tr>
                     @endforeach
                     </tbody>
@@ -788,11 +715,7 @@
         </div>
     </div>
 
-<<<<<<< HEAD
     <div class="table-wrap caixa-history">
-=======
-    <div class="table-wrap">
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         <div class="table-header">
             <h2>🕐 Pagamentos de Hoje</h2>
             <span class="badge badge-secondary">{{ $pagamentosHoje->count() }}</span>
@@ -810,16 +733,11 @@
                 <td>
                     @php $metodoIcons = ['dinheiro'=>'💵','cartao_credito'=>'💳','cartao_debito'=>'💳','pix'=>'📱']; @endphp
                     {{ $metodoIcons[$pg->metodo] ?? '' }} {{ str_replace('_',' ',ucfirst($pg->metodo)) }}
-<<<<<<< HEAD
                     @if($pg->metodo === 'cartao_credito' && ($pg->parcelas ?? 1) > 1)
                         <span class="method-installments">({{ $pg->parcelas }}x)</span>
                     @endif
                 </td>
                 <td class="td-mono money-positive">R$ {{ number_format($pg->valor_final,2,',','.') }}</td>
-=======
-                </td>
-                <td class="td-mono" style="color:#4ade80; font-weight:700">R$ {{ number_format($pg->valor_final,2,',','.') }}</td>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
             </tr>
             @endforeach
             </tbody>
@@ -828,7 +746,6 @@
     </div>
 </div>
 @endsection
-<<<<<<< HEAD
 
 @section('scripts')
 <script>
@@ -1009,5 +926,3 @@ document.querySelectorAll('.pagamento-form').forEach((form) => {
 });
 </script>
 @endsection
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568

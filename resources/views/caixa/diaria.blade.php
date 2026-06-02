@@ -29,15 +29,9 @@ tailwind.config = {
 <div class="alert alert-error mb-6 caixa-fechado-badge" style="border-radius:12px;padding:18px 20px;">
   🔒 <strong>Caixa fechado</strong> —
   Fechado {{ $caixaFechadoEm ? \Carbon\Carbon::parse($caixaFechadoEm)->format('d/m/Y \à\s H:i') : '' }}.
-<<<<<<< HEAD
   Reabre automaticamente em <strong>{{ $caixaReabreEm ? \Carbon\Carbon::parse($caixaReabreEm)->format('d/m/Y \à\s H:i') : '—' }}</strong>.
   <span id="countdown" class="ml-2 font-mono text-sm opacity-80"></span>
   @if(Auth::user()?->role === 'gerente')
-=======
-  Reabre automaticamente amanhã às <strong>10h00</strong>.
-  <span id="countdown" class="ml-2 font-mono text-sm opacity-80"></span>
-  @if(Auth::user()->role === 'gerente')
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
   <form method="POST" action="{{ route('caixa.abrir') }}" class="ml-auto" style="margin-left:auto">
     @csrf
     <button type="submit" class="btn btn-success btn-sm">🔓 Reabrir agora</button>
@@ -49,15 +43,9 @@ tailwind.config = {
 {{-- KPIs do dia --}}
 <div class="cards-grid mb-5" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">
   <div class="stat-card" style="--card-color:#22c55e;animation-delay:.0s">
-<<<<<<< HEAD
     <div class="sc-header"><div class="sc-icon">💰</div><span class="sc-badge">Período</span></div>
     <div class="sc-value" style="color:#4ade80">R$&nbsp;{{ number_format($totalDia,2,',','.') }}</div>
     <div class="sc-label">Total vendido</div>
-=======
-    <div class="sc-header"><div class="sc-icon">💰</div><span class="sc-badge">Hoje</span></div>
-    <div class="sc-value" style="color:#4ade80">R$&nbsp;{{ number_format($totalDia,2,',','.') }}</div>
-    <div class="sc-label">Total arrecadado</div>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
   </div>
   <div class="stat-card" style="--card-color:#3b82f6;animation-delay:.07s">
     <div class="sc-header"><div class="sc-icon">🧾</div><span class="sc-badge">Pedidos</span></div>
@@ -71,7 +59,6 @@ tailwind.config = {
   </div>
   <div class="stat-card" style="--card-color:#a855f7;animation-delay:.21s">
     <div class="sc-header"><div class="sc-icon">📅</div><span class="sc-badge">Data</span></div>
-<<<<<<< HEAD
     <div class="sc-value" style="font-size:14px;color:#c084fc">{{ $periodoInicio->format('d/m H:i') }} - {{ $periodoFim->format('H:i') }}</div>
     <div class="sc-label">Período de fechamento</div>
   </div>
@@ -116,24 +103,13 @@ tailwind.config = {
   @endif
 </div>
 
-=======
-    <div class="sc-value" style="font-size:16px;color:#c084fc">{{ $dataHoje->format('d/m/Y') }}</div>
-    <div class="sc-label">{{ $dataHoje->translatedFormat('l') }}</div>
-  </div>
-</div>
-
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
 <div style="display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start;"
      class="diaria-grid">
 
   {{-- Conciliação por método --}}
   <div class="panel">
     <div class="panel-header">
-<<<<<<< HEAD
       <div class="panel-title">💳 Conciliação de pagamentos — {{ $periodoInicio->format('d/m H:i') }} até {{ $periodoFim->format('d/m H:i') }}</div>
-=======
-      <div class="panel-title">💳 Conciliação de pagamentos — {{ $dataHoje->format('d/m/Y') }}</div>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     </div>
 
     @php
@@ -175,7 +151,6 @@ tailwind.config = {
 
     {{-- Total --}}
     <div style="margin-top:16px;padding:16px;background:rgba(34,197,94,.07);border:1px solid rgba(34,197,94,.2);border-radius:12px;display:flex;justify-content:space-between;align-items:center;">
-<<<<<<< HEAD
       <span style="font-size:15px;font-weight:700;color:var(--text)">Total vendido no período</span>
       <span style="font-size:24px;font-weight:900;color:#4ade80">R$ {{ number_format($totalDia,2,',','.') }}</span>
     </div>
@@ -195,12 +170,6 @@ tailwind.config = {
       </div>
     </div>
 
-=======
-      <span style="font-size:15px;font-weight:700;color:var(--text)">Total do dia</span>
-      <span style="font-size:24px;font-weight:900;color:#4ade80">R$ {{ number_format($totalDia,2,',','.') }}</span>
-    </div>
-
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     {{-- Barra visual de distribuição --}}
     @if($totalDia > 0)
     <div style="margin-top:16px;">
@@ -239,22 +208,14 @@ tailwind.config = {
             <input type="checkbox" id="chk1" onchange="checkFechar()"> Conferiu todos os pagamentos?
           </label>
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-<<<<<<< HEAD
             <input type="checkbox" id="chk2" onchange="checkFechar()"> Estou ciente das comandas abertas listadas
-=======
-            <input type="checkbox" id="chk2" onchange="checkFechar()"> Não há pedidos pendentes?
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
           </label>
         </div>
 
         <form method="POST" action="{{ route('caixa.fechar') }}">
           @csrf
           <button type="submit" id="btn-fechar" class="btn btn-danger" style="width:100%;justify-content:center;opacity:.4;pointer-events:none;" disabled>
-<<<<<<< HEAD
             🔒 Fechar e gerar relatório
-=======
-            🔒 Fechar caixa agora
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
           </button>
         </form>
 
@@ -267,20 +228,12 @@ tailwind.config = {
           <div style="font-size:40px;margin-bottom:10px;">🔒</div>
           <div style="font-size:13px;color:var(--muted);line-height:1.7;">
             Fechado em: <strong style="color:var(--text)">{{ $caixaFechadoEm ? \Carbon\Carbon::parse($caixaFechadoEm)->format('d/m/Y H:i') : '—' }}</strong><br>
-<<<<<<< HEAD
             Reabre: <strong style="color:#4ade80">{{ $caixaReabreEm ? \Carbon\Carbon::parse($caixaReabreEm)->format('d/m/Y H:i') : '—' }}</strong>
-=======
-            Reabre: <strong style="color:#4ade80">amanhã às 10h00</strong>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
           </div>
           <div id="countdown-big" class="font-mono mt-3" style="font-size:22px;font-weight:900;color:#f87171;letter-spacing:2px;"></div>
         </div>
 
-<<<<<<< HEAD
         @if(Auth::user()?->role === 'gerente')
-=======
-        @if(Auth::user()->role === 'gerente')
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         <form method="POST" action="{{ route('caixa.abrir') }}" class="mt-4">
           @csrf
           <button type="submit" class="btn btn-success" style="width:100%;justify-content:center;">
@@ -301,7 +254,6 @@ tailwind.config = {
       <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;">
         <div>
           <div style="color:var(--text);font-weight:600">{{ $f['fechado_em'] }}</div>
-<<<<<<< HEAD
           <div style="color:var(--muted)">{{ $f['usuario'] }} · {{ $f['comandas_abertas'] }} comanda(s) abertas</div>
           @if($f['periodo_inicio'])
           <div style="color:var(--muted);font-size:11px">Período desde {{ $f['periodo_inicio'] }}</div>
@@ -310,11 +262,6 @@ tailwind.config = {
         <div style="text-align:right">
           <div style="font-weight:700;color:#4ade80">R$ {{ number_format($f['total'],2,',','.') }}</div>
         </div>
-=======
-          <div style="color:var(--muted)">{{ $f['usuario'] }}</div>
-        </div>
-        <div style="font-weight:700;color:#4ade80">R$ {{ number_format($f['total'],2,',','.') }}</div>
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
       </div>
       @endforeach
     </div>
@@ -329,19 +276,11 @@ tailwind.config = {
 <script>
 // Countdown até reabertura
 function calcCountdown() {
-<<<<<<< HEAD
   const reabreEm = @json($caixaReabreEm);
   if (!reabreEm) return;
   const now = new Date();
   const reabre = new Date(reabreEm);
   const diff = Math.max(0, Math.floor((reabre - now) / 1000));
-=======
-  const now = new Date();
-  const amanha = new Date(now);
-  amanha.setDate(amanha.getDate() + 1);
-  amanha.setHours(10, 0, 0, 0);
-  const diff = Math.max(0, Math.floor((amanha - now) / 1000));
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
   const h = String(Math.floor(diff / 3600)).padStart(2, '0');
   const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
   const s = String(diff % 60).padStart(2, '0');
@@ -369,13 +308,8 @@ function checkFechar() {
 // Bloquear ações se caixa fechado
 @if(!$caixaAberto)
 document.addEventListener('DOMContentLoaded', function() {
-<<<<<<< HEAD
   // Bloqueia apenas ações operacionais de pedido/pagamento; logout continua permitido.
   document.querySelectorAll('form[action*="/pedidos"], form[action*="/mesas"], form[action*="/caixa/pagar"]').forEach(function(f) {
-=======
-  // Desabilitar forms de pagamento na mesma sessão
-  document.querySelectorAll('form:not([action*="caixa"])').forEach(function(f) {
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
     f.addEventListener('submit', function(e) {
       e.preventDefault();
       alert('❌ O caixa está fechado. Nenhum pedido ou pagamento pode ser realizado.');
