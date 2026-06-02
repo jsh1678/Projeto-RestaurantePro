@@ -12,7 +12,8 @@ WORKDIR /app
 
 COPY . .
 
-RUN rm -f add_more_dishes.php add_stock.php \
+RUN rm -rf vendor \
+    && rm -f add_more_dishes.php add_stock.php \
     public/clear-cache.php public/conexao.php \
     public/migrar.php public/rodar_seeder.php .router.php
 
