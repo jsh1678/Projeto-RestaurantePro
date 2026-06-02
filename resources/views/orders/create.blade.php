@@ -237,9 +237,7 @@
             <div class="item-grid">
                 @foreach($categoria->menuItems as $item)
                 @php
-                    $imagemUrl = $item->imagem
-                        ? (preg_match('/^https?:\/\//i', $item->imagem) ? $item->imagem : url(ltrim($item->imagem, '/')))
-                        : null;
+                    $imagemUrl = $item->imagem_url;
                 @endphp
                 <div class="menu-card"
                      id="card-{{ $item->id }}"
