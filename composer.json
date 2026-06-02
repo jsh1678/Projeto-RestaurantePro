@@ -6,10 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-<<<<<<< HEAD
         "laragear/poke": "^4.0",
-=======
->>>>>>> f04186cf0d2473ded7258548bd95edb40a327568
         "laravel/framework": "^11.0",
         "nesbot/carbon": "^3.0"
     },
