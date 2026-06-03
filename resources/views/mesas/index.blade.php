@@ -25,6 +25,16 @@
     border: 1px solid var(--border);
     border-radius: 14px;
     background: var(--bg2);
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+}
+
+.mesa-summary-card:hover,
+.mesa-summary-card.active {
+    border-color: color-mix(in srgb, var(--status-color) 32%, var(--border));
+    background: color-mix(in srgb, var(--status-color) 8%, var(--bg2));
 }
 
 .mesa-summary-card span {
@@ -541,22 +551,22 @@
 
 <div class="mesa-page">
     <section class="mesa-summary" aria-label="Resumo das mesas">
-        <div class="mesa-summary-card" style="--status-color:#22c55e">
+        <button type="button" class="mesa-summary-card" style="--status-color:#22c55e" data-summary-filter="disponivel">
             <div><span>Mesas Disponiveis</span><strong>{{ $totalDisponiveis }}</strong></div>
             <div class="mesa-summary-icon"><i class="fas fa-check"></i></div>
-        </div>
-        <div class="mesa-summary-card" style="--status-color:#eab308">
+        </button>
+        <button type="button" class="mesa-summary-card" style="--status-color:#eab308" data-summary-filter="ocupadas">
             <div><span>Mesas Ocupadas</span><strong>{{ $totalOcupadas }}</strong></div>
             <div class="mesa-summary-icon"><i class="fas fa-users"></i></div>
-        </div>
-        <div class="mesa-summary-card" style="--status-color:#94a3b8">
+        </button>
+        <button type="button" class="mesa-summary-card" style="--status-color:#94a3b8" data-summary-filter="reservada">
             <div><span>Mesas Reservadas</span><strong>{{ $totalReservadas }}</strong></div>
             <div class="mesa-summary-icon"><i class="fas fa-bookmark"></i></div>
-        </div>
-        <div class="mesa-summary-card" style="--status-color:#ef4444">
+        </button>
+        <button type="button" class="mesa-summary-card" style="--status-color:#ef4444" data-summary-filter="aguardando_pagamento">
             <div><span>Aguardando Pagamento</span><strong>{{ $totalPagamento }}</strong></div>
             <div class="mesa-summary-icon"><i class="fas fa-receipt"></i></div>
-        </div>
+        </button>
     </section>
 
     <section class="mesa-toolbar" aria-label="Busca e filtros">
@@ -565,6 +575,7 @@
             <select id="mesaStatusFilter" class="mesa-filter" aria-label="Filtrar por status">
                 <option value="">Todos os status</option>
                 <option value="disponivel">Disponivel</option>
+                <option value="ocupadas">Ocupadas / em atendimento</option>
                 <option value="ocupada">Ocupada</option>
                 <option value="pedido">Pedido em andamento</option>
                 <option value="aguardando_pagamento">Aguardando pagamento</option>
@@ -813,10 +824,25 @@ function filterMesas() {
 
     document.querySelectorAll('[data-mesa-item]').forEach(function(item) {
         const matchesNumber = !query || String(item.dataset.number).toLowerCase().includes(query);
-        const matchesStatus = !status || item.dataset.status === status;
+        const matchesStatus = !status
+            || item.dataset.status === status
+            || (status === 'ocupadas' && ['ocupada', 'pedido', 'aguardando_pagamento'].includes(item.dataset.status));
         item.classList.toggle('hidden-by-filter', !(matchesNumber && matchesStatus));
     });
+
+    document.querySelectorAll('[data-summary-filter]').forEach(function(card) {
+        card.classList.toggle('active', status && card.dataset.summaryFilter === status);
+    });
 }
+
+document.querySelectorAll('[data-summary-filter]').forEach(function(card) {
+    card.addEventListener('click', function() {
+        const status = card.dataset.summaryFilter;
+        mesaStatusFilter.value = mesaStatusFilter.value === status ? '' : status;
+        filterMesas();
+        document.getElementById('mesasGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+});
 
 function openMesaModal(button) {
     const canOpen = button.dataset.canOpen === '1';

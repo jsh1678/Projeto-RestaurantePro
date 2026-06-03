@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\KitchenEvent;
 use App\Models\MenuItem;
 use App\Models\Table;
 use App\Models\StockItem;
@@ -127,6 +128,9 @@ class OrderController extends Controller
                     'quantidade'     => $item['quantidade'],
                     'preco_unitario' => $menuItem->preco,
                     'subtotal'       => $subtotal,
+                    'status'         => 'pendente',
+                    'enviado_cozinha' => true,
+                    'enviado_cozinha_em' => now(),
                 ]);
                 $total += $subtotal;
             }
@@ -138,7 +142,14 @@ class OrderController extends Controller
             ]);
         });
 
-        return redirect()->route('dashboard')
+        $order->load('table', 'user', 'items.menuItem');
+        KitchenEvent::create([
+            'order_id' => $order->id,
+            'type'     => 'order_updated',
+            'payload'  => $this->kitchenPayload($order),
+        ]);
+
+        return redirect()->route('mesas.conta', $order->table_id)
             ->with('success', '✅ Pedido atualizado com sucesso!');
     }
 
@@ -264,6 +275,7 @@ class OrderController extends Controller
                 'status'        => 'em_preparo',
                 'observacoes'   => $validated['observacoes'] ?? null,
                 'pedido_viagem' => $request->has('pedido_viagem'),
+                'horario_pedido'=> now(),
             ]);
 
             Table::find($validated['table_id'])?->update(['status' => 'ocupada']);
@@ -277,6 +289,9 @@ class OrderController extends Controller
                     'quantidade'     => $item['quantidade'],
                     'preco_unitario' => $menuItem->preco,
                     'subtotal'       => $subtotal,
+                    'status'         => 'pendente',
+                    'enviado_cozinha' => true,
+                    'enviado_cozinha_em' => now(),
                 ]);
                 $total += $subtotal;
             }
@@ -285,7 +300,14 @@ class OrderController extends Controller
             return $pedido;
         });
 
-        return redirect()->route('dashboard')
+        $pedido->load('table', 'user', 'items.menuItem');
+        KitchenEvent::create([
+            'order_id' => $pedido->id,
+            'type'     => 'item_added',
+            'payload'  => $this->kitchenPayload($pedido),
+        ]);
+
+        return redirect()->route('mesas.conta', $pedido->table_id)
             ->with('success', 'Pedido criado com sucesso!');
     }
 
@@ -293,7 +315,7 @@ class OrderController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user || !in_array($user->role, ['gerente', 'garcom'])) {
+        if (!$user || !in_array($user->role, ['gerente', 'garcom', 'caixa'])) {
             abort(403);
         }
 
@@ -350,8 +372,98 @@ class OrderController extends Controller
             $order->table?->update(['status' => 'ocupada']);
         });
 
-        return redirect()->route('dashboard')
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Pedido marcado como entregue. Aguardando pagamento.',
+                'redirect' => route('mesas.conta', $order->table_id),
+            ]);
+        }
+
+        return redirect()->route('mesas.conta', $order->table_id)
             ->with('success', '✅ Pedido marcado como entregue! Aguardando pagamento.');
+    }
+
+    public function cancelarItem(OrderItem $item)
+    {
+        if (!in_array(Auth::user()?->role, ['garcom', 'gerente'])) {
+            abort(403);
+        }
+
+        $item->load('order.items.menuItem', 'order.table', 'order.user', 'menuItem');
+        $order = $item->order;
+
+        if (!$order || in_array($order->status, ['pago', 'aguardando_pagamento', 'cancelado'])) {
+            return back()->with('error', 'Este item nao pode mais ser cancelado.');
+        }
+
+        DB::transaction(function () use ($item, $order) {
+            $item->update(['status' => 'cancelado']);
+
+            $novoTotal = $order->items()
+                ->where('status', '!=', 'cancelado')
+                ->sum('subtotal');
+
+            $order->update(['total' => $novoTotal]);
+
+            if ($order->items()->where('status', '!=', 'cancelado')->doesntExist()) {
+                $order->update(['status' => 'cancelado']);
+                $order->table?->update(['status' => 'disponivel']);
+            }
+        });
+
+        $order->refresh()->load('table', 'user', 'items.menuItem');
+        KitchenEvent::create([
+            'order_id' => $order->id,
+            'type'     => 'order_updated',
+            'payload'  => $this->kitchenPayload($order, [
+                'itens_removidos' => [[
+                    'nome'       => $item->menuItem->nome ?? 'Item',
+                    'quantidade' => $item->quantidade,
+                ]],
+            ]),
+        ]);
+
+        return back()->with('success', 'Item cancelado.');
+    }
+
+    public function cozinhaStream(Request $request)
+    {
+        if (!in_array(Auth::user()?->role, ['chef', 'garcom'])) {
+            abort(403);
+        }
+
+        $after = max(0, (int) $request->query('after', 0));
+
+        return response()->stream(function () use ($after) {
+            echo "event: connected\n";
+            echo 'data: ' . json_encode(['ok' => true]) . "\n\n";
+
+            $events = KitchenEvent::where('id', '>', $after)
+                ->orderBy('id')
+                ->limit(30)
+                ->get()
+                ->map(fn(KitchenEvent $event) => [
+                    'id'      => $event->id,
+                    'type'    => $event->type,
+                    'payload' => $event->payload,
+                ])
+                ->values();
+
+            echo "event: cozinha_eventos\n";
+            echo 'data: ' . $events->toJson() . "\n\n";
+            echo "event: reconectar\n";
+            echo "data: {}\n\n";
+
+            if (ob_get_level() > 0) {
+                ob_flush();
+            }
+            flush();
+        }, 200, [
+            'Content-Type'      => 'text/event-stream',
+            'Cache-Control'     => 'no-cache, no-transform',
+            'X-Accel-Buffering' => 'no',
+        ]);
     }
 
     public function cancelar(Order $order)
@@ -451,5 +563,27 @@ class OrderController extends Controller
                 ->with('success', '✅ Pedido #' . str_pad($order->id, 4, '0', STR_PAD_LEFT) . ' cancelado.');
         }
         return redirect()->route('dashboard')->with('success', '✅ Pedido cancelado.');
+    }
+
+    private function kitchenPayload(Order $order, array $extra = []): array
+    {
+        $order->loadMissing('table', 'user', 'items.menuItem');
+
+        return array_merge([
+            'id'     => $order->id,
+            'numero' => str_pad($order->id, 4, '0', STR_PAD_LEFT),
+            'mesa'   => $order->table->numero ?? '-',
+            'garcom' => $order->user->name ?? 'Nao informado',
+            'viagem' => (bool) $order->pedido_viagem,
+            'obs'    => $order->observacoes,
+            'itens'  => $order->items
+                ->where('status', '!=', 'cancelado')
+                ->map(fn(OrderItem $item) => [
+                    'nome'       => $item->menuItem->nome ?? 'Item',
+                    'quantidade' => $item->quantidade,
+                ])
+                ->values()
+                ->all(),
+        ], $extra);
     }
 }

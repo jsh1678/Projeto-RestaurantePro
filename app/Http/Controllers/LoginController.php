@@ -46,7 +46,14 @@ class LoginController extends Controller
         $request->session()->regenerate();
 
         // Redireciona para a área correspondente ao cargo
-        return redirect()->intended('/dashboard');
+        $destino = match ($user->role) {
+            'garcom' => route('mesas.index'),
+            'chef'   => route('chef.preparo'),
+            'caixa'  => route('caixa.dashboard'),
+            default  => route('dashboard'),
+        };
+
+        return redirect()->intended($destino);
     }
 
     public function logout(Request $request)

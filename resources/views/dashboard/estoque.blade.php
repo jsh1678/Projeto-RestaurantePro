@@ -15,6 +15,15 @@
     display:none; margin-top:10px; padding:14px;
     background:var(--bg3); border-radius:10px; border:1px solid var(--border);
 }
+.compra-form {
+    display:grid; grid-template-columns:2fr 1fr 1fr 1.5fr auto; gap:10px; align-items:end;
+}
+.history-grid {
+    display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px;
+}
+@media (max-width: 920px) {
+    .compra-form, .history-grid { grid-template-columns:1fr; }
+}
 </style>
 @endsection
 
@@ -25,6 +34,37 @@
     ⚠️ <span><strong>{{ $estoqueAlerta->count() }} item(s)</strong> abaixo do estoque mínimo — reposição necessária!</span>
 </div>
 @endif
+
+<div class="panel" style="margin-bottom:18px">
+    <div class="panel-header">
+        <div class="panel-title"><i class="fa-solid fa-cart-shopping"></i> Registrar compra para estoque</div>
+    </div>
+    <form method="POST" action="{{ route('compras.store') }}" class="compra-form">
+        @csrf
+        <div class="form-group" style="margin:0">
+            <label>Produto</label>
+            <select name="stock_item_id" class="form-select" required>
+                <option value="">Selecione</option>
+                @foreach($itens as $itemCompra)
+                <option value="{{ $itemCompra->id }}">{{ $itemCompra->nome }} ({{ $itemCompra->unidade }})</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="form-group" style="margin:0">
+            <label>Quantidade</label>
+            <input type="number" name="quantidade" step="0.001" min="0.001" max="99999" class="form-control" required>
+        </div>
+        <div class="form-group" style="margin:0">
+            <label>Preco unit.</label>
+            <input type="number" name="preco_unitario" step="0.01" min="0.01" max="999999" class="form-control" required>
+        </div>
+        <div class="form-group" style="margin:0">
+            <label>Fornecedor</label>
+            <input type="text" name="fornecedor" class="form-control" placeholder="Opcional">
+        </div>
+        <button type="submit" class="btn btn-primary">Registrar</button>
+    </form>
+</div>
 
 <div class="table-wrap">
     <div class="table-header">
@@ -39,6 +79,8 @@
                 <th>Quantidade Atual</th>
                 <th>Mínimo</th>
                 <th>Unidade</th>
+                <th>Fornecedor</th>
+                <th>Sugestao</th>
                 <th>Preço Unit.</th>
                 <th>Status</th>
                 <th>Ajuste</th>
@@ -75,6 +117,13 @@
                 $qtdDisplay = number_format($item->quantidade_atual, 0, ',', '.') . ' un';
                 $minDisplay = number_format($item->quantidade_minima, 0, ',', '.') . ' un';
             }
+            $ultimaCompra = $comprasRecentes->firstWhere('stock_item_id', $item->id);
+            $sugestaoCompra = max(0, ($item->quantidade_minima * 2) - $item->quantidade_atual);
+            $sugestaoDisplay = $isPeso
+                ? number_format($sugestaoCompra, 3, ',', '.') . ' kg'
+                : ($isVolume
+                    ? number_format($sugestaoCompra, 2, ',', '.') . ' L'
+                    : number_format($sugestaoCompra, 0, ',', '.') . ' un');
         @endphp
         <tr class="stock-row" data-nome="{{ strtolower($item->nome) }}">
             <td>
@@ -90,6 +139,16 @@
             </td>
             <td>
                 <span class="unidade-badge">{{ $item->unidade }}</span>
+            </td>
+            <td style="color:var(--muted); font-size:12px">
+                {{ $ultimaCompra?->fornecedor ?: '-' }}
+            </td>
+            <td>
+                @if($sugestaoCompra > 0)
+                    <span class="badge badge-warning">Comprar {{ $sugestaoDisplay }}</span>
+                @else
+                    <span class="badge badge-success">OK</span>
+                @endif
             </td>
             <td class="td-mono">R$ {{ number_format($item->preco_unitario, 2, ',', '.') }}</td>
             <td>
@@ -146,12 +205,78 @@
             </td>
         </tr>
         @empty
-        <tr><td colspan="7">
+        <tr><td colspan="9">
             <div class="empty-state">📦<p>Nenhum item cadastrado</p></div>
         </td></tr>
         @endforelse
         </tbody>
     </table>
+</div>
+
+<div class="history-grid">
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title"><i class="fa-solid fa-receipt"></i> Compras recentes</div>
+        </div>
+        <div class="table-wrap" style="box-shadow:none; margin:0">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Qtd.</th>
+                        <th>Fornecedor</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @forelse($comprasRecentes as $compra)
+                    <tr>
+                        <td>{{ $compra->stockItem?->nome ?? '-' }}</td>
+                        <td>{{ number_format($compra->quantidade, 3, ',', '.') }}</td>
+                        <td>{{ $compra->fornecedor ?: '-' }}</td>
+                        <td class="td-mono">R$ {{ number_format($compra->total, 2, ',', '.') }}</td>
+                    </tr>
+                @empty
+                    <tr><td colspan="4"><div class="empty-state"><p>Nenhuma compra registrada</p></div></td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title"><i class="fa-solid fa-clock-rotate-left"></i> Movimentações recentes</div>
+        </div>
+        <div class="table-wrap" style="box-shadow:none; margin:0">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Tipo</th>
+                        <th>Qtd.</th>
+                        <th>Motivo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @forelse($movimentosRecentes as $movimento)
+                    <tr>
+                        <td>{{ $movimento->stockItem?->nome ?? '-' }}</td>
+                        <td>
+                            <span class="badge {{ $movimento->tipo === 'entrada' ? 'badge-success' : 'badge-warning' }}">
+                                {{ ucfirst($movimento->tipo) }}
+                            </span>
+                        </td>
+                        <td>{{ number_format($movimento->quantidade, 3, ',', '.') }}</td>
+                        <td style="color:var(--muted); font-size:12px">{{ $movimento->motivo ?: '-' }}</td>
+                    </tr>
+                @empty
+                    <tr><td colspan="4"><div class="empty-state"><p>Nenhuma movimentação registrada</p></div></td></tr>
+                @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 @endsection
 

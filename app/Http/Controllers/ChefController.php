@@ -166,6 +166,22 @@ class ChefController extends Controller
                     'horario_pronto'          => now(),
                     'horario_termino_preparo' => now(),
                 ]);
+
+                $pedido->load('table', 'user', 'items.menuItem');
+                KitchenEvent::create([
+                    'order_id' => $pedido->id,
+                    'type'     => 'order_ready',
+                    'payload'  => [
+                        'id'     => $pedido->id,
+                        'numero' => str_pad($pedido->id, 4, '0', STR_PAD_LEFT),
+                        'mesa'   => $pedido->table->numero ?? '-',
+                        'garcom' => $pedido->user->name ?? 'Nao informado',
+                        'itens'  => $pedido->items->map(fn(OrderItem $pedidoItem) => [
+                            'nome'       => $pedidoItem->menuItem->nome ?? 'Item',
+                            'quantidade' => $pedidoItem->quantidade,
+                        ])->values()->all(),
+                    ],
+                ]);
             }
         });
 

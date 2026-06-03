@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\StockItem;
 use App\Models\StockMovement;
+use App\Models\Purchase;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -16,14 +17,26 @@ class StockController extends Controller
             abort(403);
         }
 
-        $itens = StockItem::all();
+        $itens = StockItem::with(['movimentos' => fn($q) => $q->latest()->limit(3)])
+            ->orderBy('nome')
+            ->get();
         $estoqueAlerta = $itens->filter(function($item) {
             return $item->quantidade_atual <= $item->quantidade_minima;
         });
+        $comprasRecentes = Purchase::with('stockItem', 'user')
+            ->orderByDesc('created_at')
+            ->limit(12)
+            ->get();
+        $movimentosRecentes = StockMovement::with('stockItem', 'user')
+            ->orderByDesc('created_at')
+            ->limit(20)
+            ->get();
 
         return view('dashboard.estoque', [
-            'itens' => $itens,
-            'estoqueAlerta' => $estoqueAlerta,
+            'itens'              => $itens,
+            'estoqueAlerta'      => $estoqueAlerta,
+            'comprasRecentes'    => $comprasRecentes,
+            'movimentosRecentes' => $movimentosRecentes,
         ]);
     }
 

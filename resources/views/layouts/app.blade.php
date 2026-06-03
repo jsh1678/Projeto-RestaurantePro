@@ -3051,9 +3051,6 @@ tbody tr:hover {
     <a href="{{ route('dashboard.estoque') }}" class="{{ request()->routeIs('dashboard.estoque','controle.estoque*') ? 'active' : '' }}">
       <div class="nav-ic"><i class="fa-solid fa-warehouse"></i></div> Estoque
     </a>
-    <a href="{{ route('compras.index') }}" class="{{ request()->routeIs('compras.*') ? 'active' : '' }}">
-      <div class="nav-ic"><i class="fa-solid fa-cart-shopping"></i></div> Compras
-    </a>
     <a href="{{ route('dashboard.vendas') }}" class="{{ request()->routeIs('dashboard.vendas') ? 'active' : '' }}">
       <div class="nav-ic"><i class="fa-solid fa-chart-line"></i></div> Vendas
     </a>
@@ -3160,9 +3157,11 @@ tbody tr:hover {
       <i class="fa-solid fa-cash-register"></i><span>Caixa</span>
     </a>
     @endif
+    @if($authRole !== 'caixa')
     <button type="button" onclick="abrirCommandPalette()" aria-label="Abrir busca">
       <i class="fa-solid fa-magnifying-glass"></i><span>Buscar</span>
     </button>
+    @endif
   @endif
 </nav>
 @endauth
@@ -3178,7 +3177,7 @@ tbody tr:hover {
     </div>
     @auth
     <div class="topbar-actions">
-      <div class="quick-search" role="search">
+      <div class="quick-search" role="search" @if($authRole === 'caixa' || request()->routeIs('caixa.*')) style="display:none" @endif>
         <i class="fa-solid fa-magnifying-glass"></i>
         <input type="search" id="quick-search-input" placeholder="Pesquisar modulo (Ctrl+K)">
       </div>
@@ -3422,6 +3421,7 @@ function renderCommandResults(query){
   }).join('');
 }
 function abrirCommandPalette(){
+  if(@json($authRole) === 'caixa') return;
   collectCommandLinks();
   var palette=document.getElementById('command-palette');
   var input=document.getElementById('command-input');

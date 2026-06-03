@@ -132,7 +132,7 @@
         <i class="fa-solid fa-arrow-right action-card-arrow"></i>
     </a>
 
-    <a href="{{ route('compras.index') }}" class="action-card action-card-info">
+    <a href="{{ route('dashboard.estoque') }}" class="action-card action-card-info">
         <div class="sc-icon"><i class="fa-solid fa-cart-shopping"></i></div>
         <div class="action-card-body">
             <div class="action-card-title">Registrar Compra</div>

@@ -6,27 +6,17 @@ use App\Models\Purchase;
 use App\Models\StockItem;
 use App\Models\StockMovement;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
 
 class PurchaseController extends Controller
 {
-    public function index(): View
+    public function index(): RedirectResponse
     {
         if (Auth::user()?->role !== 'gerente') {
             abort(403);
         }
 
-        $compras = Purchase::with('stockItem', 'user')
-            ->orderByDesc('created_at')
-            ->get();
-
-        $itens = StockItem::all();
-
-        return view('dashboard.compras', [
-            'compras' => $compras,
-            'itens'   => $itens,
-        ]);
+        return redirect()->route('dashboard.estoque');
     }
 
     public function store(): RedirectResponse
@@ -103,7 +93,7 @@ class PurchaseController extends Controller
             'user_id'            => Auth::id(),
         ]);
 
-        return back()->with('success', '✅ Compra registrada com sucesso!');
+        return redirect()->route('dashboard.estoque')->with('success', 'Compra registrada e estoque atualizado.');
     }
 
     public function cancelar(Purchase $purchase): RedirectResponse
@@ -134,6 +124,6 @@ class PurchaseController extends Controller
         $purchase->status = 'cancelado';
         $purchase->save();
 
-        return back()->with('success', '✅ Compra cancelada e estoque revertido!');
+        return redirect()->route('dashboard.estoque')->with('success', 'Compra cancelada e estoque revertido.');
     }
 }
