@@ -106,6 +106,10 @@ class OrderController extends Controller
             return back()->with('error', '❌ Este pedido não pode mais ser editado.');
         }
 
+        if (!$request->has('itens') && $request->has('items')) {
+            $request->merge(['itens' => $request->input('items')]);
+        }
+
         $validated = $request->validate([
             'table_id'             => 'required|exists:tables,id',
             'observacoes'          => 'nullable|string',
@@ -165,6 +169,10 @@ class OrderController extends Controller
             if (now()->lessThan($reabreEm)) {
                 return back()->with('error', '🔒 Caixa fechado. Nenhum pedido pode ser feito até amanhã às 10h.');
             }
+        }
+
+        if (!$request->has('itens') && $request->has('items')) {
+            $request->merge(['itens' => $request->input('items')]);
         }
 
         $validated = $request->validate([

@@ -428,6 +428,19 @@
 </div>
 @endif
 
+@if(session('error'))
+<div class="alert alert-error" style="margin-bottom:16px">
+    <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+</div>
+@endif
+
+@if($errors->any())
+<div class="alert alert-error" style="margin-bottom:16px">
+    <i class="fas fa-exclamation-circle"></i>
+    <span>{{ $errors->first() }}</span>
+</div>
+@endif
+
 @if($pedido)
 <div class="edit-banner">
     <i class="fas fa-pencil-alt"></i>
@@ -614,9 +627,9 @@
                 </div>
             </div>
 
-            @if($errors->has('items'))
+            @if($errors->has('itens') || $errors->has('items'))
             <div class="alert alert-error" style="margin-bottom:12px; padding:10px 14px; font-size:13px">
-                <i class="fas fa-exclamation-circle"></i> {{ $errors->first('items') }}
+                <i class="fas fa-exclamation-circle"></i> {{ $errors->first('itens') ?: $errors->first('items') }}
             </div>
             @endif
 
@@ -772,8 +785,8 @@ function updateResumo() {
                 <span style="color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${qtds[id]}× ${p.nome}</span>
                 <span style="font-weight:700;color:#fff;white-space:nowrap;margin-left:8px">R$ ${sub.toFixed(2).replace('.',',')}</span>
             </div>`;
-            hiddenHtml += `<input type="hidden" name="items[${idx}][menu_item_id]" value="${id}">`;
-            hiddenHtml += `<input type="hidden" name="items[${idx}][quantidade]" value="${qtds[id]}">`;
+            hiddenHtml += `<input type="hidden" name="itens[${idx}][menu_item_id]" value="${id}">`;
+            hiddenHtml += `<input type="hidden" name="itens[${idx}][quantidade]" value="${qtds[id]}">`;
             idx++;
         }
     }
@@ -893,7 +906,7 @@ function enviarPedido() {
     }
 
     // Remove inputs anteriores de items
-    form.querySelectorAll('input[name^="items["]').forEach(el => el.remove());
+    form.querySelectorAll('input[name^="itens["], input[name^="items["]').forEach(el => el.remove());
 
     // Cria os inputs diretamente no form com o nome que o controller espera
     let idx = 0;
@@ -904,19 +917,19 @@ function enviarPedido() {
 
             const i1 = document.createElement('input');
             i1.type  = 'hidden';
-            i1.name  = 'items[' + idx + '][menu_item_id]';
+            i1.name  = 'itens[' + idx + '][menu_item_id]';
             i1.value = id;
             form.appendChild(i1);
 
             const i2 = document.createElement('input');
             i2.type  = 'hidden';
-            i2.name  = 'items[' + idx + '][quantidade]';
+            i2.name  = 'itens[' + idx + '][quantidade]';
             i2.value = qtds[id];
             form.appendChild(i2);
 
             const i3 = document.createElement('input');
             i3.type  = 'hidden';
-            i3.name  = 'items[' + idx + '][subtotal]';
+            i3.name  = 'itens[' + idx + '][subtotal]';
             i3.value = subtotal;
             form.appendChild(i3);
 
