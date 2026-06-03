@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\KitchenEvent;
 use App\Models\StockItem;
 use App\Models\StockMovement;
 use App\Models\MenuItemIngredient;
@@ -49,9 +50,10 @@ class ChefController extends Controller
         }
 
         return view('dashboard.chef-preparo', [
-            'pedidosEmPreparo' => $pedidosEmPreparo,
-            'totalItems'       => $totalItems,
-            'itensProntos'     => $itensProntos,
+            'pedidosEmPreparo'   => $pedidosEmPreparo,
+            'totalItems'         => $totalItems,
+            'itensProntos'       => $itensProntos,
+            'cozinhaEventCursor' => KitchenEvent::max('id') ?? 0,
         ]);
     }
 
