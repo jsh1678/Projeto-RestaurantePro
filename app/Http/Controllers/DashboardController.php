@@ -68,14 +68,6 @@ class DashboardController extends Controller
                     ->orderBy('created_at')
                     ->get(),
                 'cozinhaEventCursor' => KitchenEvent::max('id') ?? 0,
-                'pagamentosDia'      => Payment::whereDate('created_at', $dataHoje)
-                    ->where('status', 'confirmado')
-                    ->with('order')
-                    ->orderByDesc('created_at')
-                    ->get(),
-                'totalPagamentosDia' => Payment::whereDate('created_at', $dataHoje)
-                    ->where('status', 'confirmado')
-                    ->sum('valor_final'),
             ]),
 
             'chef'  => app(ChefController::class)->dashboard(),
@@ -94,6 +86,10 @@ class DashboardController extends Controller
 
     public function vendas()
     {
+        if (Auth::user()?->role !== 'gerente') {
+            abort(403);
+        }
+
         $dataHoje   = Carbon::today();
         $dataInicio = $dataHoje->copy()->startOfMonth();
         $dataFim    = $dataHoje->copy()->endOfMonth();
@@ -138,13 +134,33 @@ class DashboardController extends Controller
 
     public function mesas()
     {
+        if (Auth::user()?->role !== 'gerente') {
+            abort(403);
+        }
+
         $mesas = Table::with('garcom')->get();
         return view('dashboard.mesas', compact('mesas'));
     }
 
     public function pedidos()
     {
-        $pedidos = Order::with('table', 'user', 'items')->orderByDesc('created_at')->get();
+        /** @var User|null $user */
+        $user = Auth::user();
+
+        if (!in_array($user?->role, ['gerente', 'garcom'])) {
+            abort(403);
+        }
+
+        $pedidos = Order::with('table', 'user', 'items')
+            ->when($user?->role === 'garcom', function ($query) use ($user) {
+                $query->where(function ($q) use ($user) {
+                    $q->where('user_id', $user->id)
+                        ->orWhereIn('status', ['em_preparo', 'pronto_entrega', 'aguardando_pagamento']);
+                });
+            })
+            ->orderByDesc('created_at')
+            ->get();
+
         return view('dashboard.pedidos', compact('pedidos'));
     }
 

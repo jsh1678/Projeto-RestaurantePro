@@ -310,7 +310,7 @@ Mesa {{ $mesa->numero }} — Conta
     </div>
     <div style="display:flex; gap:10px; flex-wrap:wrap">
         {{-- Só mostra "Novo Pedido" se a conta NÃO estiver fechada --}}
-        @if(!$contaFechada && in_array(Auth::user()?->role, ['garcom','gerente']))
+        @if(!$contaFechada && Auth::user()?->role === 'garcom')
         <a href="{{ route('orders.create', ['table_id' => $mesa->id]) }}" class="btn btn-primary">
             <i class="fas fa-plus"></i> Novo Pedido
         </a>
@@ -342,7 +342,7 @@ Mesa {{ $mesa->numero }} — Conta
 <div class="empty-state" style="margin-top:60px">
     <i class="fas fa-utensils"></i>
     <p>Nenhum pedido em aberto para esta mesa</p>
-    @if(in_array(Auth::user()?->role, ['garcom','gerente']))
+    @if(Auth::user()?->role === 'garcom')
     <a href="{{ route('orders.create', ['table_id' => $mesa->id]) }}" class="btn btn-primary" style="margin-top:16px">
         <i class="fas fa-plus"></i> Criar Pedido
     </a>
@@ -487,7 +487,7 @@ Mesa {{ $mesa->numero }} — Conta
             </div>
             @endif
 
-            @if(!$contaFechada && in_array(Auth::user()?->role, ['garcom','gerente']))
+            @if(!$contaFechada && Auth::user()?->role === 'garcom')
             <form method="POST" action="{{ route('mesas.fechar-conta', $mesa) }}">
                 @csrf
                 <button type="submit" class="btn btn-warning"
@@ -499,7 +499,7 @@ Mesa {{ $mesa->numero }} — Conta
             @endif
 
             {{-- Já fechada: aviso para garçom --}}
-            @if($contaFechada && in_array(Auth::user()?->role, ['garcom']) && !in_array(Auth::user()?->role, ['caixa','gerente']))
+            @if($contaFechada && Auth::user()?->role === 'garcom')
             <div style="text-align:center; color:var(--muted); font-size:13px; padding:10px 0">
                 <i class="fas fa-hourglass-half"></i> Aguardando pagamento no caixa
             </div>
@@ -536,7 +536,7 @@ Mesa {{ $mesa->numero }} — Conta
             </div>
 
             {{-- Pagar (caixa/gerente) --}}
-            @if(in_array(Auth::user()?->role, ['caixa','gerente']))
+            @if(Auth::user()?->role === 'caixa')
             <div style="border-top:1px solid var(--border); padding-top:16px">
                 <div style="font-size:13px; font-weight:700; color:#fff; margin-bottom:12px">
                     <i class="fas fa-credit-card"></i> Registrar Pagamento

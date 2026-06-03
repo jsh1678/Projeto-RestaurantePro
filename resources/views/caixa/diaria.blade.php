@@ -31,7 +31,7 @@ tailwind.config = {
   Fechado {{ $caixaFechadoEm ? \Carbon\Carbon::parse($caixaFechadoEm)->format('d/m/Y \à\s H:i') : '' }}.
   Reabre automaticamente em <strong>{{ $caixaReabreEm ? \Carbon\Carbon::parse($caixaReabreEm)->format('d/m/Y \à\s H:i') : '—' }}</strong>.
   <span id="countdown" class="ml-2 font-mono text-sm opacity-80"></span>
-  @if(Auth::user()?->role === 'gerente')
+  @if(Auth::user()?->role === 'caixa')
   <form method="POST" action="{{ route('caixa.abrir') }}" class="ml-auto" style="margin-left:auto">
     @csrf
     <button type="submit" class="btn btn-success btn-sm">🔓 Reabrir agora</button>
@@ -212,12 +212,18 @@ tailwind.config = {
           </label>
         </div>
 
+        @if(Auth::user()?->role === 'caixa')
         <form method="POST" action="{{ route('caixa.fechar') }}">
           @csrf
           <button type="submit" id="btn-fechar" class="btn btn-danger" style="width:100%;justify-content:center;opacity:.4;pointer-events:none;" disabled>
             🔒 Fechar e gerar relatório
           </button>
         </form>
+        @else
+        <div class="alert alert-info">
+          <i class="fa-solid fa-eye"></i> Consulta do gerente. Fechamento operado pelo caixa.
+        </div>
+        @endif
 
         <div style="margin-top:10px;text-align:center;font-size:11px;color:var(--muted);">
           Reabertura automática às 10h do próximo dia
@@ -233,7 +239,7 @@ tailwind.config = {
           <div id="countdown-big" class="font-mono mt-3" style="font-size:22px;font-weight:900;color:#f87171;letter-spacing:2px;"></div>
         </div>
 
-        @if(Auth::user()?->role === 'gerente')
+        @if(Auth::user()?->role === 'caixa')
         <form method="POST" action="{{ route('caixa.abrir') }}" class="mt-4">
           @csrf
           <button type="submit" class="btn btn-success" style="width:100%;justify-content:center;">

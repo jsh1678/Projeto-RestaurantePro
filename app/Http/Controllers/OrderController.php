@@ -291,6 +291,20 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
+        $user = Auth::user();
+
+        if (!$user || !in_array($user->role, ['gerente', 'garcom'])) {
+            abort(403);
+        }
+
+        if (
+            $user->role === 'garcom'
+            && $order->user_id !== $user->id
+            && !in_array($order->status, ['em_preparo', 'pronto_entrega', 'aguardando_pagamento'])
+        ) {
+            abort(403);
+        }
+
         return view('orders.show', [
             'pedido' => $order->load('table', 'items.menuItem', 'payment'),
         ]);

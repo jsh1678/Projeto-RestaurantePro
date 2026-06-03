@@ -579,6 +579,7 @@
                         </div>
                         <div class="payment-total"><span style="display:block;color:var(--muted);font-size:12px;text-align:right;text-transform:uppercase">Total da conta</span>R$ {{ number_format($saldoPedido > 0 ? $saldoPedido : $totalPedido,2,',','.') }}</div>
                     </div>
+                    @if(Auth::user()?->role === 'caixa')
                     <form method="POST" action="{{ route('caixa.pagamento', $p) }}" class="pagamento-form" data-total="{{ $saldoPedido > 0 ? $saldoPedido : $totalPedido }}" data-base-total="{{ $totalPedido }}" data-pedido="{{ str_pad($p->id,4,'0',STR_PAD_LEFT) }}" data-pix-payload="{{ e(\App\Support\PixPayload::make((float) ($saldoPedido > 0 ? $saldoPedido : $totalPedido), 'PED' . str_pad($p->id,4,'0',STR_PAD_LEFT))) }}">
                         @csrf
                         <div class="payment-left">
@@ -661,6 +662,16 @@
                         </div>
                         </div>
                     </form>
+                    @else
+                    <div class="cash-summary" style="margin-top:12px">
+                        <div class="cash-summary-line"><span>Subtotal</span><strong>R$ {{ number_format($totalPedido,2,',','.') }}</strong></div>
+                        <div class="cash-summary-line"><span>Taxa de Servico</span><strong>R$ {{ number_format($taxaPedido,2,',','.') }}</strong></div>
+                        <div class="cash-summary-line total"><span>Total em aberto</span><strong>R$ {{ number_format($saldoPedido > 0 ? $saldoPedido : $totalPedido,2,',','.') }}</strong></div>
+                    </div>
+                    <div class="alert alert-info" style="margin-top:12px">
+                        <i class="fa-solid fa-eye"></i> Consulta do gerente. Pagamentos sao operados pelo caixa.
+                    </div>
+                    @endif
                 </div>
                 @endforeach
                 </div>
@@ -674,6 +685,7 @@
                 <span class="badge badge-danger">Hoje: R$ {{ number_format($sangriasHoje,2,',','.') }}</span>
                 @endif
             </div>
+            @if(Auth::user()?->role === 'caixa')
             <form method="POST" action="{{ route('caixa.sangria') }}" class="sangria-form">
                 @csrf
                 <div class="form-group">
@@ -686,6 +698,11 @@
                 </div>
                 <button type="submit" class="btn btn-danger">💸 Registrar</button>
             </form>
+            @else
+            <div class="alert alert-info">
+                <i class="fa-solid fa-eye"></i> Consulta do gerente. Sangrias sao registradas pelo caixa.
+            </div>
+            @endif
 
             @if($historicoSangrias->isNotEmpty())
             <div class="sangria-history">

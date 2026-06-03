@@ -13,6 +13,10 @@ class PurchaseController extends Controller
 {
     public function index(): View
     {
+        if (Auth::user()?->role !== 'gerente') {
+            abort(403);
+        }
+
         $compras = Purchase::with('stockItem', 'user')
             ->orderByDesc('created_at')
             ->get();
@@ -104,6 +108,10 @@ class PurchaseController extends Controller
 
     public function cancelar(Purchase $purchase): RedirectResponse
     {
+        if (Auth::user()?->role !== 'gerente') {
+            abort(403, 'Acesso negado. Apenas gerente pode cancelar compras.');
+        }
+
         if ($purchase->status !== 'recebido') {
             return back()->with('error', '❌ Só é possível cancelar compras recebidas.');
         }

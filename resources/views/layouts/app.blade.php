@@ -2876,7 +2876,7 @@ tbody tr:hover {
     bottom: 0;
     z-index: 90;
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
     gap: 2px;
     padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
     border-top: 1px solid var(--border);
@@ -3037,83 +3037,70 @@ tbody tr:hover {
   </div>
 
   <nav id="sidebar-nav">
-    <div class="sb-section">Principal</div>
-    <a href="{{ route('dashboard') }}" class="{{ request()->is('dashboard') ? 'active' : '' }}">
-      <div class="nav-ic"><i class="fa-solid fa-house"></i></div> Inicio
-    </a>
-    <a href="{{ route('dashboard.pedidos') }}" class="{{ request()->routeIs('dashboard.pedidos','orders.show') ? 'active' : '' }}">
-      <div class="nav-ic"><i class="fa-solid fa-receipt"></i></div> Pedidos
-    </a>
-
-    @if(in_array($authRole,['gerente','garcom']))
-    <div class="sb-section">Salao</div>
-    <a href="{{ route('mesas.index') }}" class="{{ request()->routeIs('mesas.*') ? 'active' : '' }}">
-      <div class="nav-ic"><i class="fa-solid fa-chair"></i></div> Mesas
-    </a>
-    @endif
-
-    @if($authRole === 'garcom')
-    <a href="{{ route('orders.create') }}" class="{{ request()->routeIs('orders.create') ? 'active' : '' }}">
-      <div class="nav-ic"><i class="fa-solid fa-plus"></i></div> Novo Pedido
-    </a>
-    @endif
-
-    @if(in_array($authRole, ['chef','gerente']))
-    <div class="sb-section">Cozinha</div>
-    <a href="{{ route('chef.preparo') }}" class="{{ request()->routeIs('chef.preparo') ? 'active' : '' }}">
-      <div class="nav-ic"><i class="fa-solid fa-fire-burner"></i></div> Preparo
-    </a>
-    <a href="{{ route('chef.estoque') }}" class="{{ request()->routeIs('chef.estoque') ? 'active' : '' }}">
-      <div class="nav-ic"><i class="fa-solid fa-boxes-stacked"></i></div> Estoque
-    </a>
-    @endif
-
-    @if(in_array($authRole,['caixa','gerente']))
-    <div class="sb-section">Financeiro</div>
-    <a href="{{ route('caixa.pagar-mesa') }}" class="{{ request()->routeIs('caixa.*') ? 'active' : '' }}">
-      <div class="nav-ic"><i class="fa-solid fa-cash-register"></i></div> Caixa
-    </a>
-    <a href="{{ route('caixa.diaria') }}" class="{{ request()->routeIs('caixa.diaria') ? 'active' : '' }}">
-      <div class="nav-ic"><i class="fa-solid fa-clipboard-list"></i></div> Diaria
-    </a>
-    @endif
-
     @if($authRole === 'gerente')
-    <div class="sb-section">Cadastros</div>
-    <a href="{{ route('gerenciar.mesas') }}" class="{{ request()->routeIs('gerenciar.mesas') ? 'active' : '' }}">
+    <div class="sb-section">Gerente</div>
+    <a href="{{ route('dashboard') }}" class="{{ request()->is('dashboard') ? 'active' : '' }}">
+      <div class="nav-ic"><i class="fa-solid fa-house"></i></div> Dashboard
+    </a>
+    <a href="{{ route('mesas.index') }}" class="{{ request()->routeIs('mesas.*') ? 'active' : '' }}">
       <div class="nav-ic"><i class="fa-solid fa-chair"></i></div> Mesas
     </a>
     <a href="{{ route('gerenciar.cardapio') }}" class="{{ request()->routeIs('gerenciar.cardapio*') ? 'active' : '' }}">
       <div class="nav-ic"><i class="fa-solid fa-utensils"></i></div> Cardapio
     </a>
-    <a href="{{ route('gerenciar.funcionarios') }}" class="{{ request()->routeIs('gerenciar.funcionarios') ? 'active' : '' }}">
-      <div class="nav-ic"><i class="fa-solid fa-users"></i></div> Funcionarios
-    </a>
-    <a href="{{ route('gerenciar.produtos') }}" class="{{ request()->routeIs('gerenciar.produtos*') ? 'active' : '' }}">
-      <div class="nav-ic"><i class="fa-solid fa-box"></i></div> Produtos
-    </a>
-
-    <div class="sb-section">Relatorios</div>
-    <a href="{{ route('gestao.relatorios') }}" class="{{ request()->routeIs('gestao.relatorios') ? 'active' : '' }}">
-      <div class="nav-ic"><i class="fa-solid fa-chart-pie"></i></div> Gestao
-    </a>
-    <a href="{{ route('dashboard.relatorios') }}" class="{{ request()->routeIs('dashboard.relatorios') ? 'active' : '' }}">
-      <div class="nav-ic"><i class="fa-solid fa-file-lines"></i></div> Periodo
-    </a>
-    <a href="{{ route('dashboard.vendas') }}" class="{{ request()->routeIs('dashboard.vendas') ? 'active' : '' }}">
-      <div class="nav-ic"><i class="fa-solid fa-chart-line"></i></div> Vendas
-    </a>
-
-    <div class="sb-section">Estoque</div>
-    <a href="{{ route('controle.estoque') }}" class="{{ request()->routeIs('controle.estoque*') ? 'active' : '' }}">
-      <div class="nav-ic"><i class="fa-solid fa-arrows-rotate"></i></div> Controle
-    </a>
-    <a href="{{ route('dashboard.estoque') }}" class="{{ request()->routeIs('dashboard.estoque') ? 'active' : '' }}">
-      <div class="nav-ic"><i class="fa-solid fa-warehouse"></i></div> Inventario
+    <a href="{{ route('dashboard.estoque') }}" class="{{ request()->routeIs('dashboard.estoque','controle.estoque*') ? 'active' : '' }}">
+      <div class="nav-ic"><i class="fa-solid fa-warehouse"></i></div> Estoque
     </a>
     <a href="{{ route('compras.index') }}" class="{{ request()->routeIs('compras.*') ? 'active' : '' }}">
       <div class="nav-ic"><i class="fa-solid fa-cart-shopping"></i></div> Compras
     </a>
+    <a href="{{ route('dashboard.vendas') }}" class="{{ request()->routeIs('dashboard.vendas') ? 'active' : '' }}">
+      <div class="nav-ic"><i class="fa-solid fa-chart-line"></i></div> Vendas
+    </a>
+    <a href="{{ route('dashboard.relatorios') }}" class="{{ request()->routeIs('dashboard.relatorios','gestao.relatorios') ? 'active' : '' }}">
+      <div class="nav-ic"><i class="fa-solid fa-file-lines"></i></div> Relatorios
+    </a>
+    <a href="{{ route('gerenciar.funcionarios') }}" class="{{ request()->routeIs('gerenciar.funcionarios','usuarios.*') ? 'active' : '' }}">
+      <div class="nav-ic"><i class="fa-solid fa-users"></i></div> Funcionarios
+    </a>
+    <a href="{{ route('caixa.dashboard') }}" class="{{ request()->routeIs('caixa.*') ? 'active' : '' }}">
+      <div class="nav-ic"><i class="fa-solid fa-cash-register"></i></div> Caixa
+    </a>
+    <a href="{{ route('gerenciar.mesas') }}" class="{{ request()->routeIs('gerenciar.mesas') ? 'active' : '' }}">
+      <div class="nav-ic"><i class="fa-solid fa-gear"></i></div> Configuracoes
+    </a>
+    @elseif($authRole === 'garcom')
+    <div class="sb-section">Garcom</div>
+    <a href="{{ route('mesas.index') }}" class="{{ request()->routeIs('mesas.*') ? 'active' : '' }}">
+      <div class="nav-ic"><i class="fa-solid fa-chair"></i></div> Mesas
+    </a>
+    <a href="{{ route('dashboard.pedidos') }}" class="{{ request()->routeIs('dashboard.pedidos','orders.*') ? 'active' : '' }}">
+      <div class="nav-ic"><i class="fa-solid fa-receipt"></i></div> Pedidos
+    </a>
+    <a href="{{ route('dashboard') }}#entregas" class="{{ request()->is('dashboard') ? 'active' : '' }}">
+      <div class="nav-ic"><i class="fa-solid fa-fire-burner"></i></div> Cozinha
+    </a>
+    <a href="{{ route('mesas.index') }}" class="{{ request()->routeIs('mesas.conta') ? 'active' : '' }}">
+      <div class="nav-ic"><i class="fa-solid fa-file-invoice"></i></div> Conta
+    </a>
+    @else
+    <div class="sb-section">Principal</div>
+    <a href="{{ route('dashboard') }}" class="{{ request()->is('dashboard') ? 'active' : '' }}">
+      <div class="nav-ic"><i class="fa-solid fa-house"></i></div> Inicio
+    </a>
+    @if($authRole === 'chef')
+    <a href="{{ route('chef.preparo') }}" class="{{ request()->routeIs('chef.preparo') ? 'active' : '' }}">
+      <div class="nav-ic"><i class="fa-solid fa-fire-burner"></i></div> Cozinha
+    </a>
+    <a href="{{ route('chef.estoque') }}" class="{{ request()->routeIs('chef.estoque') ? 'active' : '' }}">
+      <div class="nav-ic"><i class="fa-solid fa-boxes-stacked"></i></div> Estoque
+    </a>
+    @endif
+    @if($authRole === 'caixa')
+    <a href="{{ route('caixa.pagar-mesa') }}" class="{{ request()->routeIs('caixa.*') ? 'active' : '' }}">
+      <div class="nav-ic"><i class="fa-solid fa-cash-register"></i></div> Caixa
+    </a>
+    @endif
     @endif
   </nav>
 
@@ -3125,40 +3112,50 @@ tbody tr:hover {
 </aside>
 
 @php
-  $mobileEntregasCount = in_array($authRole, ['garcom','gerente'])
+  $mobileEntregasCount = $authRole === 'garcom'
     ? \App\Models\Order::where('status', 'pronto_entrega')->count()
     : 0;
 @endphp
 <nav class="mobile-bottom-nav" aria-label="Navegacao principal mobile">
-  @if(in_array($authRole, ['garcom','gerente']))
+  @if($authRole === 'gerente')
+    <a href="{{ route('dashboard') }}" class="{{ request()->is('dashboard') ? 'active' : '' }}">
+      <i class="fa-solid fa-house"></i><span>Dashboard</span>
+    </a>
     <a href="{{ route('mesas.index') }}" class="{{ request()->routeIs('mesas.*') ? 'active' : '' }}">
       <i class="fa-solid fa-chair"></i><span>Mesas</span>
     </a>
-    <a href="{{ route('orders.create') }}" class="{{ request()->routeIs('orders.create') ? 'active' : '' }}">
-      <i class="fa-solid fa-plus"></i><span>Pedido</span>
+    <a href="{{ route('gerenciar.cardapio') }}" class="{{ request()->routeIs('gerenciar.cardapio*') ? 'active' : '' }}">
+      <i class="fa-solid fa-utensils"></i><span>Cardapio</span>
     </a>
-    <a href="{{ route('dashboard.pedidos') }}" class="{{ request()->routeIs('dashboard.pedidos','orders.show') ? 'active' : '' }}">
-      <i class="fa-solid fa-bell-concierge"></i><span>Entregas ({{ $mobileEntregasCount }})</span>
+    <a href="{{ route('dashboard.estoque') }}" class="{{ request()->routeIs('dashboard.estoque','controle.estoque*') ? 'active' : '' }}">
+      <i class="fa-solid fa-warehouse"></i><span>Estoque</span>
+    </a>
+    <a href="{{ route('dashboard.relatorios') }}" class="{{ request()->routeIs('dashboard.relatorios','gestao.relatorios') ? 'active' : '' }}">
+      <i class="fa-solid fa-file-lines"></i><span>Relatorios</span>
+    </a>
+  @elseif($authRole === 'garcom')
+    <a href="{{ route('mesas.index') }}" class="{{ request()->routeIs('mesas.*') ? 'active' : '' }}">
+      <i class="fa-solid fa-chair"></i><span>Mesas</span>
+    </a>
+    <a href="{{ route('dashboard.pedidos') }}" class="{{ request()->routeIs('dashboard.pedidos','orders.*') ? 'active' : '' }}">
+      <i class="fa-solid fa-receipt"></i><span>Pedidos</span>
+    </a>
+    <a href="{{ route('dashboard') }}#entregas" class="{{ request()->is('dashboard') ? 'active' : '' }}">
+      <i class="fa-solid fa-fire-burner"></i><span>Cozinha ({{ $mobileEntregasCount }})</span>
     </a>
     <a href="{{ route('mesas.index') }}" class="{{ request()->routeIs('mesas.conta') ? 'active' : '' }}">
       <i class="fa-solid fa-receipt"></i><span>Conta</span>
-    </a>
-    <a href="{{ route('dashboard') }}" class="{{ request()->is('dashboard') ? 'active' : '' }}">
-      <i class="fa-solid fa-user"></i><span>Perfil</span>
     </a>
   @else
     <a href="{{ route('dashboard') }}" class="{{ request()->is('dashboard') ? 'active' : '' }}">
       <i class="fa-solid fa-house"></i><span>Inicio</span>
     </a>
-    <a href="{{ route('dashboard.pedidos') }}" class="{{ request()->routeIs('dashboard.pedidos','orders.*') ? 'active' : '' }}">
-      <i class="fa-solid fa-receipt"></i><span>Pedidos</span>
-    </a>
-    @if(in_array($authRole, ['chef','gerente']))
+    @if($authRole === 'chef')
     <a href="{{ route('chef.preparo') }}" class="{{ request()->routeIs('chef.preparo') ? 'active' : '' }}">
       <i class="fa-solid fa-fire-burner"></i><span>Cozinha</span>
     </a>
     @endif
-    @if(in_array($authRole, ['caixa','gerente']))
+    @if($authRole === 'caixa')
     <a href="{{ route('caixa.pagar-mesa') }}" class="{{ request()->routeIs('caixa.*') ? 'active' : '' }}">
       <i class="fa-solid fa-cash-register"></i><span>Caixa</span>
     </a>
@@ -3193,14 +3190,19 @@ tbody tr:hover {
           <i class="fa-solid fa-bolt"></i> Acoes
         </button>
         <div class="quick-menu-panel">
-          @if(in_array($authRole,['gerente','garcom']))
+          @if($authRole === 'gerente')
+          <a href="{{ route('dashboard') }}"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+          <a href="{{ route('dashboard.relatorios') }}"><i class="fa-solid fa-file-lines"></i> Relatorios</a>
+          <a href="{{ route('dashboard.estoque') }}"><i class="fa-solid fa-warehouse"></i> Estoque</a>
+          <a href="{{ route('caixa.dashboard') }}"><i class="fa-solid fa-cash-register"></i> Caixa</a>
+          @elseif($authRole === 'garcom')
           <a href="{{ route('mesas.index') }}"><i class="fa-solid fa-chair"></i> Abrir mesa</a>
           <a href="{{ route('orders.create') }}"><i class="fa-solid fa-plus"></i> Novo pedido</a>
-          @endif
-          @if(in_array($authRole,['caixa','gerente']))
+          <a href="{{ route('dashboard') }}#entregas"><i class="fa-solid fa-fire-burner"></i> Cozinha</a>
+          <a href="{{ route('mesas.index') }}"><i class="fa-solid fa-file-invoice"></i> Conta da mesa</a>
+          @elseif($authRole === 'caixa')
           <a href="{{ route('caixa.pagar-mesa') }}"><i class="fa-solid fa-cash-register"></i> Fechar conta</a>
-          @endif
-          @if(in_array($authRole,['chef','gerente']))
+          @elseif($authRole === 'chef')
           <a href="{{ route('chef.estoque') }}"><i class="fa-solid fa-boxes-stacked"></i> Consultar estoque</a>
           @endif
         </div>

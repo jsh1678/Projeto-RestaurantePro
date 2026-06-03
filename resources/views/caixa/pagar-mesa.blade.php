@@ -166,7 +166,7 @@
                     <span class="badge badge-warning">{{ $p->status === 'aguardando_pagamento' ? 'Aguardando pagamento' : str_replace('_',' ',ucfirst($p->status)) }}</span>
                 </div>
 
-                @if($p->status === 'aguardando_pagamento')
+                @if($p->status === 'aguardando_pagamento' && Auth::user()?->role === 'caixa')
                 <form method="POST" action="{{ route('caixa.pagamento', $p) }}" class="pagamento-form pay-form" data-total="{{ $p->total }}" data-pedido="{{ str_pad($p->id,4,'0',STR_PAD_LEFT) }}" data-pix-payload="{{ e(\App\Support\PixPayload::make((float) $p->total, 'PED' . str_pad($p->id,4,'0',STR_PAD_LEFT))) }}">
                     @csrf
                     <select name="metodo" class="form-select js-metodo-pagamento" required>
@@ -194,6 +194,10 @@
                     <input type="hidden" name="valor_pago" value="{{ $p->total }}">
                     <button type="submit" class="btn btn-success btn-sm pay-confirm">✓ Confirmar Pag.</button>
                 </form>
+                @elseif($p->status === 'aguardando_pagamento')
+                <div class="alert alert-info" style="margin-top:10px">
+                    <i class="fa-solid fa-eye"></i> Consulta. Pagamento operado pelo caixa.
+                </div>
                 @endif
             </div>
             @endforeach

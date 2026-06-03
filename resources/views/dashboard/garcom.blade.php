@@ -167,14 +167,6 @@
         <div class="sc-label">Prontos para entregar</div>
     </div>
 
-    <div class="stat-card stat-card-danger">
-        <div class="sc-header">
-            <div class="sc-icon"><i class="fa-solid fa-dollar-sign"></i></div>
-            <span class="sc-badge">Hoje</span>
-        </div>
-        <div class="sc-value sc-value-money">R$ {{ number_format($totalPagamentosDia, 2, ',', '.') }}</div>
-        <div class="sc-label">Total recebido</div>
-    </div>
 </div>
 
 @php

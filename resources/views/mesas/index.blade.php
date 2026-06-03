@@ -593,7 +593,9 @@
             $abertura = $primeiroPedido?->created_at;
             $valorAtual = $orders->sum('total');
             $responsavel = $mesa->garcom->name ?? $primeiroPedido?->user?->name ?? 'Sem responsavel';
-            $href = $temPedido ? route('mesas.conta', $mesa) : route('orders.create', ['table_id' => $mesa->id]);
+            $href = $temPedido
+                ? route('mesas.conta', $mesa)
+                : (Auth::user()?->role === 'garcom' ? route('orders.create', ['table_id' => $mesa->id]) : route('mesas.show', $mesa));
 
             if ($contaFechada) {
                 $uiStatus = 'aguardando_pagamento';
@@ -650,7 +652,7 @@
             </button>
 
             <div class="mesa-actions">
-                @if(in_array(Auth::user()?->role, ['garcom','gerente']) && !$temPedido)
+                @if(Auth::user()?->role === 'garcom' && !$temPedido)
                 <form method="POST" action="{{ route('mesas.atualizar', $mesa) }}">
                     @csrf @method('PATCH')
                     <input type="hidden" name="status" value="disponivel">
@@ -667,7 +669,7 @@
                 </form>
                 @else
                 <span class="mesa-legend"><i class="mesa-dot" style="--status-color:{{ $statusColor }}"></i>{{ $contaFechada ? 'Conta pendente' : 'Pedidos em aberto' }}</span>
-                    @if(in_array(Auth::user()?->role, ['garcom','gerente']) && $temPedido)
+                    @if(Auth::user()?->role === 'garcom' && $temPedido)
                     <button type="button"
                             class="mesa-mini-btn"
                             data-juntar-origem="{{ $mesa->id }}"

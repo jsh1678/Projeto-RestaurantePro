@@ -88,7 +88,7 @@ class TableController extends Controller
     // ── FECHAR CONTA (garçom fecha a conta da mesa) ──────────────────────────
     public function fecharConta(Table $mesa)
     {
-        if (!in_array(Auth::user()?->role, ['garcom', 'gerente'])) abort(403);
+        if (Auth::user()?->role !== 'garcom') abort(403);
 
         // Buscar pedidos que ainda não foram enviados para o caixa.
         // Pedidos em pronto_entrega também devem virar aguardando_pagamento ao fechar a conta.
@@ -134,7 +134,7 @@ class TableController extends Controller
 
     public function juntar(Request $request, Table $mesa)
     {
-        if (!in_array(Auth::user()?->role, ['garcom', 'gerente'])) abort(403);
+        if (Auth::user()?->role !== 'garcom') abort(403);
 
         $validated = $request->validate([
             'destino_id' => 'required|integer|exists:tables,id',
@@ -176,7 +176,7 @@ class TableController extends Controller
     // ── PAGAR CONTA DA MESA (aceita pagamento parcial/dividido) ──────────────
     public function pagarConta(Request $request, Table $mesa)
     {
-        if (!in_array(Auth::user()?->role, ['caixa', 'gerente'])) abort(403);
+        if (Auth::user()?->role !== 'caixa') abort(403);
 
         if (CaixaFechamento::fechadoAtual()) {
             return back()->with('error', '🔒 Caixa fechado. Nenhum pagamento pode ser feito até a reabertura.');
@@ -320,7 +320,7 @@ class TableController extends Controller
 
     public function atualizar(Request $request, Table $mesa)
     {
-        if (!in_array(Auth::user()?->role, ['garcom', 'gerente'])) {
+        if (Auth::user()?->role !== 'garcom') {
             abort(403);
         }
 

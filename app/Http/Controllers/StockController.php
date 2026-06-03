@@ -12,6 +12,10 @@ class StockController extends Controller
 {
     public function index(): View
     {
+        if (Auth::user()?->role !== 'gerente') {
+            abort(403);
+        }
+
         $itens = StockItem::all();
         $estoqueAlerta = $itens->filter(function($item) {
             return $item->quantidade_atual <= $item->quantidade_minima;
@@ -25,6 +29,10 @@ class StockController extends Controller
 
     public function registrarMovimento(StockItem $item): RedirectResponse
     {
+        if (Auth::user()?->role !== 'gerente') {
+            abort(403);
+        }
+
         $validated = request()->validate([
             'tipo' => 'required|in:entrada,saida',
             'quantidade' => 'required|numeric|min:0.01|max:99999',

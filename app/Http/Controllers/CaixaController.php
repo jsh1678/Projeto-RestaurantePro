@@ -62,7 +62,7 @@ class CaixaController extends Controller
 
     public function registrarSangria(): RedirectResponse
     {
-        if (!in_array(Auth::user()?->role, ['caixa', 'gerente'])) {
+        if (Auth::user()?->role !== 'caixa') {
             abort(403);
         }
         $validated = request()->validate([
@@ -85,7 +85,7 @@ class CaixaController extends Controller
      */
     public function confirmarPagamento(Order $order): RedirectResponse|JsonResponse
     {
-        if (!in_array(Auth::user()?->role, ['caixa', 'gerente', 'garcom'])) {
+        if (Auth::user()?->role !== 'caixa') {
             abort(403);
         }
 
@@ -251,7 +251,7 @@ class CaixaController extends Controller
 
     public function fecharCaixa(): RedirectResponse
     {
-        if (!in_array(Auth::user()?->role, ['caixa', 'gerente'])) {
+        if (Auth::user()?->role !== 'caixa') {
             abort(403);
         }
 
@@ -303,7 +303,7 @@ class CaixaController extends Controller
 
     public function abrirCaixa(): RedirectResponse
     {
-        if (Auth::user()?->role !== 'gerente') {
+        if (Auth::user()?->role !== 'caixa') {
             abort(403);
         }
 
